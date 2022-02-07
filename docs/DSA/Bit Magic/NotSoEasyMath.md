@@ -15,25 +15,6 @@ $1 <= t <= 10$
 $1 <= n <= 10^1$$^8$
 
 
-
-## Sample Input
-```txt
-5
-5
-10
-12
-15
-18
-```
-
-## Sample Output
-```txt
-4
-9
-11
-14
-17
-```
 <details><summary>Click - to see solution</summary>
 
 ## Solution
