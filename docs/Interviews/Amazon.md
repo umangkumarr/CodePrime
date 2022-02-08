@@ -4,10 +4,9 @@ sidebar_position : 3
 
 # Amazon
 
-
 | S.No      | Problem | Link | Solution |
 | ----------- | ----------- | ----------- | ----------- |
-| 1.| Two Sum       | https://leetcode.com/problems/two-sum| [Click](/docs/codes/twosum) | 
+| 1.| Two Sum       | https://leetcode.com/problems/two-sum| [Click](/docs/codes/Amazon/twosum) | 
 | 2.| Longest Palindromic Substring | https://leetcode.com/problems/longest-palindromic-substring |
 |3.| 3Sum | https://leetcode.com/problems/3sum |
 |4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists |

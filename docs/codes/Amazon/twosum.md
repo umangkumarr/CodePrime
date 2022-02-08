@@ -1,5 +1,17 @@
 # Two sum
 
+## Solution Approach
+
+Iterate over all the elements and check for the number $target - arr[i]$ exist in the array other than the index $i$.
+
+Expected Time complexity: $O(logn)
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+<TabItem value="cpp" label="C++">
+
 ```cpp
 class Solution {
 public:
@@ -21,3 +33,6 @@ public:
         return ans;
     }
 };
+```
+</TabItem>
+</Tabs>

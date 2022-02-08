@@ -1,41 +1,28 @@
-# Website
+# Guidelines for contributors
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+We have two folders which are required from development to deployment of the website.
+1. [CodePrime](https://github.com/umangkumarr/CodePrime) - contains all the necessary code (docs, configurations files). This is the main working repo.
+2. [CP](https://github.com/umangkumarr/CP) - contains HTML files which will be rendered on the website.
 
-### Installation
 
+---
+## Procedure
+First clone both the repositories. Then run the following commands:
+```bsh
+$ cd CodePrime && npm install
 ```
-$ yarn
-```
+This will install all the required packages need to run the website.
 
-### Local Development
+**Make sure your npm version is >= 13.**
 
-```
-$ yarn start
-```
+## Docs
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+In CodePrime, the folders name ```docs``` will contain all the .md and folder configuration files.
 
-### Build
+After adding content in the ```docs``` folder run the following command to build the HTML files. Html files will be created in CodePrime/build folders.
 
-```
-$ yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
+```bsh
+npm build
 ```
 
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+After that, replace all the HTML files in the CP folders by the HTML files in the CodePrime/build folder. Then push all the changes to github(CodePrime & CP).
