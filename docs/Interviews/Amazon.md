@@ -6,11 +6,11 @@ sidebar_position : 3
 
 | S.No      | Problem | Link | Solution |
 | ----------- | ----------- | ----------- | ----------- |
-| 1.| Two Sum       | https://leetcode.com/problems/two-sum| [Click](/docs/codes/Amazon/twosum) | 
-| 2.| Longest Palindromic Substring | https://leetcode.com/problems/longest-palindromic-substring |
+| 1.| Two Sum | https://leetcode.com/problems/two-sum| [Click](/docs/codes/Amazon/twosum) | 
+| 2.| Longest Palindromic Substring | https://leetcode.com/problems/longest-palindromic-substring | [Click](/docs/codes/Amazon/longestPalindromicSubstring) |
 |3.| 3Sum | https://leetcode.com/problems/3sum |
-|4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists |
-|5.| Merge k Sorted Lists | https://leetcode.com/problems/merge-k-sorted-lists |
+|4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists | [Click](/docs/codes/Amazon/Merge2sortedlist) | 
+|5.| Merge k Sorted Lists | https://leetcode.com/problems/merge-k-sorted-lists | [Click](/docs/codes/Amazon/MergeksortedList) | 
 |6.| Trapping Rain Water|  https://leetcode.com/problems/trapping-rain-water |
 |7.| Group Anagrams | https://leetcode.com/problems/group-anagrams |
 |8.| Maximum Subarray | https://leetcode.com/problems/maximum-subarray |

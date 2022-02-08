@@ -13,7 +13,7 @@ $ cd CodePrime && npm install
 ```
 This will install all the required packages need to run the website.
 
-**Make sure your npm version is >= 13.**
+**Make sure your node version is >= 13.**
 
 ## Docs
 

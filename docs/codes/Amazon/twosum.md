@@ -2,7 +2,7 @@
 
 ## Solution Approach
 
-Iterate over all the elements and check for the number $target - arr[i]$ exist in the array other than the index $i$.
+Iterate over all the elements and check for the number $target - arr[i]$ if it exist at any index in the array other than the index $i$.
 
 Expected Time complexity: $O(logn)
 
