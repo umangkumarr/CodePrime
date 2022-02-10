@@ -11,8 +11,8 @@ sidebar_position : 3
 |3.| 3Sum | https://leetcode.com/problems/3sum |
 |4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists | [Click](/docs/codes/Amazon/Merge2sortedlist) | 
 |5.| Merge k Sorted Lists | https://leetcode.com/problems/merge-k-sorted-lists | [Click](/docs/codes/Amazon/MergeksortedList) | 
-|6.| Trapping Rain Water|  https://leetcode.com/problems/trapping-rain-water |
-|7.| Group Anagrams | https://leetcode.com/problems/group-anagrams |
+|6.| Trapping Rain Water|  https://leetcode.com/problems/trapping-rain-water | [Click](/docs/codes/Amazon/TrappingRainWater) | 
+|7.| Group Anagrams | https://leetcode.com/problems/group-anagrams | [Click](/docs/codes/Amazon/GroupAnagram) | 
 |8.| Maximum Subarray | https://leetcode.com/problems/maximum-subarray |
 |9.| Word Search | https://leetcode.com/problems/word-search |
 |10.| Binary Tree Zigzag Level Order Traversal | https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal |
