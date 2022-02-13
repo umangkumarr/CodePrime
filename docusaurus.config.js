@@ -11,12 +11,12 @@ const config = {
   title: 'CodePrime',
   tagline: 'One place for DSA and Competitive Programming',
   url: 'https://umangkumarr.github.io',
-  baseUrl: '/CP/',
+  baseUrl: '/CodePrime/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'umangkumarr', // Usually your GitHub org/user name.
-  projectName: 'CP', // Usually your repo name.
+  projectName: 'CodePrime', // Usually your repo name.
   // themes : ['@docusaurus/theme-live-codeblock'],
   presets: [
     [ 
@@ -68,7 +68,7 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/umangkumarr/CP',
+            href: 'https://github.com/umangkumarr/CodePrime',
             label: 'GitHub',
             position: 'right',
           },
@@ -112,7 +112,7 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/umangkumarr/CP',
+                href: 'https://github.com/umangkumarr/CodePrime',
               },
             ],
           },
