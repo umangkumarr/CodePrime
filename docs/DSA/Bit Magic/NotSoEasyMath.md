@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Not So Easy Math
+# Inclusive Exclusive Principle
 
 ## Problem statement
 

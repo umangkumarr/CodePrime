@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 ---
-# Playing With Bits
+# Sets bits from 1 to N
 
 ## Problem Statement
 You are gives Q queries each query containing two integers $a$ and $b$. Your task is to count the no of set-bits in for all numbers between $a$ and $b$ (both inclusive).
