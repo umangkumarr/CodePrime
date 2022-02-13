@@ -1,6 +1,6 @@
 # Guidelines for contributors
 
-We have two brancghes which are required from development to deployment of the website.
+We have two branches which are required from development to deployment of the website.
 1. Main - contains all the necessary code (docs, configurations files). This is the main working repo.
 2. gh-pages - contains HTML files which will be rendered on the website.
 
