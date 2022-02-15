@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[5346],{6350:function(e){e.exports=JSON.parse('{"allTagsPath":"/CodePrime/blog/tags","slug":"/CodePrime/blog/tags/docusaurus","name":"docusaurus","count":4,"permalink":"/CodePrime/blog/tags/docusaurus"}')}}]);
