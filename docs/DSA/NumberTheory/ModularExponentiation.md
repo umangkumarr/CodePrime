@@ -2,7 +2,7 @@
 
 ## Problem statement
 
-Find the value of $(a^n)%mod$.
+Find the value of $(a^n)$%$mod$.
 
 ### Example
 ```
