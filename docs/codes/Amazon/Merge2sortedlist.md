@@ -4,7 +4,7 @@
 ```LinkedList```, ```recursion```, ```implementation```
 
 ## Solution Approach
-Make a new linkedlist and keep adding the smaller of the two head(list1, list2) node at the back of the new linked list and return the head node of the sorted linkedlist.
+Make a new LinkedList and keep adding the smaller of the two head(list1, list2) nodes at the tail of the new linked list and return the head node of the sorted Linked list.
 
 Expected Time complexity: $O(n)$
 

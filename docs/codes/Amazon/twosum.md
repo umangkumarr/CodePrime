@@ -2,13 +2,14 @@
 
 ## Solution Approach
 
-Iterate over all the elements and check for the number $target - arr[i]$ if it exist at any index in the array other than the index $i$.
+Iterate over all the elements and check for the number $target - arr[i]$, if exists at any index in the array other than the index $i$, make the pair.
 
-Expected Time complexity: $O(logn)
+Expected Time complexity: $O(logn)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+<details><summary>Click - to see solution code</summary>
 <Tabs>
 <TabItem value="cpp" label="C++">
 
@@ -36,3 +37,4 @@ public:
 ```
 </TabItem>
 </Tabs>
+</details>
