@@ -1,7 +1,11 @@
+---
+tags: [Array, Two Pointer, Sorting, Greedy]
+---
+
 # 3 Sum
 
-#### Tags
-```Array```, ```Two pointers```, ```Sorting```, ```Greedy```
+## Problem Link
+https://leetcode.com/problems/3sum
 
 ## Solution Approach
 Follow a simple Greedy approach. Find all the possible solutions having all the three elements different, two same and one different element, and all the elements are the same. Store the key in a set of vectors to avoid repetition. 

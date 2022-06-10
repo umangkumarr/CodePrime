@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[5378],{3657:function(e){e.exports=JSON.parse('{"name":"Tree","permalink":"/CodePrime/docs/tags/tree","docs":[{"id":"codes/Amazon/ZigZag","title":"Binary Tree Zigzag Traversal","description":"Problem Link","permalink":"/CodePrime/docs/codes/Amazon/ZigZag"}],"allTagsPath":"/CodePrime/docs/tags"}')}}]);

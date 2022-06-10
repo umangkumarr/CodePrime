@@ -1,7 +1,11 @@
+---
+tags: [Array, Two Pointer, Dyanamic Programming]
+---
+
 # Trapping Rain Water
 
-#### Tags
-```Array```, ```two-pointer```, ```dyanamic programming```
+## Problem Link
+https://leetcode.com/problems/trapping-rain-water
 
 ## Solution Approach
 Find the maximum height $h_m$ and calculate the volume capacity for height $h_i$.

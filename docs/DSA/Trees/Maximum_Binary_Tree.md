@@ -85,6 +85,7 @@ public:
 </details>
 
 
-## Author: [Deepak Sharma](https://www.linkedin.com/in/deepak-sharma-66968120a/).
+## Author
+[Deepak Sharma](https://www.linkedin.com/in/deepak-sharma-66968120a/)
 
 

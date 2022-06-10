@@ -1,11 +1,13 @@
+---
+tags: [Hash Table, Sorting, Heap(Priority Queue), Counting]
+---
+
 # Top K Frequent Words
 
-#### Tags
-```Hash Table```, ```Sorting```, ```Heap(Priority Queue)```, ```Counting```
+## Problem Link
+https://leetcode.com/problems/top-k-frequent-words
 
 ## Solution Approach
-
-
 
 Expected Time complexity: $O(nlogn)$
 

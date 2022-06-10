@@ -1,7 +1,11 @@
+---
+tags: [Two Pointer, String Matching, Dynamic Programming]
+---
+
 # Longest Palindromic Substring
 
-#### Tags
-```two-pointer```, ```string-matching```, ```dynamic programming```
+## Problem Link
+https://leetcode.com/problems/longest-palindromic-substring
 
 ## Solution Approach
 

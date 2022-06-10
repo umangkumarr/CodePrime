@@ -1,7 +1,11 @@
+---
+tags: [Array, Divide Conquer, Dynamic Programming]
+---
+
 # Maximum Subarray
 
-#### Tags
-```Array```, ```Divide-Conquer```, ```Dynamic Programming```
+## Problem Link
+https://leetcode.com/problems/maximum-subarray
 
 ## Solution Approach
 

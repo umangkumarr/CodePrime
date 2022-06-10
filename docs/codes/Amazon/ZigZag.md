@@ -1,7 +1,11 @@
+---
+tags: [Tree, Breadth-First Search, Binary Tree]
+---
+
 # Binary Tree Zigzag Traversal
 
-#### Tags
-```Tree```, ```Breadth-First Search```, ```Binary Tree```
+## Problem Link
+https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal
 
 ## Solution Approach
 

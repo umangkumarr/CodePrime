@@ -1,7 +1,11 @@
+---
+tags: [Hash Table, String, Sorting]
+---
+
 # Group Anagram
 
-#### Tags
-```Hash Table```, ```String```, ```Sorting```
+## Problem Link
+https://leetcode.com/problems/group-anagrams
 
 ## Solution Approach
 Self Explanatory.

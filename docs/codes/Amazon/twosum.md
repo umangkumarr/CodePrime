@@ -1,5 +1,8 @@
 # Two sum
 
+## Problem Link
+https://leetcode.com/problems/two-sum
+
 ## Solution Approach
 
 Iterate over all the elements and check for the number $target - arr[i]$, if exists at any index in the array other than the index $i$, make the pair.

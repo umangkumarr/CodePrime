@@ -19,7 +19,7 @@ sidebar_position : 3
 |11.| Best Time to Buy and Sell Stock | https://leetcode.com/problems/best-time-to-buy-and-sell-stock | [Click](/docs/codes/Amazon/BuyandSellStock) |
 |12.| Word Ladder II   | https://leetcode.com/problems/word-ladder-ii |
 |13.| Word Ladder   | https://leetcode.com/problems/word-ladder |
-|14.|Copy List with Random Pointer   | https://leetcode.com/problems/copy-list-with-random-pointer |
+|14.|Copy List with Random Pointer   | https://leetcode.com/problems/copy-list-with-random-pointer | [Click](/docs/codes/Amazon/CopyListwithRandomPointer) |
 |15.|Word Break   | https://leetcode.com/problems/word-break  |
 |16.|Word Break II   | https://leetcode.com/problems/word-break-ii 
 17.|LRU Cache   | https://leetcode.com/problems/lru-cache 
@@ -28,7 +28,7 @@ sidebar_position : 3
 20.|Course Schedule II   | https://leetcode.com/problems/course-schedule-ii 
 21.|Word Search II   | https://leetcode.com/problems/word-search-ii 
 22.|Basic Calculator II   | https://leetcode.com/problems/basic-calculator-ii 
-23.|Sliding Window Maximum   | https://leetcode.com/problems/sliding-window-maximum 
+23.|Sliding Window Maximum   | https://leetcode.com/problems/sliding-window-maximum | [Click](/docs/codes/Amazon/SlidingWindowMaximum) |
 24.|Search a 2D Matrix II   | https://leetcode.com/problems/search-a-2d-matrix-ii 
 25.|Meeting Rooms II   | https://leetcode.com/problems/meeting-rooms-ii 
 26.|Alien Dictionary   | https://leetcode.com/problems/alien-dictionary 

@@ -1,7 +1,12 @@
+---
+tags: [Array, Backtracking, Matrix]
+---
+
 # Word Search
 
-#### Tags
-```Array```, ```Backtracking```, ```Matrix```
+## Problem Link
+https://leetcode.com/problems/word-search
+
 
 ## Solution Approach
 

@@ -1,7 +1,11 @@
+---
+tags: [Linked List, Recursion, Implementation]
+---
+
 # Merge k Sorted Lists
 
-#### Tags
-```LinkedList```, ```recursion```, ```implementation```
+## Problem Link
+https://leetcode.com/problems/merge-k-sorted-lists
 
 ## Solution Approach
 [Merge two linked list](/docs/codes/Amazon/Merge2sortedlist) and merge the third with resultant of the first two and so on.

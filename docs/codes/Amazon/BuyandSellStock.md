@@ -1,7 +1,12 @@
+---
+tags: [Array, Dynamic Programming]
+---
+
 # Best Time to Buy and Sell Stock
 
-#### Tags
-```Array```, ```Dynamic Programming```
+## Problem Link
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock
+
 
 ## Solution Approach
 
