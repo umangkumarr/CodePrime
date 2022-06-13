@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[7806],{8274:function(e){e.exports=JSON.parse('{"name":"Matrix","permalink":"/CodePrime/docs/tags/matrix","docs":[{"id":"codes/Amazon/WordSearch","title":"Word Search","description":"Problem Link","permalink":"/CodePrime/docs/codes/Amazon/WordSearch"}],"allTagsPath":"/CodePrime/docs/tags"}')}}]);
