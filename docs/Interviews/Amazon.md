@@ -6,20 +6,20 @@ sidebar_position : 3
 
 | S.No      | Problem | Link | Solution |
 | ----------- | ----------- | ----------- | ----------- |
-| 1.| Two Sum | https://leetcode.com/problems/two-sum| [Click](/docs/codes/Amazon/twosum) | 
-| 2.| Longest Palindromic Substring | https://leetcode.com/problems/longest-palindromic-substring | [Click](/docs/codes/Amazon/longestPalindromicSubstring) |
-|3.| 3Sum | https://leetcode.com/problems/3sum | [Click](/docs/codes/Amazon/3Sum) |
-|4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists | [Click](/docs/codes/Amazon/Merge2sortedlist) | 
-|5.| Merge k Sorted Lists | https://leetcode.com/problems/merge-k-sorted-lists | [Click](/docs/codes/Amazon/MergeksortedList) | 
-|6.| Trapping Rain Water|  https://leetcode.com/problems/trapping-rain-water | [Click](/docs/codes/Amazon/TrappingRainWater) | 
-|7.| Group Anagrams | https://leetcode.com/problems/group-anagrams | [Click](/docs/codes/Amazon/GroupAnagram) | 
-|8.| Maximum Subarray | https://leetcode.com/problems/maximum-subarray | [Click](/docs/codes/Amazon/MaximumSubarray) | 
-|9.| Word Search | https://leetcode.com/problems/word-search | [Click](/docs/codes/Amazon/WordSearch) |
-|10.| Binary Tree Zigzag Level Order Traversal | https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal | [Click](/docs/codes/Amazon/ZigZag) |
-|11.| Best Time to Buy and Sell Stock | https://leetcode.com/problems/best-time-to-buy-and-sell-stock | [Click](/docs/codes/Amazon/BuyandSellStock) |
+| 1.| Two Sum | https://leetcode.com/problems/two-sum| [Click](/docs/codes/twosum) | 
+| 2.| Longest Palindromic Substring | https://leetcode.com/problems/longest-palindromic-substring | [Click](/docs/codes/longestPalindromicSubstring) |
+|3.| 3Sum | https://leetcode.com/problems/3sum | [Click](/docs/codes/3Sum) |
+|4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists | [Click](/docs/codes/Merge2sortedlist) | 
+|5.| Merge k Sorted Lists | https://leetcode.com/problems/merge-k-sorted-lists | [Click](/docs/codes/MergeksortedList) | 
+|6.| Trapping Rain Water|  https://leetcode.com/problems/trapping-rain-water | [Click](/docs/codes/TrappingRainWater) | 
+|7.| Group Anagrams | https://leetcode.com/problems/group-anagrams | [Click](/docs/codes/GroupAnagram) | 
+|8.| Maximum Subarray | https://leetcode.com/problems/maximum-subarray | [Click](/docs/codes/MaximumSubarray) | 
+|9.| Word Search | https://leetcode.com/problems/word-search | [Click](/docs/codes/WordSearch) |
+|10.| Binary Tree Zigzag Level Order Traversal | https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal | [Click](/docs/codes/ZigZag) |
+|11.| Best Time to Buy and Sell Stock | https://leetcode.com/problems/best-time-to-buy-and-sell-stock | [Click](/docs/codes/BuyandSellStock) |
 |12.| Word Ladder II   | https://leetcode.com/problems/word-ladder-ii |
 |13.| Word Ladder   | https://leetcode.com/problems/word-ladder |
-|14.|Copy List with Random Pointer   | https://leetcode.com/problems/copy-list-with-random-pointer | [Click](/docs/codes/Amazon/CopyListwithRandomPointer) |
+|14.|Copy List with Random Pointer   | https://leetcode.com/problems/copy-list-with-random-pointer | [Click](/docs/codes/CopyListwithRandomPointer) |
 |15.|Word Break   | https://leetcode.com/problems/word-break  |
 |16.|Word Break II   | https://leetcode.com/problems/word-break-ii 
 17.|LRU Cache   | https://leetcode.com/problems/lru-cache 
@@ -28,7 +28,7 @@ sidebar_position : 3
 20.|Course Schedule II   | https://leetcode.com/problems/course-schedule-ii 
 21.|Word Search II   | https://leetcode.com/problems/word-search-ii 
 22.|Basic Calculator II   | https://leetcode.com/problems/basic-calculator-ii 
-23.|Sliding Window Maximum   | https://leetcode.com/problems/sliding-window-maximum | [Click](/docs/codes/Amazon/SlidingWindowMaximum) |
+23.|Sliding Window Maximum   | https://leetcode.com/problems/sliding-window-maximum | [Click](/docs/codes/SlidingWindowMaximum) |
 24.|Search a 2D Matrix II   | https://leetcode.com/problems/search-a-2d-matrix-ii 
 25.|Meeting Rooms II   | https://leetcode.com/problems/meeting-rooms-ii 
 26.|Alien Dictionary   | https://leetcode.com/problems/alien-dictionary 
@@ -42,7 +42,7 @@ sidebar_position : 3
 34.|Subtree of Another Tree   | https://leetcode.com/problems/subtree-of-another-tree 
 35.|Design In-Memory File System   | https://leetcode.com/problems/design-in-memory-file-system 
 36.|Design Search Autocomplete System   | https://leetcode.com/problems/design-search-autocomplete-system 
-37.|Top K Frequent Words   | https://leetcode.com/problems/top-k-frequent-words | [Click](/docs/codes/Amazon/TopKFrequentWords) |
+37.|Top K Frequent Words   | https://leetcode.com/problems/top-k-frequent-words | [Click](/docs/codes/TopKFrequentWords) |
 38.|Number of Distinct Islands   | https://leetcode.com/problems/number-of-distinct-islands 
 39.|Partition Labels   | https://leetcode.com/problems/partition-labels 
 40.|Most Common Word   | https://leetcode.com/problems/most-common-word 

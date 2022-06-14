@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[6296],{4764:function(e){e.exports=JSON.parse('{"name":"Bit Masking","permalink":"/CodePrime/docs/tags/bit-masking","docs":[{"id":"codes/Powxn","title":"Pow(x, n)","description":"Problem Link","permalink":"/CodePrime/docs/codes/Powxn"}],"allTagsPath":"/CodePrime/docs/tags"}')}}]);

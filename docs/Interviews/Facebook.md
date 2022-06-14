@@ -5,13 +5,13 @@ sidebar_position : 5
 # Facebook
 
 
-| S.No      | Problem | Link |
-| ----------- | ----------- | ----------- |
-1.|Merge k Sorted Lists  |  https://leetcode.com/problems/merge-k-sorted-lists |  
+| S.No      | Problem | Link | Solution |
+| ----------- | ----------- | ----------- | ----------- |
+1.|Merge k Sorted Lists  |  https://leetcode.com/problems/merge-k-sorted-lists |  [Click](/docs/codes/MergeksortedList) | 
 2.|Divide Two Integers  |  https://leetcode.com/problems/divide-two-integers |  
 3.|Next Permutation  |  https://leetcode.com/problems/next-permutation |  
 4.|Multiply Strings  |  https://leetcode.com/problems/multiply-strings |  
-5.|Pow(x, n)   |  https://leetcode.com/problems/powx-n |  
+5.|Pow(x, n)   |  https://leetcode.com/problems/powx-n |  [Click](/docs/codes/Powxn) | 
 6.|Merge Intervals  |  https://leetcode.com/problems/merge-intervals |  
 7.|Valid Number  |  https://leetcode.com/problems/valid-number |  
 8.|Add Binary  |  https://leetcode.com/problems/add-binary |  
