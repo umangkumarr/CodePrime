@@ -5,8 +5,10 @@ tags: [Two Pointer, Sorting, Heap(Priority-Queue), Data Stream]
 
 # Find Median from Data Stream
 
-## Problem Link
-https://leetcode.com/problems/find-median-from-data-stream/
+## [Problem](https://leetcode.com/problems/find-median-from-data-stream/)
+
+<p>The <strong>median</strong> is the middle value in an ordered integer list. If the size of the list is even, there is no middle value and the median is the mean of the two middle values.</p><ul><li>For example, for <code>arr = [2,3,4]</code>, the median is <code>3</code>.</li><li>For example, for <code>arr = [2,3]</code>, the median is <code>(2 + 3) / 2 = 2.5</code>.</li></ul><p>Implement the MedianFinder class:</p><ul><li><code>MedianFinder()</code> initializes the <code>MedianFinder</code> object.</li><li><code>void addNum(int num)</code> adds the integer <code>num</code> from the data stream to the data structure.</li><li><code>double findMedian()</code> returns the median of all elements so far. Answers within <code>10<sup>-5</sup></code> of the actual answer will be accepted.</li></ul><p>&nbsp;</p>
+
 
 ## Solution Approach
 

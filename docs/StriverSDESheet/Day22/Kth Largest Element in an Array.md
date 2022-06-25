@@ -5,8 +5,13 @@ tags: [Heap(Priority-Queue), Divide and Conquer, Quickselect, Array]
 
 # Kth Largest Element in an Array
 
-## Problem Link
-https://leetcode.com/problems/kth-largest-element-in-an-array/
+## [Problem](https://leetcode.com/problems/kth-largest-element-in-an-array/)
+
+<p>Given an integer array <code>nums</code> and an integer <code>k</code>, return <em>the</em> <code>kth</code> <em>largest element in the array</em>.</p>
+
+<p>Note that it is the <code>kth</code> largest element in the sorted order, not the <code>kth</code> distinct element.</p>
+
+<p>&nbsp;</p>
 
 ## Solution Approach
 

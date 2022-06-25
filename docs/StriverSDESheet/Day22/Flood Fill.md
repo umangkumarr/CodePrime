@@ -5,8 +5,17 @@ tags: [Breadth-First Search, Matrix, Array]
 
 # Flood Fill
 
-## Problem Link
-https://leetcode.com/problems/flood-fill/
+## [Problem](https://leetcode.com/problems/flood-fill/)
+
+<p>An image is represented by an <code>m x n</code> integer grid <code>image</code> where <code>image[i][j]</code> represents the pixel value of the image.</p>
+
+<p>You are also given three integers <code>sr</code>, <code>sc</code>, and <code>color</code>. You should perform a <strong>flood fill</strong> on the image starting from the pixel <code>image[sr][sc]</code>.</p>
+
+<p>To perform a <strong>flood fill</strong>, consider the starting pixel, plus any pixels connected <strong>4-directionally</strong> to the starting pixel of the same color as the starting pixel, plus any pixels connected <strong>4-directionally</strong> to those pixels (also with the same color), and so on. Replace the color of all of the aforementioned pixels with <code>color</code>.</p>
+
+<p>Return <em>the modified image after performing the flood fill</em>.</p>
+
+<p>&nbsp;</p>
 
 ## Solution Approach
 

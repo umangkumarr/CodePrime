@@ -5,8 +5,9 @@ tags: [Linked List, Stack, Tree, Depth-First Search, Binary Tree]
 
 # Flatten Binary Tree to Linked List
 
-## Problem Link
-https://leetcode.com/problems/flatten-binary-tree-to-linked-list/
+## [Problem](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
+
+<p>Given the <code>root</code> of a binary tree, flatten the tree into a &quot;linked list&quot;:</p><ul><li>The &quot;linked list&quot; should use the same <code>TreeNode</code> class where the <code>right</code> child pointer points to the next node in the list and the <code>left</code> child pointer is always <code>null</code>.</li><li>The &quot;linked list&quot; should be in the same order as a <a href="https://en.wikipedia.org/wiki/Tree_traversal#Pre-order,_NLR\" target="_blank\"><strong>pre-order</strong><strong> traversal</strong></a> of the binary tree.</li></ul><p>&nbsp;</p>
 
 ## Solution Approach
 
