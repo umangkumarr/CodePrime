@@ -1,16 +1,27 @@
 ---
 sidebar_position : 1
+tags: [Array, Hash Table, Matrix]
 ---
 
 # Set Matrix Zeroes
 
-## Problem Link
-https://leetcode.com/problems/set-matrix-zeroes/
+## [Problem](https://leetcode.com/problems/set-matrix-zeroes/)
 
-## Solution Code
+<p>Given an <code>m x n</code> integer matrix <code>matrix</code>, if an element is <code>0</code>, set its entire row and column to <code>0</code>&#39;s.</p>
+
+<p>You must do it <a href="https://en.wikipedia.org/wiki/In-place_algorithm" target="_blank">in place</a>.</p>
+
+<p>&nbsp;</p>
+
+
+## Solution Approach
+
+Expected Time complexity: $O(n^3)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+<details><summary>Click - to see solution code</summary>
 
 <Tabs>
 <TabItem value="cpp" label="C++">
@@ -37,3 +48,5 @@ class Solution {
 ```
 </TabItem>
 </Tabs>
+
+</details>

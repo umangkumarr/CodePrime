@@ -1,16 +1,27 @@
 ---
 sidebar_position : 4
+tags: [Array, Divide and Conquer, Dynamic Programming]
 ---
 
-# Kadane’s Algorithm
+# Maximum Subarray
 
-## Problem Link
-https://leetcode.com/problems/maximum-subarray/
+## [Problem](https://leetcode.com/problems/maximum-subarray/)
 
-## Solution Code
+<p>Given an integer array <code>nums</code>, find the contiguous subarray (containing at least one number) which has the largest sum and return <em>its sum</em>.</p>
+
+<p>A <strong>subarray</strong> is a <strong>contiguous</strong> part of an array.</p>
+
+<p>&nbsp;</p>
+
+
+## Solution Approach
+
+Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+<details><summary>Click - to see solution code</summary>
 
 <Tabs>
 <TabItem value="cpp" label="C++">
@@ -35,3 +46,5 @@ class Solution {
 ```
 </TabItem>
 </Tabs>
+
+</details>
