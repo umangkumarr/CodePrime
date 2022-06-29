@@ -9,7 +9,7 @@ const math = require('remark-math');
 const katex = require('rehype-katex');
 const config = {
   title: 'CodePrime',
-  tagline: 'One place for DSA and Competitive Programming',
+  tagline: 'One place for Data Structure and Algorithms',
   url: 'https://umangkumarr.github.io',
   baseUrl: '/CodePrime/',
   onBrokenLinks: 'throw',
@@ -42,6 +42,7 @@ const config = {
       }),
     ],
   ],
+
   stylesheets: [
     {
       href: 'https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css',
@@ -60,12 +61,20 @@ const config = {
           src: 'img/logo.svg',
         },
         items: [
+
+          // {
+          //   type: 'doc',
+          //   docId: 'intro',
+          //   position: 'left',
+          //   label: 'Problems',
+          // },
           {
-            type: 'doc',
-            docId: 'intro',
+            type: 'docSidebar',  // docSidebar
             position: 'left',
-            label: 'Problems',
+            sidebarId: 'api', // foldername
+            label: 'Problems',     // navbar title
           },
+
           // {to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/umangkumarr/CodePrime',
@@ -82,7 +91,7 @@ const config = {
             items: [
               {
                 label: 'Problems',
-                to: '/docs/intro',
+                to: '/docs/Problems/intro',
               },
             ],
           },
