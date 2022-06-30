@@ -13,8 +13,6 @@ tags: [Array, Two Pointers, Sorting]
 
 <p>You must solve this problem without using the library&#39;s sort function.</p>
 
-<p>&nbsp;</p>
-
 
 ## Solution Approach
 

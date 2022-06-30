@@ -11,8 +11,6 @@ tags: [Array, Hash Table, Matrix]
 
 <p>You must do it <a href="https://en.wikipedia.org/wiki/In-place_algorithm" target="_blank">in place</a>.</p>
 
-<p>&nbsp;</p>
-
 
 ## Solution Approach
 

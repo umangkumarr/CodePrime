@@ -11,7 +11,6 @@ tags: [Array, Dynamic Programming]
 
 <p>In <strong>Pascal&#39;s triangle</strong>, each number is the sum of the two numbers directly above it as shown:</p>
 <img alt="" src="https://upload.wikimedia.org/wikipedia/commons/0/0d/PascalTriangleAnimated2.gif" />
-<p>&nbsp;</p>
 
 
 ## Solution Approach

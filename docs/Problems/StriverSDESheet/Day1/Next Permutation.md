@@ -25,8 +25,6 @@ tags: [Array, Two Pointers]
 
 <p>The replacement must be <strong><a href="http://en.wikipedia.org/wiki/In-place_algorithm" target="_blank">in place</a></strong> and use only constant extra memory.</p>
 
-<p>&nbsp;</p>
-
 
 ## Solution Approach
 
