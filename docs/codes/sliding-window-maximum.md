@@ -1,5 +1,5 @@
 ---
-sidebar_position : 9
+sidebar_position : 81
 tags: [Array, Queue, Sliding Window, Heap (Priority Queue), Monotonic Queue]
 ---
 
@@ -13,9 +13,7 @@ tags: [Array, Queue, Sliding Window, Heap (Priority Queue), Monotonic Queue]
 
 ## Solution Approach
 
-Store all the elements of the window in an ordered map. Then using the iterator, $mp.end()$, find the last element present in the hash map $O(logn)$.
-
-Expected Time complexity: $O(nlogn)$
+Expected Time complexity: $O(nlog(n))$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -50,6 +48,7 @@ class Solution {
         return ans;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

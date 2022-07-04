@@ -1,5 +1,5 @@
 ---
-sidebar_position : 25
+sidebar_position : 84
 tags: [Hash Table, Linked List, Design, Doubly-Linked List]
 ---
 
@@ -90,7 +90,6 @@ class LFUCache {
     }
 
     int get(int key) {
-        // cout << mf << "\n";
         if (mp.find(key) == mp.end()) return -1;
         Node *ptr = mp[key];
         fmap[ptr->freq]->delNode(ptr);
@@ -165,6 +164,7 @@ class LFUCache {
         mp[key] = node;
     }
 };
+
 
 ```
 </TabItem>

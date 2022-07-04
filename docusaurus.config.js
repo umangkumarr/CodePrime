@@ -71,9 +71,11 @@ const config = {
           {
             type: 'docSidebar',  // docSidebar
             position: 'left',
-            sidebarId: 'api', // foldername
+            sidebarId: 'main', // foldername
             label: 'Problems',     // navbar title
           },
+          
+          
 
           // {to: '/blog', label: 'Blog', position: 'left'},
           {

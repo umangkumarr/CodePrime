@@ -1,5 +1,5 @@
 ---
-sidebar_position : 24
+sidebar_position : 140
 tags: [String, Tree, Depth-First Search, Breadth-First Search, Design, Binary Tree]
 ---
 
@@ -15,9 +15,6 @@ tags: [String, Tree, Depth-First Search, Breadth-First Search, Design, Binary Tr
 
 ## Solution Approach
 
-Decode the given tree as follows: <br />
-`node_value`L(`here_discribe_left_subtree`)R(`here_describe_right_subtree`)
-
 Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
@@ -29,11 +26,8 @@ import TabItem from '@theme/TabItem';
 <TabItem value="cpp" label="C++">
 
 ```cpp
-
 class Codec {
    public:
-    // Encodes a tree to a single string.
-
     string s = "";
     void serial(TreeNode* root) {
         string a = to_string(root->val);
@@ -56,8 +50,6 @@ class Codec {
         cout << s << "\n";
         return s;
     }
-
-    // Decodes your encoded data to tree.
 
     string d;
     TreeNode* deserial(int& i) {

@@ -1,5 +1,5 @@
 ---
-sidebar_position : 23
+sidebar_position : 146
 tags: [Two Pointers, Design, Sorting, Heap (Priority Queue), Data Stream]
 ---
 
@@ -24,9 +24,7 @@ tags: [Two Pointers, Design, Sorting, Heap (Priority Queue), Data Stream]
 
 ## Solution Approach
 
-Maintain two priority queues small and high. If the new element is greater than small.top push it in high queue then equalise the size of both the queue. The median element will be the average of top elements of the queues.
-
-Expected Time complexity: $O(nlogn)$
+Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -55,6 +53,7 @@ class MedianFinder {
         return small.size() > large.size() ? small.top() : (small.top() - large.top()) / 2.0;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

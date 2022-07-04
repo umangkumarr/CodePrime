@@ -42,6 +42,7 @@ class Solution {
         return max_so_far;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

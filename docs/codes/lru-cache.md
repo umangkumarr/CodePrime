@@ -1,5 +1,5 @@
 ---
-sidebar_position : 18
+sidebar_position : 88
 tags: [Hash Table, Linked List, Design, Doubly-Linked List]
 ---
 
@@ -21,7 +21,7 @@ tags: [Hash Table, Linked List, Design, Doubly-Linked List]
 
 ## Solution Approach
 
-Expected Time complexity: $O(logn)$
+Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -65,6 +65,7 @@ class LRUCache {
         lst.pop_back();
     }
 };
+
 
 ```
 </TabItem>

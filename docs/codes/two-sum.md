@@ -1,5 +1,5 @@
 ---
-sidebar_position : 15
+sidebar_position : 21
 tags: [Array, Hash Table]
 ---
 
@@ -15,9 +15,6 @@ tags: [Array, Hash Table]
 
 ## Solution Approach
 
-Iterate over all the elements and check for the number $target - arr[i]$, if exists at any index in the array other than the index $i$, make the pair.
-
-Expected Time complexity: $O(logn)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -29,17 +26,17 @@ import TabItem from '@theme/TabItem';
 
 ```cpp
 class Solution {
-public:
+   public:
     vector<int> twoSum(vector<int>& nums, int target) {
         int n = nums.size();
         unordered_map<int, vector<int>> mp;
         vector<int> ans(2);
-        for(int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             mp[nums[i]].push_back(i);
         }
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < mp[target - nums[i]].size(); j++){
-                if(mp[target - nums[i]][j] != i){
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < mp[target - nums[i]].size(); j++) {
+                if (mp[target - nums[i]][j] != i) {
                     ans = {i, mp[target - nums[i]][j]};
                     return ans;
                 }
@@ -48,6 +45,7 @@ public:
         return ans;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

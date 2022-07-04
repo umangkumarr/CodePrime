@@ -1,5 +1,5 @@
 ---
-sidebar_position : 11
+sidebar_position : 37
 tags: [Array, Two Pointers, Dynamic Programming, Stack, Monotonic Stack]
 ---
 
@@ -10,7 +10,6 @@ tags: [Array, Two Pointers, Dynamic Programming, Stack, Monotonic Stack]
 <p>Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is <code>1</code>, compute how much water it can trap after raining.</p>
 
 ## Solution Approach
-
 Find the maximum height $h_m$ and calculate the volume capacity for height $h_i$.
 
 $Volume = (h_m - h_i)*(h_i)$
@@ -21,6 +20,7 @@ At the last, subtract the total volume occupy by the heights.
 ![tapping_rain_water](/img/trapping_rain_water.png "trappig_rain_water")
 
 Expected Time complexity: $O(n)$
+
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -63,6 +63,7 @@ public:
 
     }
 };   
+
 ```
 </TabItem>
 </Tabs>

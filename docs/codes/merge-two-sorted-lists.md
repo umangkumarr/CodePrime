@@ -1,5 +1,5 @@
 ---
-sidebar_position : 6
+sidebar_position : 29
 tags: [Linked List, Recursion]
 ---
 
@@ -15,9 +15,6 @@ tags: [Linked List, Recursion]
 
 ## Solution Approach
 
-Make a new LinkedList and keep adding the smaller of the two head(list1, list2) nodes at the tail of the new linked list and return the head node of the new Linked list.
-
-Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -29,15 +26,13 @@ import TabItem from '@theme/TabItem';
 
 ```cpp
 class Solution {
-public:
+   public:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
-
-        // if any of the linkedlist is NULL return the other
-        if (list1 == NULL) return list2;    
+        if (list1 == NULL) return list2;
         if (list2 == NULL) return list1;
 
         if (list1->val > list2->val) swap(list1, list2);
-        ListNode *head;
+        ListNode* head;
         head = (ListNode*)malloc(sizeof(ListNode*));
         head = list1;
 
@@ -46,7 +41,7 @@ public:
                 list1 = list1->next;
                 continue;
             }
-            ListNode *temp;
+            ListNode* temp;
             temp = (ListNode*)malloc(sizeof(ListNode*));
             temp = list2;
             list2 = list2->next;
@@ -60,6 +55,7 @@ public:
         return head;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

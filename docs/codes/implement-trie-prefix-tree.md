@@ -1,5 +1,5 @@
 ---
-sidebar_position : 1
+sidebar_position : 178
 tags: [Hash Table, String, Design, Trie]
 ---
 
@@ -89,6 +89,7 @@ class Trie {
  * bool param_2 = obj->search(word);
  * bool param_3 = obj->startsWith(prefix);
  */
+
 ```
 </TabItem>
 </Tabs>

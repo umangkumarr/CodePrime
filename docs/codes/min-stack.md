@@ -1,5 +1,5 @@
 ---
-sidebar_position : 19
+sidebar_position : 86
 tags: [Stack, Design]
 ---
 
@@ -23,7 +23,7 @@ tags: [Stack, Design]
 
 ## Solution Approach
 
-Expected Time complexity: $O(1)$
+Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';

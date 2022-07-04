@@ -1,5 +1,6 @@
 ---
 sidebar_position : 5
+description: "Collection of problems asked in Facebook technical rounds"
 ---
 
 # Facebook
@@ -7,11 +8,11 @@ sidebar_position : 5
 
 | S.No      | Problem | Link | Solution |
 | ----------- | ----------- | ----------- | ----------- |
-1.|Merge k Sorted Lists  |  https://leetcode.com/problems/merge-k-sorted-lists |  [Click](/docs/codes/merge-k-sorted-lists) | 
+1.|Merge k Sorted Lists  |  https://leetcode.com/problems/merge-k-sorted-lists |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/merge-k-sorted-lists) | 
 2.|Divide Two Integers  |  https://leetcode.com/problems/divide-two-integers |  
 3.|Next Permutation  |  https://leetcode.com/problems/next-permutation |  
 4.|Multiply Strings  |  https://leetcode.com/problems/multiply-strings |  
-5.|Pow(x, n)   |  https://leetcode.com/problems/powx-n |  [Click](/docs/codes/powx-n) | 
+5.|Pow(x, n)   |  https://leetcode.com/problems/powx-n |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/powx-n) | 
 6.|Merge Intervals  |  https://leetcode.com/problems/merge-intervals |  
 7.|Valid Number  |  https://leetcode.com/problems/valid-number |  
 8.|Add Binary  |  https://leetcode.com/problems/add-binary |  

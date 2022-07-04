@@ -1,5 +1,5 @@
 ---
-sidebar_position : 13
+sidebar_position : 113
 tags: [Tree, Breadth-First Search, Binary Tree]
 ---
 
@@ -10,10 +10,6 @@ tags: [Tree, Breadth-First Search, Binary Tree]
 <p>Given the <code>root</code> of a binary tree, return <em>the zigzag level order traversal of its nodes&#39; values</em>. (i.e., from left to right, then right to left for the next level and alternate between).</p>
 
 ## Solution Approach
-We only need the arrays of nodes on height $i$. This can be done by inorder traversal through the tree. <br />
-When reach on any node n, store in the its corresponding height vector.<br/>
-Finally, reverse the vectors of odd heights and print them.
-
 
 Expected Time complexity: $O(n)$
 
@@ -59,6 +55,7 @@ class Solution {
         return ans;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

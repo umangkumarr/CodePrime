@@ -1,5 +1,6 @@
 ---
 sidebar_position : 4
+description: "Collection of problems asked in LinkedIn technical rounds"
 ---
 
 # Linkedln

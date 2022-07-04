@@ -1,5 +1,5 @@
 ---
-sidebar_position : 20
+sidebar_position : 151
 tags: [Array, Depth-First Search, Breadth-First Search, Union Find, Matrix]
 ---
 
@@ -13,9 +13,7 @@ tags: [Array, Depth-First Search, Breadth-First Search, Union Find, Matrix]
 
 ## Solution Approach
 
-Use DFS to find the number of disjoint components present in the matrix.
-
-Expected Time complexity: $O(n*m)$
+Expected Time complexity: $O(n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -55,9 +53,11 @@ class Solution {
                 }
             }
         }
+
         return ans;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

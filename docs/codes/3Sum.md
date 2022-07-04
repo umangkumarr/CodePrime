@@ -1,6 +1,8 @@
 ---
-sidebar_position : 1
+sidebar_position : 40
 tags: [Array, Two Pointers, Sorting]
+displayed_sidebars:
+
 ---
 
 # 3Sum
@@ -12,15 +14,10 @@ tags: [Array, Two Pointers, Sorting]
 <p>Notice that the solution set must not contain duplicate triplets.</p>
 
 ## Solution Approach
-
-Follow a simple Greedy approach. Solve the problem in the following steps:
-<li>In Step 1, find all combinations of thoses indexes having different values and sums to 0.</li>
-<li>In Step 2, find all combinations of thoses indexes having exactly two same values and sums to 0.</li>
-<li>In Step 3, find all combinations of thoses indexes having all values sames (in this case value will be 0) and sums to 0.</li>
-
-Store these combinations in a Hash Map or in a Set to avoid repetition.
+Follow a simple Greedy approach. Find all the possible solutions having all the three elements different, two same and one different element, and all the elements are the same. Store the key in a set of vectors to avoid repetition. 
 
 Expected Time complexity: $O(n^2)$
+
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -48,8 +45,6 @@ class Solution {
         set<vector<int>> ans;
         n = arr.size();
         sort(arr.begin(), arr.end());
-
-        // Step 1
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 int sm = arr[i] + arr[j];
@@ -61,7 +56,6 @@ class Solution {
             }
         }
 
-        // Step 2
         for (int i = 0; i < n; i++) {
             int sm = 2 * arr[i];
             if (sm != arr[i] && mp[arr[i]] > 1 && mp[-2 * arr[i]] > 0) {
@@ -71,7 +65,6 @@ class Solution {
             }
         }
 
-        // Step 3
         if (mp[0] > 2) {
             ans.insert({0, 0, 0});
         }
@@ -82,6 +75,7 @@ class Solution {
         return vv;
     }
 };
+
 ```
 </TabItem>
 </Tabs>

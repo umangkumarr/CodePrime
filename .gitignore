@@ -1,5 +1,6 @@
 # Dependencies
 /node_modules
+/docs/Problems/Striver
 
 # Production
 # /build
@@ -22,6 +23,10 @@ A.cpp
 j.json
 format.md
 leetcode1.py
+problem_generator.py
+ref.py
+sidebar_generator.py
+temp.json
 
 npm-debug.log*
 yarn-debug.log*

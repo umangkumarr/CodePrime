@@ -1,5 +1,6 @@
 ---
 sidebar_position : 6
+description: "Collection of problems asked in Google Technical rounds"
 ---
 
 # Google

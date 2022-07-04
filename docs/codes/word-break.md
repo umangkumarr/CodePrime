@@ -1,5 +1,5 @@
 ---
-sidebar_position : 16
+sidebar_position : 168
 tags: [Hash Table, String, Dynamic Programming, Trie, Memoization]
 ---
 
@@ -12,8 +12,6 @@ tags: [Hash Table, String, Dynamic Programming, Trie, Memoization]
 <p><strong>Note</strong> that the same word in the dictionary may be reused multiple times in the segmentation.</p>
 
 ## Solution Approach
-
-We use a boolean vector $dp[]$. $dp[i]$ is set to true if a valid word (word sequence) ends there. The optimization is to look from current position $i$ back and only substring and do dictionary look up in case the preceding position $j$ with $dp[j] == true$ is found.
 
 Expected Time complexity: $O(n^3)$
 
@@ -40,9 +38,11 @@ class Solution {
                 if (mp.find(w) != mp.end() && dp[j]) dp[i] = true;
             }
         }
+
         return dp[s.size()];
     }
 };
+
 ```
 </TabItem>
 </Tabs>

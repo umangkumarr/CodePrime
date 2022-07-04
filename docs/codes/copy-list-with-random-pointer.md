@@ -1,5 +1,5 @@
 ---
-sidebar_position : 3
+sidebar_position : 41
 tags: [Hash Table, Linked List]
 ---
 
@@ -26,9 +26,6 @@ tags: [Hash Table, Linked List]
 
 ## Solution Approach
 
-By using Hash Map make an alternative node for every node in the given linkedlist. Then make the connection in the alternative nodes same as in the original nodes.
-
-Expected Time complexity: $O(nlogn)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -58,6 +55,7 @@ class Solution {
         return mp[head];
     }
 };
+
 ```
 </TabItem>
 </Tabs>
