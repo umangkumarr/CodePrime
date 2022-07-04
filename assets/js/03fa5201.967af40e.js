@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[7550],{7860:e=>{e.exports=JSON.parse('{"name":"Bit Manipulationa","permalink":"/CodePrime/docs/tags/bit-manipulationa","docs":[{"id":"codes/subset-sums","title":"Subset Sums","description":"Problem","permalink":"/CodePrime/docs/codes/subset-sums"}],"allTagsPath":"/CodePrime/docs/tags"}')}}]);

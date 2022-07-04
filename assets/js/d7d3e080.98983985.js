@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[2870],{3379:e=>{e.exports=JSON.parse('{"name":"Combinatorics","permalink":"/CodePrime/docs/tags/combinatorics","docs":[{"id":"codes/unique-paths","title":"Unique Paths","description":"Problem","permalink":"/CodePrime/docs/codes/unique-paths"}],"allTagsPath":"/CodePrime/docs/tags"}')}}]);
