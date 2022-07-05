@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 13
 tags: [Array, Binary Search, Divide and Conquer, Binary Indexed Tree, Segment Tree, Merge Sort, Ordered Set]
 ---

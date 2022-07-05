@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 140
 tags: [String, Tree, Depth-First Search, Breadth-First Search, Design, Binary Tree]
 ---

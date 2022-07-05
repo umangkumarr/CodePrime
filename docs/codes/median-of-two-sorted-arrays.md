@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 60
 tags: [Array, Binary Search, Divide and Conquer]
 ---

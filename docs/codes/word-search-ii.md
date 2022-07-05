@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 22
 tags: [Array, String, Backtracking, Trie, Matrix]
 ---

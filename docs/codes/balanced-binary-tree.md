@@ -1,8 +1,7 @@
 ---
+displayed_sidebar: null
 sidebar_position : 119
 tags: [Tree, Depth-First Search, Binary Tree]
-displayed_sidebars:
-
 ---
 
 # Balanced Binary Tree

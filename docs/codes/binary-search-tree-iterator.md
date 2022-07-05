@@ -1,8 +1,7 @@
 ---
+displayed_sidebar: null
 sidebar_position : 137
 tags: [Stack, Tree, Design, Binary Search Tree, Binary Tree, Iterator]
-displayed_sidebars:
-
 ---
 
 # Binary Search Tree Iterator

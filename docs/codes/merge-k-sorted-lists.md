@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 7
 tags: [Linked List, Divide and Conquer, Heap (Priority Queue), Merge Sort]
 ---

@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 42
 tags: [Linked List, Two Pointers]
 ---

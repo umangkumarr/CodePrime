@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 6
 tags: [Array, Binary Search]
 ---

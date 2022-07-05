@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 11
 tags: [Hash Table, Tree, Depth-First Search, Binary Tree]
 ---

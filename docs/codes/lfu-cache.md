@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 84
 tags: [Hash Table, Linked List, Design, Doubly-Linked List]
 ---

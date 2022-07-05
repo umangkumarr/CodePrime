@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 85
 tags: [Stack, Design, Monotonic Stack, Data Stream]
 ---

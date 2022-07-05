@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 7
 tags: [Stack, Tree, Depth-First Search, Binary Tree]
 ---

@@ -18,15 +18,9 @@ package-lock.json
 .env.development.local
 .env.test.local
 .env.production.local
-leetcode.py
-A.cpp
-j.json
-format.md
-leetcode1.py
-problem_generator.py
-ref.py
-sidebar_generator.py
-temp.json
+/scripts
+/docs/anew
+
 
 npm-debug.log*
 yarn-debug.log*

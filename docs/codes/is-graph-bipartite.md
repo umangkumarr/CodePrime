@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 149
 tags: [Depth-First Search, Breadth-First Search, Union Find, Graph]
 ---

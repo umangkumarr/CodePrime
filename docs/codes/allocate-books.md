@@ -1,8 +1,7 @@
 ---
+displayed_sidebar: null
 sidebar_position : 7
 tags: [Array, Binary Search]
-displayed_sidebars:
-
 ---
 
 # Allocate Books

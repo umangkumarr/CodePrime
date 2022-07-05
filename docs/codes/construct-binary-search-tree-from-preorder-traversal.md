@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 130
 tags: [Array, Stack, Tree, Binary Search Tree, Monotonic Stack, Binary Tree]
 ---

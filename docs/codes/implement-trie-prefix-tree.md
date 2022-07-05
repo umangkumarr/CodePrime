@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 178
 tags: [Hash Table, String, Design, Trie]
 ---

@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 129
 tags: [Tree, Binary Search Tree, Binary Tree]
 ---

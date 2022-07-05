@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 86
 tags: [Stack, Design]
 ---

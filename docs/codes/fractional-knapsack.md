@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 4
 tags: [Dynamic Programming, Sorting]
 ---

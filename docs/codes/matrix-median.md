@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 2
 tags: [Divide Conquer, Matrix]
 ---

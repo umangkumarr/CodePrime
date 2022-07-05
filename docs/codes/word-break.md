@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 168
 tags: [Hash Table, String, Dynamic Programming, Trie, Memoization]
 ---

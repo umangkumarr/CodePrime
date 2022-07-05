@@ -1,4 +1,5 @@
 ---
+displayed_sidebar: null
 sidebar_position : 79
 tags: [Stack, Design, Queue]
 ---
