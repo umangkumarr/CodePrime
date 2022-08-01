@@ -167,7 +167,7 @@ const sidebars = {
                                 "title": "Arrays Part-IV"
                             },
                             "items": [
-                                "codes/4Sum",
+                                "codes/4sum",
                                 "codes/longest-consecutive-sequence",
                                 "codes/subarray-with-given-xor",
                                 "codes/longest-subarray-zero-sum",
