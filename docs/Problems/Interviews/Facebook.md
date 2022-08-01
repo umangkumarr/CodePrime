@@ -10,16 +10,16 @@ description: "Collection of problems asked in Facebook technical rounds"
 | ----------- | ----------- | ----------- | ----------- |
 1.|Merge k Sorted Lists  |  https://leetcode.com/problems/merge-k-sorted-lists |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/merge-k-sorted-lists) | 
 2.|Divide Two Integers  |  https://leetcode.com/problems/divide-two-integers |  
-3.|Next Permutation  |  https://leetcode.com/problems/next-permutation |  
-4.|Multiply Strings  |  https://leetcode.com/problems/multiply-strings |  
+3.|Next Permutation  |  https://leetcode.com/problems/next-permutation/ |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/next-permutation)
+4.|Multiply Strings  |  https://leetcode.com/problems/multiply-strings |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/multiply-strings)
 5.|Pow(x, n)   |  https://leetcode.com/problems/powx-n |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/powx-n) | 
-6.|Merge Intervals  |  https://leetcode.com/problems/merge-intervals |  
-7.|Valid Number  |  https://leetcode.com/problems/valid-number |  
-8.|Add Binary  |  https://leetcode.com/problems/add-binary |  
-9.|Merge Sorted Array  |  https://leetcode.com/problems/merge-sorted-array |  
+6.|Merge Intervals  |  https://leetcode.com/problems/merge-intervals |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/merge-intervals)
+7.|Valid Number  |  https://leetcode.com/problems/valid-number |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/valid-number)
+8.|Add Binary  |  https://leetcode.com/problems/add-binary |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/add-binary)
+9.|Merge Sorted Array  |  https://leetcode.com/problems/merge-sorted-array |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/merge-sorted-array)
 10.|Binary Tree Maximum Path Sum  |  https://leetcode.com/problems/binary-tree-maximum-path-sum |  
 11.|Valid Palindrome  |  https://leetcode.com/problems/valid-palindrome |  
-12.|Word Break  |  https://leetcode.com/problems/word-break |  
+12.|Word Break  |  https://leetcode.com/problems/word-break |  [Click](https://umangkumarr.github.io/CodePrime/docs/codes/word-break )|
 13.|Read N Characters Given Read4 II - Call multiple times |  https://leetcode.com/problems/read-n-characters-given-read4-ii-call-multiple-times |  
 14.|Binary Search Tree Iterator  |  https://leetcode.com/problems/binary-search-tree-iterator |  
 15.|Binary Tree Right Side View  |  https://leetcode.com/problems/binary-tree-right-side-view |  

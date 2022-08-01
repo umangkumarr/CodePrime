@@ -46,13 +46,13 @@ description: "Collection of problems asked in Amazon technical rounds"
 37.|Top K Frequent Words   | https://leetcode.com/problems/top-k-frequent-words | [Click](https://umangkumarr.github.io/CodePrime/docs/codes/top-k-frequent-words) |
 38.|Number of Distinct Islands   | https://leetcode.com/problems/number-of-distinct-islands 
 39.|Partition Labels   | https://leetcode.com/problems/partition-labels 
-40.|Most Common Word   | https://leetcode.com/problems/most-common-word 
+40.|Most Common Word   | https://leetcode.com/problems/most-common-word | [Click](https://umangkumarr.github.io/CodePrime/docs/codes/most-common-word)|
 41.|All Nodes Distance K in Binary Tree   | https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree 
 42.|Snakes and Ladders   | https://leetcode.com/problems/snakes-and-ladders 
 43.|Reorder Data in Log Files   | https://leetcode.com/problems/reorder-data-in-log-files 
 44.|Prison Cells After N Days   | https://leetcode.com/problems/prison-cells-after-n-days 
-45.|K Closest Points to Origin   | https://leetcode.com/problems/k-closest-points-to-origin 
-46.|Rotting Oranges   | https://leetcode.com/problems/rotting-oranges 
+45.|K Closest Points to Origin   | https://leetcode.com/problems/k-closest-points-to-origin | [Click](https://umangkumarr.github.io/CodePrime/docs/codes/k-closest-points-to-origin) |
+46.|Rotting Oranges   | https://leetcode.com/problems/rotting-oranges | [Click](https://umangkumarr.github.io/CodePrime/docs/codes/rotting-oranges) |
 47.|Analyze User Website Visit Pattern   | https://leetcode.com/problems/analyze-user-website-visit-pattern 
 48.|Minimum Cost to Connect Sticks   | https://leetcode.com/problems/minimum-cost-to-connect-sticks 
 49.|Critical Connections in a Network   | https://leetcode.com/problems/critical-connections-in-a-network 

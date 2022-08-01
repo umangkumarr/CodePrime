@@ -1,7 +1,7 @@
 ---
-displayed_sidebar: null
-sidebar_position : 82
+sidebar_position : 1
 tags: [Array, Breadth-First Search, Matrix]
+displayed_sidebar: null
 ---
 
 # Rotting Oranges
@@ -20,9 +20,18 @@ tags: [Array, Breadth-First Search, Matrix]
 
 <p>Return <em>the minimum number of minutes that must elapse until no cell has a fresh orange</em>. If <em>this is impossible, return</em> <code>-1</code>.</p>
 
+<p>&nbsp;</p>
+<p><strong>Example 1:</strong></p>
+<img alt="" src="https://assets.leetcode.com/uploads/2019/02/16/oranges.png" style={ {width: "650px", height: "137px"} } /> <br/>
+<pre>
+<strong>Input:</strong> grid = [[2,1,1],[1,1,0],[0,1,1]] <br/>
+<strong>Output:</strong> 4 <br/>
+</pre>
+
+
 ## Solution Approach
 
-Expected Time complexity: $O(n^n)$
+Expected Time Complexity: $O(n^n)$
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -87,7 +96,6 @@ class Solution {
         return res;
     }
 };
-
 ```
 </TabItem>
 </Tabs>

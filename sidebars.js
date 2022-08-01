@@ -95,7 +95,7 @@ const sidebars = {
             label: 'Striver Sheet',
             link: {
                 type: 'generated-index',
-                title: 'Leetcode for Placement',
+                title: 'Striver DSA Sheets',
                 description:
                     "SDE and DP sheet by Stiver",
                 keywords: ['Striver'],
@@ -568,7 +568,22 @@ const sidebars = {
                         title: 'Striver DP Sheet',
                     },
                     items: [
-                        
+                        {
+                            type: 'category',
+                            label: '1D DP',
+                            link: {
+                                type: 'generated-index',
+                                title: '1D DP',
+                            },
+                            items: [
+                                'codes/climbing-stairs',
+                                'codes/frog-with-k-jumps',
+                                'codes/maximum-sum-of-non-adjacent-elements',
+                                'codes/house-robber',
+                                'codes/house-robber-ii',
+                            ]
+                        },
+
                     ]
                 },
                 {
