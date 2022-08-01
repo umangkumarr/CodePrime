@@ -167,7 +167,7 @@ const sidebars = {
                                 "title": "Arrays Part-IV"
                             },
                             "items": [
-                                "codes/4sum",
+                                "codes/4Sum",
                                 "codes/longest-consecutive-sequence",
                                 "codes/subarray-with-given-xor",
                                 "codes/longest-subarray-zero-sum",
@@ -218,7 +218,7 @@ const sidebars = {
                                 "codes/trapping-rain-water",
                                 "codes/max-consecutive-ones",
                                 "codes/remove-duplicates-from-sorted-array",
-                                "codes/3sum",
+                                "codes/3Sum",
                                 "codes/copy-list-with-random-pointer",
                                 "codes/rotate-list"
                             ]
@@ -611,7 +611,7 @@ const sidebars = {
                                 'codes/find-minimum-in-rotated-sorted-array',
                                 'codes/find-minimum-in-rotated-sorted-array-ii',
                                 'codes/search-in-rotated-sorted-array',
-                                'codes/3sum',
+                                'codes/3Sum',
                                 'codes/container-with-most-water',
 
                             ]
