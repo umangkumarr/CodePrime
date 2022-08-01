@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[7419],{980:e=>{e.exports=JSON.parse('{"name":"Ordered Set","permalink":"/docs/tags/ordered-set","docs":[{"id":"codes/reverse-pairs","title":"Reverse Pairs","description":"Problem","permalink":"/docs/codes/reverse-pairs"}],"allTagsPath":"/docs/tags"}')}}]);

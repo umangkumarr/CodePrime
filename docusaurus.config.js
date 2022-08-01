@@ -10,8 +10,8 @@ const katex = require('rehype-katex');
 const config = {
   title: 'CodePrime',
   tagline: 'One place for Data Structure and Algorithms',
-  url: 'https://umangkumarr.github.io',
-  baseUrl: '/CodePrime/',
+  url: 'https://codeprime.herokuapp.com',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -19,7 +19,7 @@ const config = {
   projectName: 'CodePrime', // Usually your repo name.
   // themes : ['@docusaurus/theme-live-codeblock'],
   presets: [
-    [ 
+    [
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
@@ -74,8 +74,8 @@ const config = {
             sidebarId: 'main', // foldername
             label: 'Problems',     // navbar title
           },
-          
-          
+
+
 
           // {to: '/blog', label: 'Blog', position: 'left'},
           {
@@ -97,23 +97,23 @@ const config = {
               },
             ],
           },
-        //   {
-        //     title: 'Community',
-        //     items: [
-        //       {
-        //         label: 'Stack Overflow',
-        //         href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-        //       },
-        //       {
-        //         label: 'Discord',
-        //         href: 'https://discordapp.com/invite/docusaurus',
-        //       },
-        //       {
-        //         label: 'Twitter',
-        //         href: 'https://twitter.com/docusaurus',
-        //       },
-        //     ],
-        //   },
+          //   {
+          //     title: 'Community',
+          //     items: [
+          //       {
+          //         label: 'Stack Overflow',
+          //         href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+          //       },
+          //       {
+          //         label: 'Discord',
+          //         href: 'https://discordapp.com/invite/docusaurus',
+          //       },
+          //       {
+          //         label: 'Twitter',
+          //         href: 'https://twitter.com/docusaurus',
+          //       },
+          //     ],
+          //   },
           {
             title: 'More',
             items: [
