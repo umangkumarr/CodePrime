@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[8251],{3806:e=>{e.exports=JSON.parse('{"title":"Arrays Part-IV","slug":"/category/arrays-part-iv","permalink":"/docs/category/arrays-part-iv","navigation":{"previous":{"title":"Majority Element","permalink":"/docs/codes/majority-element"},"next":{"title":"4Sum","permalink":"/docs/codes/4sum"}}}')}}]);
