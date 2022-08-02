@@ -10,8 +10,8 @@ const katex = require('rehype-katex');
 const config = {
   title: 'CodePrime',
   tagline: 'One place for Data Structure and Algorithms',
-  url: 'https://codeprime.herokuapp.com',
-  baseUrl: '/',
+  url: 'https://umangkumarr.github.io',
+  baseUrl: '/CodePrime',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
