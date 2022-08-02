@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[7592],{4415:e=>{e.exports=JSON.parse('{"name":"Implementation","permalink":"/docs/tags/implementation","docs":[{"id":"codes/the-celebrity-problem","title":"The Celebrity Problem","description":"Problem","permalink":"/docs/codes/the-celebrity-problem"}],"allTagsPath":"/docs/tags"}')}}]);
