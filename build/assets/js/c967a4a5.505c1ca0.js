@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[5250],{2978:e=>{e.exports=JSON.parse('{"name":"Geometry","permalink":"/docs/tags/geometry","docs":[{"id":"codes/k-closest-points-to-origin","title":"K Closest Points to Origin","description":"Problem","permalink":"/docs/codes/k-closest-points-to-origin"}],"allTagsPath":"/docs/tags"}')}}]);

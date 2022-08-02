@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[3327],{5852:e=>{e.exports=JSON.parse('{"title":"Arrays","slug":"/category/arrays-1","permalink":"/docs/category/arrays-1","navigation":{"previous":{"title":"Blind 75","permalink":"/docs/category/blind-75"},"next":{"title":"Two Sum","permalink":"/docs/codes/two-sum"}}}')}}]);

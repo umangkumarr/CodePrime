@@ -11,7 +11,7 @@ const config = {
   title: 'CodePrime',
   tagline: 'One place for Data Structure and Algorithms',
   url: 'https://umangkumarr.github.io',
-  baseUrl: '/CodePrime',
+  baseUrl: '/CodePrime/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',

@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[8363],{7777:e=>{e.exports=JSON.parse('{"name":"Monotonic Queue","permalink":"/docs/tags/monotonic-queue","docs":[{"id":"codes/sliding-window-maximum","title":"Sliding Window Maximum","description":"Problem","permalink":"/docs/codes/sliding-window-maximum"}],"allTagsPath":"/docs/tags"}')}}]);

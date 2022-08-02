@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[5143],{2827:e=>{e.exports=JSON.parse('{"title":"1D DP","slug":"/category/1d-dp","permalink":"/docs/category/1d-dp","navigation":{"previous":{"title":"Striver DP Sheet","permalink":"/docs/category/striver-dp-sheet"},"next":{"title":"Climbing Stairs","permalink":"/docs/codes/climbing-stairs"}}}')}}]);
