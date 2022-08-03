@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 163
 tags: [String, Dynamic Programming]
 ---

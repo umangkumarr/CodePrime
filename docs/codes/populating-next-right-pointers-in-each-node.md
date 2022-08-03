@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 133
 tags: [Linked List, Tree, Depth-First Search, Breadth-First Search, Binary Tree]
 ---

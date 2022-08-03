@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Hash Table, String, Counting]
-displayed_sidebar: null
 ---
 
 # Most Common Word

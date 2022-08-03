@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Dynamic Programming]
-displayed_sidebar: null
 ---
 
 # Frog with k jumps

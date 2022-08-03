@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Math, String, Bit Manipulation, Simulation]
-displayed_sidebar: null
 ---
 
 # Add Binary

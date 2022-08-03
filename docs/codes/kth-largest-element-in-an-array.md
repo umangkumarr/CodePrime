@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 142
 tags: [Array, Divide and Conquer, Sorting, Heap (Priority Queue), Quickselect]
 ---

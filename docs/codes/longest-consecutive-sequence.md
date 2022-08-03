@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 20
 tags: [Array, Hash Table, Union Find]
 ---

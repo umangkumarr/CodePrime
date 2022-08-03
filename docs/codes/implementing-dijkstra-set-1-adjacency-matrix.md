@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 2
 tags: [Graph, Dynamic Programming, Heap(Priority_Queue)]
 ---

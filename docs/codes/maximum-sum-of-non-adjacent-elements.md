@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Dynamic Programming]
-displayed_sidebar: null
 ---
 
 # Maximum sum of non-adjacent elements

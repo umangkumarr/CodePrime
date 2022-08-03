@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 16
 tags: [Array, Hash Table]
 ---

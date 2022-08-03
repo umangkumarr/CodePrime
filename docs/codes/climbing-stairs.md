@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Math, Dynamic Programming, Memoization]
-displayed_sidebar: null
 ---
 
 # Climbing Stairs

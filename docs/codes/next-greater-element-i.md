@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 74
 tags: [Array, Hash Table, Stack, Monotonic Stack]
 ---

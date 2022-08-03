@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 171
 tags: [Array, Dynamic Programming, Matrix]
 ---

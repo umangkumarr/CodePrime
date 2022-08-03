@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Math, String, Simulation]
-displayed_sidebar: null
 ---
 
 # Multiply Strings

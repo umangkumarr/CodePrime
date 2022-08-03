@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Array, Math, Divide and Conquer, Geometry, Sorting, Heap (Priority Queue), Quickselect]
-displayed_sidebar: null
 ---
 
 # K Closest Points to Origin

@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 1
 tags: [Math, Divide Conquer]
 ---

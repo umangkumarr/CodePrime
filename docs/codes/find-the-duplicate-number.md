@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 12
 tags: [Array, Two Pointers, Binary Search, Bit Manipulation]
 ---

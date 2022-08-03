@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 179
 tags: [Array, Bit Manipulation, Trie]
 ---

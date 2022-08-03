@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 97
 tags: [Hash Table, String, Sorting]
 ---

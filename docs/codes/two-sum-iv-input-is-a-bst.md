@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 135
 tags: [Hash Table, Two Pointers, Tree, Depth-First Search, Breadth-First Search, Binary Search Tree, Binary Tree]
 ---

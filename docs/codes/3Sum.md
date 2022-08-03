@@ -1,7 +1,8 @@
 ---
-displayed_sidebar: null
 sidebar_position : 40
 tags: [Array, Two Pointers, Sorting]
+slug: /3sum
+hide_table_of_contents: true
 ---
 
 # 3Sum

@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 98
 tags: [Two Pointers, String, String Matching]
 ---

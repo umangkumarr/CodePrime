@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 100
 tags: [String]
 ---

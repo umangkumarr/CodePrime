@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 161
 tags: [Array, Binary Search, Dynamic Programming]
 ---

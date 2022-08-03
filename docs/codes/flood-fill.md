@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 143
 tags: [Array, Depth-First Search, Breadth-First Search, Matrix]
 ---

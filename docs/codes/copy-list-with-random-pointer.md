@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 41
 tags: [Hash Table, Linked List]
 ---

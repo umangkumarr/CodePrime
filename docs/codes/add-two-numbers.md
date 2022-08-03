@@ -1,9 +1,6 @@
 ---
-displayed_sidebar: null
 sidebar_position : 25
 tags: [Linked List, Math, Recursion]
-displayed_sidebars:
-
 ---
 
 # Add Two Numbers

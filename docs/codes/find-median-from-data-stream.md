@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 146
 tags: [Two Pointers, Design, Sorting, Heap (Priority Queue), Data Stream]
 ---

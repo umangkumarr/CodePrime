@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 14
 tags: [Array, Binary Search, Matrix]
 ---

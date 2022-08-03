@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 26
 tags: [Linked List]
 ---

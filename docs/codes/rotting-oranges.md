@@ -1,7 +1,6 @@
 ---
 sidebar_position : 1
 tags: [Array, Breadth-First Search, Matrix]
-displayed_sidebar: null
 ---
 
 # Rotting Oranges

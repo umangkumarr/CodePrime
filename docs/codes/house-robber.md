@@ -1,7 +1,6 @@
 ---
 sidebar_position : 2
 tags: [Array, Dynamic Programming]
-displayed_sidebar: null
 ---
 
 # House Robber

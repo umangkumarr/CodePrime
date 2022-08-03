@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 121
 tags: [Array, Hash Table, Divide and Conquer, Tree, Binary Tree]
 ---

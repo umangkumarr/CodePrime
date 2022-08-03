@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 126
 tags: [Dynamic Programming, Tree, Depth-First Search, Binary Tree]
 ---

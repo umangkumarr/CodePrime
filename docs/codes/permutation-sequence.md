@@ -1,5 +1,4 @@
 ---
-displayed_sidebar: null
 sidebar_position : 49
 tags: [Math, Recursion]
 ---
