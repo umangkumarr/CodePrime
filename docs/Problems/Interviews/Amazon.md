@@ -9,7 +9,7 @@ description: "Collection of problems asked in Amazon technical rounds"
 | ----------- | ----------- | ----------- | ----------- |
 | 1.| Two Sum | https://leetcode.com/problems/two-sum| [Click](/docs/codes/repeat-and-missing-number-array) | 
 | 2.| Longest Palindromic Substring | https://leetcode.com/problems/longest-palindromic-substring | [Click](/docs/codes/longest-palindromic-substring) |
-|3.| 3Sum | https://leetcode.com/problems/3sum | [Click](/docs/codes/3Sum) |
+|3.| 3Sum | https://leetcode.com/problems/3sum | [Click](/docs/codes/3Sum.md) |
 |4.| Merge Two Sorted Lists | https://leetcode.com/problems/merge-two-sorted-lists | [Click](/docs/codes/merge-two-sorted-lists) | 
 |5.| Merge k Sorted Lists | https://leetcode.com/problems/merge-k-sorted-lists | [Click](/docs/codes/merge-k-sorted-lists) | 
 |6.| Trapping Rain Water|  https://leetcode.com/problems/trapping-rain-water | [Click](/docs/codes/trapping-rain-water) | 
