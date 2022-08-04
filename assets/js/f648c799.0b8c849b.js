@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[9435],{7049:e=>{e.exports=JSON.parse('{"name":"Segment Tree","permalink":"/CodePrime/docs/tags/segment-tree","docs":[{"id":"codes/reverse-pairs","title":"Reverse Pairs","description":"Problem","permalink":"/CodePrime/docs/codes/reverse-pairs"}],"allTagsPath":"/CodePrime/docs/tags"}')}}]);
