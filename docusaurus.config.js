@@ -53,88 +53,122 @@ const config = {
     },
   ],
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').themeConfig} */
-    {
-      docs: {
-        sidebar: {
-          hideable: true,
-          autoCollapseCategories: true,
-        }
-      },
-      navbar: {
-        title: 'CodePrime',
-        logo: {
-          alt: 'My Site Logo',
-          src: 'img/logo.svg',
-        },
-        items: [
-          {
-            type: 'docSidebar',  // docSidebar
-            position: 'left',
-            sidebarId: 'main', // foldername
-            label: 'Problems',     // navbar title
-          },
-
-
-
-          // {to: '/blog', label: 'Blog', position: 'left'},
-          {
-            href: 'https://github.com/umangkumarr/CodePrime',
-            label: 'GitHub',
-            position: 'right',
-          },
-        ],
-      },
-      footer: {
-        style: 'dark',
-        links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Problems',
-                to: '/docs/Problems/intro',
-              },
-            ],
-          },
-          //   {
-          //     title: 'Community',
-          //     items: [
-          //       {
-          //         label: 'Stack Overflow',
-          //         href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-          //       },
-          //       {
-          //         label: 'Discord',
-          //         href: 'https://discordapp.com/invite/docusaurus',
-          //       },
-          //       {
-          //         label: 'Twitter',
-          //         href: 'https://twitter.com/docusaurus',
-          //       },
-          //     ],
-          //   },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'Blog',
-                to: '/blog',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/umangkumarr/CodePrime',
-              },
-            ],
-          },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} CodePrime, Inc. Built with Docusaurus.`,
-      },
-      prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
-      },
+  /** @type {import('@docusaurus/preset-classic').themeConfig} */
+  {
+    docs: {
+      sidebar: {
+        hideable: true,
+        autoCollapseCategories: true,
+      }
     },
+    navbar: {
+      title: 'CodePrime',
+      logo: {
+        alt: 'My Site Logo',
+        src: 'img/logo.svg',
+      },
+      items: [
+        {
+          type: 'docSidebar',
+          position: 'left',
+          sidebarId: 'DSA',
+          label: 'DSA',
+        },
+        {
+          type: 'docSidebar',
+          position: 'left',
+          sidebarId: 'Leetcode',
+          label: 'Leetcode',
+        },
+        {
+          type: 'dropdown',
+          dropdownActiveClassDisabled: true,
+          label: "Projects",
+          items: [
+            {
+              href: 'https://umangkumarr.github.io/AI-Snake/',
+              label: 'AI-Snake',
+            },
+            {
+              href: 'https://umangkumarr.github.io/AI-Minesweeper/',
+              label: 'AI-Minesweeper',
+            },
+
+          ],
+        },
+        {
+          type: 'docSidebar',  // docSidebar
+          position: 'left',
+          sidebarId: 'ProjectEuler', // foldername
+          label: 'ProjectEuler+',     // navbar title
+        },
+        {
+          type: 'docSidebar',  // docSidebar
+          position: 'left',
+          sidebarId: 'About', // foldername
+          label: 'About',     // navbar title
+        },
+
+
+
+        // {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          href: 'https://github.com/umangkumarr/CodePrime',
+          label: 'GitHub',
+          position: 'right',
+        },
+      ],
+    },
+    footer: {
+      style: 'dark',
+      links: [
+        {
+          title: 'Docs',
+          items: [
+            {
+              label: 'Problems',
+              to: '/docs/Problems/intro',
+            },
+          ],
+        },
+        //   {
+        //     title: 'Community',
+        //     items: [
+        //       {
+        //         label: 'Stack Overflow',
+        //         href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+        //       },
+        //       {
+        //         label: 'Discord',
+        //         href: 'https://discordapp.com/invite/docusaurus',
+        //       },
+        //       {
+        //         label: 'Twitter',
+        //         href: 'https://twitter.com/docusaurus',
+        //       },
+        //     ],
+        //   },
+        {
+          title: 'More',
+          items: [
+            {
+              label: 'Blog',
+              to: '/blog',
+            },
+            {
+              label: 'GitHub',
+              href: 'https://github.com/umangkumarr/CodePrime',
+            },
+          ],
+        },
+      ],
+      copyright: `Copyright © ${new Date().getFullYear()} CodePrime, Inc. Built with Docusaurus.`,
+    },
+    prism: {
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
+    },
+  },
 };
 
 module.exports = config;

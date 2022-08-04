@@ -4,18 +4,18 @@ sidebar_position: 1
 
 # Guidelines for Contributors
 
-We welcome every kind of contribution which can help us in improving the website.
-We accept only the programming related contribution.
+We welcome every kind of contribution that can help us improve the website.
+We accept only the programming-related contribution.
 
 ---
 ## How to Contribute?
 
-We have two branches which are required from development to deployment of the website.
-1. **Main** - contains all the necessary code (docs, configurations files). This is the main working repository.
-2. **gh-pages** - contains HTML files which will be rendered on the website.
+The following branches are required from development to deployment of the website.
+1. **Main** - contains all the necessary code (docs, configurations files). This is the main working branch.
+2. **gh-pages** - is the build version of the main branch.
 
 ## Procedure
-First clone the repository. Then run the following commands:
+First, clone the repository. Then run the following command:
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -43,7 +43,7 @@ This will install all the required packages needed to run the website.
 
 In CodePrime, the folders name ```docs``` contain all the .md and folder configuration files.
 
-After adding content in the ```docs``` folder, run the following command to build the HTML files.
+After adding content to the ```docs``` folder, run the following command to build the HTML files.
 
 
 <Tabs>
@@ -62,10 +62,11 @@ $ yarn build
 </TabItem>
 </Tabs>
 
-HTML files will be created in ```build``` folder.
+The website's build version will be in the ``build``` folder.
 
-After that, commit all the changes and push it to the ```main branch```. Once this done, push build HTML to ```gh-pages branch``` using the following command
+After that, commit all the changes and push them to the ```main branch```. Once this is done, push build to ```gh-pages branch``` using the following command.
 
 ```git
 git subtree push --prefix build origin gh-pages
 ```
+
