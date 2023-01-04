@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[6402],{9066:e=>{e.exports=JSON.parse('{"permalink":"/CodePrime/blog/tags/learning","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

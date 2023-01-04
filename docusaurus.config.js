@@ -64,6 +64,19 @@ const config = {
   themeConfig:
   /** @type {import('@docusaurus/preset-classic').themeConfig} */
   {
+    // announcementBar: {
+    //   id: 'support_us',
+    //   content:
+    //     'We are looking to revamp our docs, please fill <a target="_blank" rel="noopener noreferrer" href="#">this survey</a>',
+    //   backgroundColor: '#fafbfc',
+    //   textColor: '#091E42',
+    //   isCloseable: false,
+    // },
+    colorMode: {
+      defaultMode: "dark",
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
+    },
     docs: {
       sidebar: {
         hideable: true,
@@ -115,12 +128,12 @@ const config = {
           type: 'docSidebar',  // docSidebar
           position: 'left',
           sidebarId: 'About', // foldername
-          label: 'About',     // navbar title
+          label: 'Contribute',     // navbar title
         },
 
 
 
-        // {to: '/blog', label: 'Blog', position: 'left'},
+        { to: '/blog', label: 'Blog', position: 'right' },
         {
           href: 'https://github.com/umangkumarr/CodePrime',
           label: 'GitHub',
@@ -174,7 +187,7 @@ const config = {
       copyright: `Copyright © ${new Date().getFullYear()} CodePrime, Inc. Built with Docusaurus.`,
     },
     prism: {
-      theme: lightCodeTheme,
+      theme: darkCodeTheme,
       darkTheme: darkCodeTheme,
     },
   },

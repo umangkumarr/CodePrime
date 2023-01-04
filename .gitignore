@@ -10,6 +10,7 @@
 .cache-loader
 .vscode
 package-lock.json
+yarn.lock
 
 
 # Misc
@@ -20,6 +21,7 @@ package-lock.json
 .env.production.local
 /scripts
 /docs/anew
+
 
 
 npm-debug.log*

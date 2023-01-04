@@ -4,38 +4,35 @@ import styles from './HomepageFeatures.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'High quality blogs on data structures and algorithms',
     Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Our website features in-depth and expertly written blogs on various topics related to data structures and algorithms. These blogs are aimed at helping our readers understand these complex concepts in a more comprehensive and easy to follow manner.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Text and code solution of questions asked in interviews and coding rounds',
     Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Our website offers comprehensive solutions to various questions asked in coding interviews and rounds. These solutions come with detailed explanations and accompanying code, helping our readers understand the thought process behind solving these problems.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Expert guidance and support',
     Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Our team of experts is always available to provide guidance and support to our readers. Whether you have a question about a specific data structure or algorithm, or you need help with a coding problem, our experts are here to help you out.
       </>
     ),
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, title, description }) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
@@ -52,7 +49,10 @@ function Feature({Svg, title, description}) {
 export default function HomepageFeatures() {
   return (
     <section className={styles.features}>
-      <div className="container">
+      <div className="container text--center">
+        <h2>
+          What we Offer
+        </h2>
         <div className="row">
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />

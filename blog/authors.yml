@@ -11,7 +11,13 @@ yangshun:
   image_url: https://github.com/yangshun.png
 
 slorber:
-  name: Sébastien Lorber
-  title: Docusaurus maintainer
-  url: https://sebastienlorber.com
+  name: Umang Kumar
+  title: Competitive Programmer and Web Developer
+  url: https://www.linkedin.com/in/umangkumarr
+  image_url: https://github.com/slorber.png
+
+umangkumar:
+  name: Umang Kumar
+  title: Competitive Programmer and Web Developer
+  url: https://www.linkedin.com/in/umangkumarr
   image_url: https://github.com/slorber.png
