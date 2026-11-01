@@ -1,0 +1,185 @@
+/**
+ * CodePrime design tokens — ink + phosphor amber.
+ * Starlight's own variables are mapped from these so every built-in component
+ * (sidebar, search, TOC, asides, tabs) inherits the brand automatically.
+ * Dark is Starlight's :root default; light overrides live on [data-theme='light'].
+ */
+
+:root {
+  --cp-bg: #0b0d12;
+  --cp-bg-soft: #10131a;
+  --cp-surface: #141821;
+  --cp-surface-2: #181d27;
+  --cp-border: rgba(232, 236, 245, 0.08);
+  --cp-border-strong: rgba(232, 236, 245, 0.16);
+  --cp-text: #eef0f4;
+  --cp-text-2: #c4c8d2;
+  --cp-muted: #8b92a1;
+  --cp-accent: #ffb547;
+  --cp-accent-hover: #ffc56f;
+  --cp-accent-soft: rgba(255, 181, 71, 0.11);
+  --cp-accent-ink: #1a1203;
+  --cp-teal: #5eead4;
+  --cp-teal-soft: rgba(94, 234, 212, 0.1);
+  --cp-red: #ff6b6b;
+  --cp-grid: rgba(232, 236, 245, 0.05);
+  --cp-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --cp-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 30px 60px -24px rgba(0, 0, 0, 0.75);
+
+  --cp-font-display: 'Bricolage Grotesque Variable', 'IBM Plex Sans', system-ui, sans-serif;
+  --cp-radius-sm: 8px;
+  --cp-radius: 12px;
+  --cp-radius-lg: 18px;
+
+  /* Starlight mapping */
+  --sl-color-accent-low: #33250d;
+  --sl-color-accent: #ffb547;
+  --sl-color-accent-high: #ffdcaa;
+  --sl-color-white: #eef0f4;
+  --sl-color-gray-1: #d6d9e0;
+  --sl-color-gray-2: #b3b8c3;
+  --sl-color-gray-3: #8b92a1;
+  --sl-color-gray-4: #5b6171;
+  --sl-color-gray-5: #262b36;
+  --sl-color-gray-6: #141821;
+  --sl-color-black: #0b0d12;
+  --sl-color-bg-nav: color-mix(in srgb, #0b0d12 82%, transparent);
+  --sl-color-bg-sidebar: #0b0d12;
+  --sl-color-hairline: rgba(232, 236, 245, 0.08);
+  --sl-color-hairline-light: rgba(232, 236, 245, 0.12);
+  --sl-color-hairline-shade: rgba(0, 0, 0, 0.4);
+
+  --sl-font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sl-font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sl-content-width: 46rem;
+  --sl-nav-height: 4rem;
+  --sl-line-height: 1.75;
+}
+
+:root[data-theme='light'] {
+  --cp-bg: #fbfaf7;
+  --cp-bg-soft: #f4f2ec;
+  --cp-surface: #ffffff;
+  --cp-surface-2: #f7f5f0;
+  --cp-border: rgba(24, 22, 18, 0.1);
+  --cp-border-strong: rgba(24, 22, 18, 0.18);
+  --cp-text: #17171a;
+  --cp-text-2: #3d3f46;
+  --cp-muted: #676b75;
+  --cp-accent: #b45309;
+  --cp-accent-hover: #92400e;
+  --cp-accent-soft: rgba(180, 83, 9, 0.09);
+  --cp-accent-ink: #ffffff;
+  --cp-teal: #0f766e;
+  --cp-teal-soft: rgba(15, 118, 110, 0.1);
+  --cp-red: #c2410c;
+  --cp-grid: rgba(24, 22, 18, 0.06);
+  --cp-shadow: 0 1px 2px rgba(24, 22, 18, 0.04), 0 8px 24px -12px rgba(24, 22, 18, 0.12);
+  --cp-shadow-lg: 0 2px 4px rgba(24, 22, 18, 0.04), 0 24px 48px -20px rgba(24, 22, 18, 0.22);
+
+  --sl-color-accent-low: #fbe6c6;
+  --sl-color-accent: #b45309;
+  --sl-color-accent-high: #6b2a07;
+  --sl-color-white: #17171a;
+  --sl-color-gray-1: #2b2d33;
+  --sl-color-gray-2: #3d3f46;
+  --sl-color-gray-3: #676b75;
+  --sl-color-gray-4: #9a9ea8;
+  --sl-color-gray-5: #dcd9d0;
+  --sl-color-gray-6: #f1eee7;
+  --sl-color-gray-7: #f7f5f0;
+  --sl-color-black: #fbfaf7;
+  --sl-color-bg-nav: color-mix(in srgb, #fbfaf7 82%, transparent);
+  --sl-color-bg-sidebar: #fbfaf7;
+  --sl-color-hairline: rgba(24, 22, 18, 0.1);
+  --sl-color-hairline-light: rgba(24, 22, 18, 0.07);
+  --sl-color-hairline-shade: rgba(24, 22, 18, 0.14);
+}
+
+/* Native cross-page transitions (Chrome, Edge, Safari 18+); ignored elsewhere. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--cp-accent);
+  color: var(--cp-accent-ink);
+}
+
+/* ---------- Header ---------- */
+
+header.header {
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.site-title {
+  font-family: var(--cp-font-display);
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+  color: var(--sl-color-white) !important;
+}
+
+.site-title img {
+  height: 1.8rem !important;
+}
+
+/* ---------- Sidebar ---------- */
+
+#starlight__sidebar a[aria-current='page'] {
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--cp-accent);
+}
+
+#starlight__sidebar a[data-solved]::after {
+  content: '✓';
+  margin-inline-start: auto;
+  padding-inline-start: 0.5rem;
+  color: var(--cp-teal);
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
+/* ---------- Headings ---------- */
+
+h1#_top,
+.sl-markdown-content :is(h1, h2, h3, h4) {
+  font-family: var(--cp-font-display);
+  letter-spacing: -0.02em;
+}
+
+h1#_top {
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+#starlight__sidebar a[aria-current='page'],
+#starlight__sidebar a[aria-current='page']:hover,
+#starlight__sidebar a[aria-current='page']:focus {
+  background: var(--cp-accent-soft);
+  color: var(--cp-accent);
+}

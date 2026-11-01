@@ -1,0 +1,25 @@
+---
+title: System Design
+prev: false
+description: End-to-end architecture case studies of real products — the problems they hit at scale and how they solved them.
+---
+
+import CaseStudyList from '../../../components/CaseStudyList.astro';
+
+How do products like ride-hailing, streaming and messaging platforms actually work end to end? This section takes real systems apart: what they had to build, where it broke as they grew, and the engineering decisions that fixed it.
+
+## Case studies
+
+<CaseStudyList />
+
+## How each case study is structured
+
+Every case study follows the same arc, so you can compare systems side by side:
+
+1. **Requirements:** what the product must do, functionally and non-functionally.
+2. **Scale and constraints:** traffic, data volume, latency and availability targets.
+3. **High-level architecture:** the main services and how requests flow between them.
+4. **Deep dives:** the interesting components, such as matching, storage and real-time delivery.
+5. **What broke at scale:** the real problems the team ran into as usage grew.
+6. **How it was solved:** the redesigns, trade-offs and technologies chosen.
+7. **Takeaways:** patterns you can reuse in your own designs and interviews.

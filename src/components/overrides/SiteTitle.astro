@@ -1,0 +1,63 @@
+---
+import Default from '@astrojs/starlight/components/SiteTitle.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const path = Astro.url.pathname;
+const links = [
+  {label: 'DSA', href: `${base}/docs/dsa/`, match: ['/docs/dsa/']},
+  {label: 'LeetCode', href: `${base}/docs/leetcode/`, match: ['/docs/leetcode/', '/docs/codes/', '/docs/interviews']},
+  {label: 'Project Euler+', href: `${base}/docs/project-euler/`, match: ['/docs/project-euler']},
+  {label: 'System Design', href: `${base}/system-design/`, match: ['/system-design']},
+  {label: 'Blog', href: `${base}/blog/`, match: ['/blog']},
+];
+const isActive = (match: string[]) => match.some((m) => path.startsWith(base + m));
+---
+
+<div class="cp-brand">
+  <Default />
+  <nav class="cp-topnav" aria-label="Primary">
+    {
+      links.map((l) => (
+        <a href={l.href} aria-current={isActive(l.match) ? 'page' : undefined}>
+          {l.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<style>
+  .cp-brand {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+  .cp-topnav {
+    display: none;
+    gap: 0.15rem;
+  }
+  .cp-topnav a {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 140ms ease, color 140ms ease;
+  }
+  .cp-topnav a:hover {
+    color: var(--sl-color-white);
+    background: var(--cp-bg-soft);
+  }
+  .cp-topnav a[aria-current='page'] {
+    color: var(--sl-color-white);
+    background: var(--cp-accent-soft);
+  }
+  @media (min-width: 72rem) {
+    .cp-topnav {
+      display: flex;
+    }
+  }
+</style>

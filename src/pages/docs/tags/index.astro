@@ -1,0 +1,84 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import {getTags} from '../../../lib/tags';
+
+const tags = await getTags();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const max = tags[0]?.entries.length ?? 1;
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Topics',
+    description: 'Browse every problem by the data structure or technique it practises.',
+    tableOfContents: false,
+  }}
+>
+  <p>Pick the pattern you want to practise. Each topic lists every problem that uses it.</p>
+  <ul class="cp-topics not-content">
+    {
+      tags.map((t) => (
+        <li>
+          <a href={`${base}/docs/tags/${t.slug}/`}>
+            <span class="cp-topics__label">{t.label}</span>
+            <span class="cp-topics__bar" aria-hidden="true">
+              <span style={`width:${Math.max(6, (t.entries.length / max) * 100)}%`} />
+            </span>
+            <span class="cp-list__meta">{t.entries.length}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</StarlightPage>
+
+<style>
+  .cp-topics {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0 2rem;
+  }
+  .cp-topics li {
+    margin: 0;
+  }
+  .cp-topics a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 4.5rem 2rem;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid var(--cp-border);
+    color: var(--cp-text-2);
+    text-decoration: none;
+  }
+  .cp-topics a:hover {
+    color: var(--sl-color-white);
+  }
+  .cp-topics__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .cp-topics__bar {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--cp-border);
+    overflow: hidden;
+  }
+  .cp-topics__bar span {
+    display: block;
+    height: 100%;
+    background: var(--cp-muted);
+    border-radius: inherit;
+  }
+  .cp-topics a:hover .cp-topics__bar span {
+    background: var(--cp-accent);
+  }
+  .cp-topics .cp-list__meta {
+    text-align: right;
+  }
+</style>

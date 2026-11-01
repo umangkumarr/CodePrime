@@ -1,0 +1,131 @@
+---
+/**
+ * Lists every section of a sidebar topic with its pages — the landing page for a track.
+ * Reads the same src/data/sidebar.json that drives the sidebar, so it never drifts.
+ */
+import {getCollection} from 'astro:content';
+import katex from 'katex';
+import sidebar from '../data/sidebar.json';
+
+type Item = string | {label: string; items: Item[]};
+interface Props {
+  topic: keyof typeof sidebar;
+}
+
+const {topic} = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const docs = await getCollection('docs');
+const byId = new Map(docs.map((d) => [d.id, d]));
+
+const countPages = (items: Item[]): number =>
+  items.reduce((n, it) => n + (typeof it === 'string' ? 1 : countPages(it.items)), 0);
+
+type Section = {label: string; path: string[]; pages: string[]};
+const sections: Section[] = [];
+const collect = (items: Item[], path: string[]) => {
+  const pages = items.filter((i): i is string => typeof i === 'string');
+  if (pages.length) sections.push({label: path[path.length - 1] ?? '', path, pages});
+  for (const it of items) if (typeof it !== 'string') collect(it.items, [...path, it.label]);
+};
+collect(sidebar[topic] as Item[], []);
+
+const groups = (sidebar[topic] as Item[]).filter((i): i is Exclude<Item, string> => typeof i !== 'string');
+---
+
+<div class="cp-track not-content">
+  <nav class="cp-track__toc" aria-label="Sections">
+    {
+      groups.map((g) => (
+        <a href={`#${encodeURIComponent(g.label)}`}>
+          <span>{g.label}</span>
+          <span class="cp-list__meta">{countPages(g.items)}</span>
+        </a>
+      ))
+    }
+  </nav>
+
+  {
+    sections.map((s) => (
+      <section class="cp-track__section" id={s.path.length === 1 ? encodeURIComponent(s.path[0]) : undefined}>
+        <h2 class="cp-track__heading">
+          {s.path.length > 1 && <span class="cp-track__parent">{s.path.slice(0, -1).join(' / ')}</span>}
+          {s.label}
+        </h2>
+        <ul class="cp-list">
+          {s.pages.map((id) => {
+            const entry = byId.get(id);
+            if (!entry) return null;
+            const time = entry.data.complexity?.time;
+            return (
+              <li>
+                <a href={`${base}/${id}/`}>
+                  <span>{entry.data.title}</span>
+                  {time && <span class="cp-list__meta" set:html={katex.renderToString(time, {throwOnError: false})} />}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<script>
+  // Mirror solved ticks from the reader script's store.
+  try {
+    const solved = new Set<string>(JSON.parse(localStorage.getItem('codeprime:solved') ?? '[]'));
+    document.querySelectorAll<HTMLAnchorElement>('.cp-track .cp-list a').forEach((a) => {
+      a.toggleAttribute('data-solved', solved.has(a.getAttribute('href') ?? ''));
+    });
+  } catch {
+    /* ignore */
+  }
+</script>
+
+<style>
+  .cp-track__toc {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .cp-track__toc a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--cp-border);
+    border-radius: var(--cp-radius);
+    background: var(--cp-surface);
+    color: var(--sl-color-white);
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 140ms ease, transform 140ms ease;
+  }
+  .cp-track__toc a:hover {
+    border-color: var(--cp-accent);
+    transform: translateY(-1px);
+  }
+  .cp-track__section {
+    margin-bottom: 2rem;
+    scroll-margin-top: calc(var(--sl-nav-height) + 1rem);
+  }
+  .cp-track__heading {
+    font-family: var(--cp-font-display);
+    font-size: 1.15rem;
+    margin: 0 0 0.75rem;
+    color: var(--sl-color-white);
+  }
+  .cp-track__parent {
+    display: block;
+    font-family: var(--sl-font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cp-muted);
+    margin-bottom: 0.15rem;
+  }
+</style>
