@@ -1,0 +1,60 @@
+---
+import katex from 'katex';
+import {platformOf} from '../lib/platform.mjs';
+import {tagSlug} from '../lib/tags';
+
+const {entry} = Astro.locals.starlightRoute;
+const {source, complexity, tags, difficulty} = entry.data;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const permalink = `${base}/${entry.id}/`;
+const platform = source ? platformOf(source) : '';
+
+const renderMath = (tex: string) => katex.renderToString(tex, {throwOnError: false, output: 'html'});
+const badges = [
+  complexity?.time && {label: 'Time', html: renderMath(complexity.time)},
+  complexity?.space && {label: 'Space', html: renderMath(complexity.space)},
+].filter(Boolean) as {label: string; html: string}[];
+---
+
+<div class="cp-problem-header not-content" data-permalink={permalink}>
+  <div class="cp-problem-header__actions">
+    <a class="cp-btn cp-btn--accent" href={source} target="_blank" rel="noopener noreferrer">
+      Solve on {platform}
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M6 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5V10M9 2h5v5M14 2 7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </a>
+    <button type="button" class="cp-btn cp-btn--outline cp-solved-toggle" aria-pressed="false">
+      <span class="cp-solved-toggle__box" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="m3.5 8.5 3 3 6-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </span>
+      <span class="cp-solved-toggle__label">Mark as solved</span>
+    </button>
+    {difficulty && <span class:list={['cp-difficulty', `cp-difficulty--${difficulty.toLowerCase()}`]}>{difficulty}</span>}
+  </div>
+
+  {
+    badges.length > 0 && (
+      <div class="cp-problem-header__badges">
+        {badges.map((b) => (
+          <div class="cp-badge">
+            <span class="cp-badge__label">{b.label}</span>
+            <span class="cp-badge__value" set:html={b.html} />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    tags.length > 0 && (
+      <ul class="cp-tags" aria-label="Topics">
+        {tags.map((tag) => (
+          <li>
+            <a href={`${base}/docs/tags/${tagSlug(tag)}/`}>{tag}</a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>

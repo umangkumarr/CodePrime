@@ -1,0 +1,446 @@
+{
+ "dsa": [
+  {
+   "label": "Bit Manipulation",
+   "collapsed": true,
+   "items": [
+    "docs/dsa/bit-magic/prerequisite",
+    "docs/dsa/bit-magic/longest-ones-in-binary-representation",
+    "docs/dsa/bit-magic/not-so-easy-math",
+    "docs/dsa/bit-magic/playing-with-bits"
+   ]
+  },
+  {
+   "label": "Number Theory",
+   "collapsed": true,
+   "items": [
+    "docs/dsa/number-theory/exponentiation",
+    "docs/dsa/number-theory/modular-exponentiation"
+   ]
+  },
+  {
+   "label": "Trees",
+   "collapsed": true,
+   "items": [
+    "docs/dsa/trees/maximum-binary-tree"
+   ]
+  }
+ ],
+ "leetcode": [
+  {
+   "label": "Company interview lists",
+   "collapsed": true,
+   "items": [
+    "docs/interviews",
+    "docs/interviews/amazon",
+    "docs/interviews/facebook",
+    "docs/interviews/google",
+    "docs/interviews/linkedin",
+    "docs/interviews/top-50-interview-questions"
+   ]
+  },
+  {
+   "label": "Striver SDE Sheet",
+   "collapsed": true,
+   "items": [
+    {
+     "label": "Arrays",
+     "collapsed": true,
+     "items": [
+      "docs/codes/pascals-triangle",
+      "docs/codes/next-permutation",
+      "docs/codes/set-matrix-zeroes",
+      "docs/codes/best-time-to-buy-and-sell-stock",
+      "docs/codes/maximum-subarray",
+      "docs/codes/sort-colors"
+     ]
+    },
+    {
+     "label": "Arrays Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/merge-intervals",
+      "docs/codes/merge-sorted-array",
+      "docs/codes/repeat-and-missing-number-array",
+      "docs/codes/rotate-image",
+      "docs/codes/count-inversions",
+      "docs/codes/find-the-duplicate-number"
+     ]
+    },
+    {
+     "label": "Arrays Part-III",
+     "collapsed": true,
+     "items": [
+      "docs/codes/reverse-pairs",
+      "docs/codes/search-a-2d-matrix",
+      "docs/codes/powx-n",
+      "docs/codes/majority-element-ii",
+      "docs/codes/unique-paths",
+      "docs/codes/majority-element"
+     ]
+    },
+    {
+     "label": "Arrays Part-IV",
+     "collapsed": true,
+     "items": [
+      "docs/codes/4sum",
+      "docs/codes/longest-consecutive-sequence",
+      "docs/codes/subarray-with-given-xor",
+      "docs/codes/longest-subarray-zero-sum",
+      "docs/codes/two-sum",
+      "docs/codes/longest-substring-without-repeating-characters"
+     ]
+    },
+    {
+     "label": "Linked List",
+     "collapsed": true,
+     "items": [
+      "docs/codes/add-two-numbers",
+      "docs/codes/delete-node-in-a-linked-list",
+      "docs/codes/reverse-linked-list",
+      "docs/codes/middle-of-the-linked-list",
+      "docs/codes/merge-two-sorted-lists",
+      "docs/codes/remove-nth-node-from-end-of-list"
+     ]
+    },
+    {
+     "label": "Linked List Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/palindrome-linked-list",
+      "docs/codes/flattening-a-linked-list",
+      "docs/codes/linked-list-cycle",
+      "docs/codes/reverse-nodes-in-k-group",
+      "docs/codes/intersection-of-two-linked-lists",
+      "docs/codes/linked-list-cycle-ii"
+     ]
+    },
+    {
+     "label": "Linked List and Arrays",
+     "collapsed": true,
+     "items": [
+      "docs/codes/trapping-rain-water",
+      "docs/codes/max-consecutive-ones",
+      "docs/codes/remove-duplicates-from-sorted-array",
+      "docs/codes/3sum",
+      "docs/codes/copy-list-with-random-pointer",
+      "docs/codes/rotate-list"
+     ]
+    },
+    {
+     "label": "Greedy Algorithm",
+     "collapsed": true,
+     "items": [
+      "docs/codes/minimum-platforms",
+      "docs/codes/job-sequencing-problem",
+      "docs/codes/number-of-coins",
+      "docs/codes/maximum-meetings",
+      "docs/codes/fractional-knapsack"
+     ]
+    },
+    {
+     "label": "Recursion",
+     "collapsed": true,
+     "items": [
+      "docs/codes/combination-sum-ii",
+      "docs/codes/subset-sums",
+      "docs/codes/permutation-sequence",
+      "docs/codes/combination-sum",
+      "docs/codes/subsets-ii",
+      "docs/codes/palindrome-partitioning"
+     ]
+    },
+    {
+     "label": "Recursion and Backtracking",
+     "collapsed": true,
+     "items": [
+      "docs/codes/sudoku-solver",
+      "docs/codes/word-break",
+      "docs/codes/rat-in-a-maze-problemi",
+      "docs/codes/n-queens",
+      "docs/codes/m-coloring-problem",
+      "docs/codes/permutations"
+     ]
+    },
+    {
+     "label": "Binary Search",
+     "collapsed": true,
+     "items": [
+      "docs/codes/allocate-books",
+      "docs/codes/k-th-element-of-two-sorted-array",
+      "docs/codes/median-of-two-sorted-arrays",
+      "docs/codes/nth-root-of-m",
+      "docs/codes/single-element-in-a-sorted-array",
+      "docs/codes/matrix-median",
+      "docs/codes/search-in-rotated-sorted-array",
+      "docs/codes/chess-tournament"
+     ]
+    },
+    {
+     "label": "Heaps",
+     "collapsed": true,
+     "items": [
+      "docs/codes/merge-k-sorted-arrays",
+      "docs/codes/kth-largest-element-in-an-array",
+      "docs/codes/top-k-frequent-elements",
+      "docs/codes/maximum-sum-combinations",
+      "docs/codes/find-median-from-data-stream"
+     ]
+    },
+    {
+     "label": "Stack and Queue",
+     "collapsed": true,
+     "items": [
+      "docs/codes/implement-a-queue-using-array",
+      "docs/codes/next-greater-element-i",
+      "docs/codes/implement-stack-using-queues",
+      "docs/codes/implement-a-stack-using-arrays",
+      "docs/codes/implement-queue-using-stacks",
+      "docs/codes/sort-a-stack",
+      "docs/codes/valid-parentheses"
+     ]
+    },
+    {
+     "label": "Stack and Queue Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/sliding-window-maximum",
+      "docs/codes/nearest-smaller-element",
+      "docs/codes/rotting-oranges",
+      "docs/codes/lfu-cache",
+      "docs/codes/online-stock-span",
+      "docs/codes/min-stack",
+      "docs/codes/lru-cache",
+      "docs/codes/largest-rectangle-in-histogram",
+      "docs/codes/the-celebrity-problem"
+     ]
+    },
+    {
+     "label": "String",
+     "collapsed": true,
+     "items": [
+      "docs/codes/reverse-words-in-a-string",
+      "docs/codes/repeated-string-match",
+      "docs/codes/string-to-integer-atoi",
+      "docs/codes/roman-to-integer",
+      "docs/codes/longest-palindromic-substring",
+      "docs/codes/longest-common-prefix"
+     ]
+    },
+    {
+     "label": "String-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/valid-anagram",
+      "docs/codes/minimum-characters-required-to-make-a-string-palindromic",
+      "docs/codes/implement-strstr",
+      "docs/codes/compare-version-numbers",
+      "docs/codes/count-and-say"
+     ]
+    },
+    {
+     "label": "Binary Tree",
+     "collapsed": true,
+     "items": [
+      "docs/codes/binary-tree-preorder-traversal",
+      "docs/codes/left-view-of-binary-tree",
+      "docs/codes/tree-traversals",
+      "docs/codes/maximum-width-of-binary-tree",
+      "docs/codes/binary-tree-postorder-traversal",
+      "docs/codes/binary-tree-preorder-traversal",
+      "docs/codes/path-to-given-node",
+      "docs/codes/vertical-order-traversal-of-a-binary-tree",
+      "docs/codes/binary-tree-inorder-traversal",
+      "docs/codes/top-view-of-binary-tree",
+      "docs/codes/bottom-view-of-binary-tree",
+      "docs/codes/binary-tree-inorder-traversal"
+     ]
+    },
+    {
+     "label": "Binary Tree Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/binary-tree-zigzag-level-order-traversal",
+      "docs/codes/binary-tree-level-order-traversal",
+      "docs/codes/boundary-traversal-of-binary-tree",
+      "docs/codes/lowest-common-ancestor-of-a-binary-tree",
+      "docs/codes/same-tree",
+      "docs/codes/maximum-depth-of-binary-tree",
+      "docs/codes/balanced-binary-tree",
+      "docs/codes/diameter-of-binary-tree"
+     ]
+    },
+    {
+     "label": "Binary Tree part-III",
+     "collapsed": true,
+     "items": [
+      "docs/codes/construct-binary-tree-from-preorder-and-inorder-traversal",
+      "docs/codes/construct-binary-tree-from-inorder-and-postorder-traversal",
+      "docs/codes/symmetric-tree",
+      "docs/codes/flatten-binary-tree-to-linked-list",
+      "docs/codes/children-sum-property",
+      "docs/codes/binary-tree-maximum-path-sum",
+      "docs/codes/mirror-tree"
+     ]
+    },
+    {
+     "label": "Binary Search Tree",
+     "collapsed": true,
+     "items": [
+      "docs/codes/lowest-common-ancestor-of-a-binary-search-tree",
+      "docs/codes/search-in-a-binary-search-tree",
+      "docs/codes/construct-binary-search-tree-from-preorder-traversal",
+      "docs/codes/validate-binary-search-tree",
+      "docs/codes/convert-sorted-array-to-binary-search-tree",
+      "docs/codes/populating-next-right-pointers-in-each-node"
+     ]
+    },
+    {
+     "label": "Binary Search Tree Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/two-sum-iv-input-is-a-bst",
+      "docs/codes/kth-largest-element-in-bst",
+      "docs/codes/maximum-sum-bst-in-binary-tree",
+      "docs/codes/binary-search-tree-iterator",
+      "docs/codes/ceil-from-bst",
+      "docs/codes/kth-smallest-element-in-a-bst",
+      "docs/codes/serialize-and-deserialize-binary-tree",
+      "docs/codes/floor-in-bst"
+     ]
+    },
+    {
+     "label": "Binary Trees[Miscellaneous]",
+     "collapsed": true,
+     "items": [
+      "docs/codes/kth-largest-element-in-an-array",
+      "docs/codes/flood-fill",
+      "docs/codes/distinct-numbers-in-window",
+      "docs/codes/flatten-binary-tree-to-linked-list",
+      "docs/codes/kth-largest-element-in-a-stream",
+      "docs/codes/find-median-from-data-stream"
+     ]
+    },
+    {
+     "label": "Graph",
+     "collapsed": true,
+     "items": [
+      "docs/codes/is-graph-bipartite",
+      "docs/codes/number-of-islands",
+      "docs/codes/course-schedule",
+      "docs/codes/clone-graph",
+      "docs/codes/depth-first-traversal-for-a-graph",
+      "docs/codes/topological-sort",
+      "docs/codes/bfs-traversal-of-graph"
+     ]
+    },
+    {
+     "label": "Graph Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/maximum-number-of-non-overlapping-substrings",
+      "docs/codes/implementing-dijkstra-set-1-adjacency-matrix",
+      "docs/codes/implementing-floyd-warshall",
+      "docs/codes/distance-from-the-source-bellman-ford-algorithm",
+      "docs/codes/minimum-spanning-tree"
+     ]
+    },
+    {
+     "label": "Dynamic Programming",
+     "collapsed": true,
+     "items": [
+      "docs/codes/longest-increasing-subsequence",
+      "docs/codes/longest-common-subsequence",
+      "docs/codes/ones-and-zeroes",
+      "docs/codes/matrix-chain-multiplication",
+      "docs/codes/edit-distance",
+      "docs/codes/maximum-sum-increasing-subsequence",
+      "docs/codes/maximum-product-subarray"
+     ]
+    },
+    {
+     "label": "Dynamic Programming Part-II",
+     "collapsed": true,
+     "items": [
+      "docs/codes/word-break",
+      "docs/codes/partition-equal-subset-sum",
+      "docs/codes/maximum-profit-in-job-scheduling",
+      "docs/codes/minimum-path-sum",
+      "docs/codes/coin-change",
+      "docs/codes/palindrome-partitioning",
+      "docs/codes/minimum-cost-to-cut-a-stick",
+      "docs/codes/super-egg-drop"
+     ]
+    },
+    {
+     "label": "Trie",
+     "collapsed": true,
+     "items": [
+      "docs/codes/subsets",
+      "docs/codes/maximum-xor-of-two-numbers-in-an-array",
+      "docs/codes/implement-trie-prefix-tree",
+      "docs/codes/maximum-xor-with-an-element-from-array"
+     ]
+    }
+   ]
+  },
+  {
+   "label": "Striver DP Sheet",
+   "collapsed": true,
+   "items": [
+    {
+     "label": "1D DP",
+     "collapsed": true,
+     "items": [
+      "docs/codes/climbing-stairs",
+      "docs/codes/frog-with-k-jumps",
+      "docs/codes/maximum-sum-of-non-adjacent-elements",
+      "docs/codes/house-robber",
+      "docs/codes/house-robber-ii"
+     ]
+    }
+   ]
+  },
+  {
+   "label": "Blind 75",
+   "collapsed": true,
+   "items": [
+    {
+     "label": "Arrays",
+     "collapsed": true,
+     "items": [
+      "docs/codes/two-sum",
+      "docs/codes/best-time-to-buy-and-sell-stock",
+      "docs/codes/contains-duplicate",
+      "docs/codes/product-of-array-except-self",
+      "docs/codes/maximum-subarray",
+      "docs/codes/maximum-product-subarray",
+      "docs/codes/find-minimum-in-rotated-sorted-array",
+      "docs/codes/find-minimum-in-rotated-sorted-array-ii",
+      "docs/codes/search-in-rotated-sorted-array",
+      "docs/codes/3sum",
+      "docs/codes/container-with-most-water"
+     ]
+    }
+   ]
+  },
+  {
+   "label": "More problems",
+   "collapsed": true,
+   "items": [
+    "docs/codes/add-binary",
+    "docs/codes/course-schedule-ii",
+    "docs/codes/group-anagrams",
+    "docs/codes/k-closest-points-to-origin",
+    "docs/codes/merge-k-sorted-lists",
+    "docs/codes/most-common-word",
+    "docs/codes/multiply-strings",
+    "docs/codes/top-k-frequent-words",
+    "docs/codes/valid-number",
+    "docs/codes/word-break-ii",
+    "docs/codes/word-search",
+    "docs/codes/word-search-ii"
+   ]
+  }
+ ]
+}

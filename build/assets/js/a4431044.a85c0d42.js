@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkcodeprime=self.webpackChunkcodeprime||[]).push([[7587],{1494:e=>{e.exports=JSON.parse('{"label":"hola","permalink":"/CodePrime/blog/tags/hola","allTagsPath":"/CodePrime/blog/tags","count":1}')}}]);
