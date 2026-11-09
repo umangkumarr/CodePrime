@@ -94,7 +94,7 @@ Example 2 sorted by end time is `[1,3] 20`, `[2,5] 20`, `[4,6] 70`, `[6,9] 60`, 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {
@@ -116,4 +116,56 @@ class Solution {
         return dp[n];
     }
 };
+```
+
+```java
+class Solution {
+    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {
+        int n = startTime.length;
+        Integer[] order = new Integer[n];
+        for (int i = 0; i < n; i++) order[i] = i;
+        Arrays.sort(order, (a, b) -> Integer.compare(endTime[a], endTime[b]));
+
+        int[] ends = new int[n];
+        for (int i = 0; i < n; i++) ends[i] = endTime[order[i]];
+
+        // dp[i] = best profit using only the first i jobs in end-time order.
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            int k = order[i - 1];
+            int j = upperBound(ends, startTime[k]);
+            dp[i] = Math.max(dp[i - 1], dp[j] + profit[k]);
+        }
+        return dp[n];
+    }
+
+    // First index whose value is greater than x.
+    private int upperBound(int[] a, int x) {
+        int lo = 0, hi = a.length;
+        while (lo < hi) {
+            int mid = (lo + hi) >>> 1;
+            if (a[mid] <= x) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+}
+```
+
+```python
+from bisect import bisect_right
+
+
+class Solution:
+    def jobScheduling(self, startTime: list[int], endTime: list[int], profit: list[int]) -> int:
+        n = len(startTime)
+        order = sorted(range(n), key=lambda i: endTime[i])
+        ends = [endTime[i] for i in order]
+
+        # dp[i] = best profit using only the first i jobs in end-time order.
+        dp = [0] * (n + 1)
+        for i, k in enumerate(order, 1):
+            j = bisect_right(ends, startTime[k])
+            dp[i] = max(dp[i - 1], dp[j] + profit[k])
+        return dp[n]
 ```

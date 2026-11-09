@@ -86,7 +86,7 @@ The crucial detail is the order: the copy is registered in `copies` **before** r
 
 ### Algorithm
 
-1. If `node` is null, return `nullptr` (empty graph).
+1. If `node` is null, return null (empty graph).
 2. `clone(node, copies)`:
    - If `node` is already in `copies`, return its copy.
    - Otherwise create `copy = new Node(node->val)` and store `copies[node] = copy`.
@@ -123,13 +123,13 @@ Each copy collects the results of its children in the same order as the original
 
 ### Edge cases
 
-- **Empty graph (`adjList = []`):** `node` is null and `nullptr` is returned.
+- **Empty graph (`adjList = []`):** `node` is null and null is returned.
 - **Single node with no neighbours:** one copy is created and the loop does nothing.
 - **Cycles:** stopped by the map lookup, as shown above.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     Node* clone(Node* node, unordered_map<Node*, Node*>& copies) {
         auto it = copies.find(node);
@@ -148,4 +148,41 @@ class Solution {
         return clone(node, copies);
     }
 };
+```
+
+```java
+class Solution {
+    private Node clone(Node node, Map<Node, Node> copies) {
+        Node copy = copies.get(node);
+        if (copy != null) return copy;
+
+        copy = new Node(node.val);
+        copies.put(node, copy);  // register before recursing so cycles stop here
+        for (Node nbr : node.neighbors) copy.neighbors.add(clone(nbr, copies));
+        return copy;
+    }
+
+    public Node cloneGraph(Node node) {
+        if (node == null) return null;
+        return clone(node, new HashMap<>());
+    }
+}
+```
+
+```python
+class Solution:
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        if not node:
+            return None
+        copies = {}
+
+        def clone(node):
+            if node in copies:
+                return copies[node]
+            copy = Node(node.val)
+            copies[node] = copy  # register before recursing so cycles stop here
+            copy.neighbors = [clone(nbr) for nbr in node.neighbors]
+            return copy
+
+        return clone(node)
 ```

@@ -104,7 +104,7 @@ So the sign of each symbol depends only on its right neighbour: subtract it if t
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int romanToInt(string s) {
@@ -132,4 +132,46 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public int romanToInt(String s) {
+        int n = s.length(), total = 0;
+        for (int i = 0; i < n; i++) {
+            int cur = value(s.charAt(i));
+            if (i + 1 < n && cur < value(s.charAt(i + 1)))
+                total -= cur;
+            else
+                total += cur;
+        }
+        return total;
+    }
+
+    private static int value(char c) {
+        return switch (c) {
+            case 'I' -> 1;
+            case 'V' -> 5;
+            case 'X' -> 10;
+            case 'L' -> 50;
+            case 'C' -> 100;
+            case 'D' -> 500;
+            default -> 1000;  // 'M'
+        };
+    }
+}
+```
+
+```python
+class Solution:
+    def romanToInt(self, s: str) -> int:
+        value = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+        total = 0
+        for i, ch in enumerate(s):
+            cur = value[ch]
+            if i + 1 < len(s) and cur < value[s[i + 1]]:
+                total -= cur
+            else:
+                total += cur
+        return total
 ```

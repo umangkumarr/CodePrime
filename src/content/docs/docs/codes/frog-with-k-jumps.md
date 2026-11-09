@@ -119,7 +119,7 @@ The largest possible answer is about $(N - 1) \cdot 10^4 \le 10^9$, which fits i
 
 ## Code
 
-```cpp title="C++"
+```cpp
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -139,4 +139,53 @@ int main() {
     cout << dp[n - 1] << '\n';
     return 0;
 }
+```
+
+```java
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
+        in.nextToken();
+        int n = (int) in.nval;
+        in.nextToken();
+        int k = (int) in.nval;
+        int[] h = new int[n];
+        for (int i = 0; i < n; i++) {
+            in.nextToken();
+            h[i] = (int) in.nval;
+        }
+
+        int[] dp = new int[n];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        for (int i = 1; i < n; i++) {
+            for (int j = Math.max(0, i - k); j < i; j++) {
+                dp[i] = Math.min(dp[i], dp[j] + Math.abs(h[i] - h[j]));
+            }
+        }
+        System.out.println(dp[n - 1]);
+    }
+}
+```
+
+```python
+import sys
+
+
+def main():
+    data = sys.stdin.buffer.read().split()
+    n, k = int(data[0]), int(data[1])
+    h = list(map(int, data[2:2 + n]))
+
+    dp = [0] * n
+    for i in range(1, n):
+        lo, hi = max(0, i - k), h[i]
+        dp[i] = min([d + abs(hi - x) for d, x in zip(dp[lo:i], h[lo:i])])
+    print(dp[n - 1])
+
+
+main()
 ```

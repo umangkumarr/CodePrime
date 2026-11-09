@@ -94,7 +94,7 @@ The cost could instead be moved to `pop` (push in $O(1)$, rotate to reach the ne
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class MyStack {
     queue<int> q;  // front of q is the top of the stack
 
@@ -120,4 +120,49 @@ class MyStack {
 
     bool empty() { return q.empty(); }
 };
+```
+
+```java
+class MyStack {
+    private final ArrayDeque<Integer> q = new ArrayDeque<>();  // front of q is the top of the stack
+
+    public MyStack() {}
+
+    public void push(int x) {
+        q.offer(x);
+        // Move the older elements behind x so that x is at the front.
+        for (int i = 0; i + 1 < q.size(); i++) q.offer(q.poll());
+    }
+
+    public int pop() { return q.poll(); }
+
+    public int top() { return q.peek(); }
+
+    public boolean empty() { return q.isEmpty(); }
+}
+```
+
+```python
+from collections import deque
+
+
+class MyStack:
+
+    def __init__(self):
+        self.q = deque()  # front of q is the top of the stack
+
+    def push(self, x: int) -> None:
+        self.q.append(x)
+        # Move the older elements behind x so that x is at the front.
+        for _ in range(len(self.q) - 1):
+            self.q.append(self.q.popleft())
+
+    def pop(self) -> int:
+        return self.q.popleft()
+
+    def top(self) -> int:
+        return self.q[0]
+
+    def empty(self) -> bool:
+        return not self.q
 ```

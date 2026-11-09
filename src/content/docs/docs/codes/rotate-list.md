@@ -82,7 +82,7 @@ flowchart LR
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode* rotateRight(ListNode* head, int k) {
@@ -103,4 +103,47 @@ class Solution {
         return newHead;
     }
 };
+```
+
+```java
+class Solution {
+    public ListNode rotateRight(ListNode head, int k) {
+        if (head == null) return head;
+        int n = 1;
+        ListNode tail = head;
+        while (tail.next != null) {
+            tail = tail.next;
+            n++;
+        }
+        k %= n;
+        if (k == 0) return head;
+        tail.next = head;  // close the ring
+        ListNode newTail = head;
+        for (int i = 0; i < n - k - 1; i++) newTail = newTail.next;
+        ListNode newHead = newTail.next;
+        newTail.next = null;
+        return newHead;
+    }
+}
+```
+
+```python
+class Solution:
+    def rotateRight(self, head: ListNode | None, k: int) -> ListNode | None:
+        if not head:
+            return head
+        n, tail = 1, head
+        while tail.next:
+            tail = tail.next
+            n += 1
+        k %= n
+        if k == 0:
+            return head
+        tail.next = head  # close the ring
+        new_tail = head
+        for _ in range(n - k - 1):
+            new_tail = new_tail.next
+        new_head = new_tail.next
+        new_tail.next = None
+        return new_head
 ```

@@ -90,7 +90,7 @@ On `[1,3,5,4,2]` (not an official example, but it shows every step). Orange is t
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void nextPermutation(vector<int>& nums) {
@@ -105,4 +105,45 @@ class Solution {
         reverse(nums.begin() + i + 1, nums.end());
     }
 };
+```
+
+```java
+class Solution {
+    public void nextPermutation(int[] nums) {
+        int n = nums.length;
+        int i = n - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) i--;  // pivot: rightmost i with nums[i] < nums[i+1]
+        if (i >= 0) {
+            int j = n - 1;
+            while (nums[j] <= nums[i]) j--;  // rightmost element larger than the pivot
+            swap(nums, i, j);
+        }
+        for (int l = i + 1, r = n - 1; l < r; l++, r--) swap(nums, l, r);
+    }
+
+    private void swap(int[] a, int i, int j) {
+        int t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
+}
+```
+
+```python
+class Solution:
+    def nextPermutation(self, nums: list[int]) -> None:
+        n = len(nums)
+        i = n - 2
+        while i >= 0 and nums[i] >= nums[i + 1]:  # pivot: rightmost i with nums[i] < nums[i+1]
+            i -= 1
+        if i >= 0:
+            j = n - 1
+            while nums[j] <= nums[i]:  # rightmost element larger than the pivot
+                j -= 1
+            nums[i], nums[j] = nums[j], nums[i]
+        l, r = i + 1, n - 1
+        while l < r:
+            nums[l], nums[r] = nums[r], nums[l]
+            l += 1
+            r -= 1
 ```

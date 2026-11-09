@@ -79,7 +79,7 @@ Example 2: sorted `nums = [2,3,4,5,6,6]`, queries in order of `m` are `[8,1]`, `
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> maximizeXor(vector<int>& nums, vector<vector<int>>& queries) {
@@ -127,4 +127,101 @@ class Solution {
         return answer;
     }
 };
+```
+
+```java
+class Solution {
+    private static final int HIGH = 29;  // all values are at most 1e9 < 2^30
+
+    // Flat trie: children of node v are trie[2v] (bit 0) and trie[2v + 1] (bit 1).
+    // Node 0 is the root; child 0 means "none".
+    private int[] trie;
+    private int size;
+
+    private void insert(int v) {
+        int node = 0;
+        for (int b = HIGH; b >= 0; b--) {
+            int slot = 2 * node + ((v >> b) & 1);
+            if (trie[slot] == 0) trie[slot] = size++;
+            node = trie[slot];
+        }
+    }
+
+    private int bestXor(int x) {
+        int node = 0, res = 0;
+        for (int b = HIGH; b >= 0; b--) {
+            int want = 1 - ((x >> b) & 1);
+            if (trie[2 * node + want] != 0) {
+                res |= 1 << b;
+                node = trie[2 * node + want];
+            } else {
+                node = trie[2 * node + 1 - want];
+            }
+        }
+        return res;
+    }
+
+    public int[] maximizeXor(int[] nums, int[][] queries) {
+        Arrays.sort(nums);
+        int n = nums.length, q = queries.length;
+        Integer[] order = new Integer[q];
+        for (int k = 0; k < q; k++) order[k] = k;
+        Arrays.sort(order, (a, b) -> Integer.compare(queries[a][1], queries[b][1]));
+
+        trie = new int[2 * (n * (HIGH + 1) + 1)];
+        size = 1;
+
+        int[] answer = new int[q];
+        int i = 0;
+        for (int k : order) {
+            int x = queries[k][0], m = queries[k][1];
+            while (i < n && nums[i] <= m) insert(nums[i++]);
+            answer[k] = (i == 0) ? -1 : bestXor(x);
+        }
+        return answer;
+    }
+}
+```
+
+```python
+class Solution:
+    def maximizeXor(self, nums: list[int], queries: list[list[int]]) -> list[int]:
+        HIGH = 29  # all values are at most 1e9 < 2^30
+        nums.sort()
+        n, q = len(nums), len(queries)
+        order = sorted(range(q), key=lambda k: queries[k][1])
+
+        # Flat trie: children of node v are trie[2v] (bit 0) and trie[2v + 1] (bit 1).
+        # Node 0 is the root; child 0 means "none".
+        trie = [0, 0]
+
+        def insert(v):
+            node = 0
+            for b in range(HIGH, -1, -1):
+                slot = 2 * node + ((v >> b) & 1)
+                if not trie[slot]:
+                    trie[slot] = len(trie) // 2
+                    trie.extend((0, 0))
+                node = trie[slot]
+
+        def best_xor(x):
+            node = res = 0
+            for b in range(HIGH, -1, -1):
+                want = 1 - ((x >> b) & 1)
+                if trie[2 * node + want]:
+                    res |= 1 << b
+                    node = trie[2 * node + want]
+                else:
+                    node = trie[2 * node + 1 - want]
+            return res
+
+        answer = [0] * q
+        i = 0
+        for k in order:
+            x, m = queries[k]
+            while i < n and nums[i] <= m:
+                insert(nums[i])
+                i += 1
+            answer[k] = -1 if i == 0 else best_xor(x)
+        return answer
 ```

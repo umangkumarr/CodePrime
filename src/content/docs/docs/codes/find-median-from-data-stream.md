@@ -94,7 +94,7 @@ The stream `5, 15, 1, 3, 8, 7`, drawn as the sorted list of numbers seen so far.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class MedianFinder {
     priority_queue<int> lo;                             // smaller half, max at top
     priority_queue<int, vector<int>, greater<int>> hi;  // larger half, min at top
@@ -117,4 +117,45 @@ class MedianFinder {
         return (lo.top() + hi.top()) / 2.0;
     }
 };
+```
+
+```java
+class MedianFinder {
+    private final PriorityQueue<Integer> lo = new PriorityQueue<>(Collections.reverseOrder());  // smaller half, max at top
+    private final PriorityQueue<Integer> hi = new PriorityQueue<>();                            // larger half, min at top
+
+    public MedianFinder() {}
+
+    public void addNum(int num) {
+        lo.offer(num);
+        hi.offer(lo.poll());
+        if (hi.size() > lo.size()) lo.offer(hi.poll());
+    }
+
+    public double findMedian() {
+        if (lo.size() > hi.size()) return lo.peek();
+        return (lo.peek() + hi.peek()) / 2.0;
+    }
+}
+```
+
+```python
+import heapq
+
+
+class MedianFinder:
+
+    def __init__(self):
+        self.lo = []  # smaller half as negatives, so -lo[0] is its max
+        self.hi = []  # larger half, min at hi[0]
+
+    def addNum(self, num: int) -> None:
+        heapq.heappush(self.hi, -heapq.heappushpop(self.lo, -num))
+        if len(self.hi) > len(self.lo):
+            heapq.heappush(self.lo, -heapq.heappop(self.hi))
+
+    def findMedian(self) -> float:
+        if len(self.lo) > len(self.hi):
+            return float(-self.lo[0])
+        return (-self.lo[0] + self.hi[0]) / 2.0
 ```

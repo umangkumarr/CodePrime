@@ -109,7 +109,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     Node* connect(Node* root) {
@@ -123,4 +123,36 @@ class Solution {
         return root;
     }
 };
+```
+
+```java
+class Solution {
+    public Node connect(Node root) {
+        if (root == null) return root;
+        for (Node leftmost = root; leftmost.left != null; leftmost = leftmost.left) {
+            for (Node node = leftmost; node != null; node = node.next) {
+                node.left.next = node.right;
+                if (node.next != null) node.right.next = node.next.left;
+            }
+        }
+        return root;
+    }
+}
+```
+
+```python
+class Solution:
+    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        if not root:
+            return root
+        leftmost = root
+        while leftmost.left:
+            node = leftmost
+            while node:
+                node.left.next = node.right
+                if node.next:
+                    node.right.next = node.next.left
+                node = node.next
+            leftmost = leftmost.left
+        return root
 ```

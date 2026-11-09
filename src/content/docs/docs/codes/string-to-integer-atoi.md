@@ -130,7 +130,7 @@ Every access is guarded by `i < n`, so empty strings and strings that end early 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int myAtoi(string s) {
@@ -155,4 +155,55 @@ class Solution {
         return sign * result;
     }
 };
+```
+
+```java
+class Solution {
+    public int myAtoi(String s) {
+        int n = s.length(), i = 0;
+        while (i < n && s.charAt(i) == ' ') i++;
+
+        int sign = 1;
+        if (i < n && (s.charAt(i) == '+' || s.charAt(i) == '-')) {
+            if (s.charAt(i) == '-') sign = -1;
+            i++;
+        }
+
+        int result = 0;
+        while (i < n && s.charAt(i) >= '0' && s.charAt(i) <= '9') {
+            int d = s.charAt(i) - '0';
+            if (result > Integer.MAX_VALUE / 10 || (result == Integer.MAX_VALUE / 10 && d > Integer.MAX_VALUE % 10)) {
+                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            }
+            result = result * 10 + d;
+            i++;
+        }
+        return sign * result;
+    }
+}
+```
+
+```python
+class Solution:
+    def myAtoi(self, s: str) -> int:
+        INT_MAX, INT_MIN = 2**31 - 1, -(2**31)
+        n, i = len(s), 0
+        while i < n and s[i] == ' ':
+            i += 1
+
+        sign = 1
+        if i < n and s[i] in '+-':
+            if s[i] == '-':
+                sign = -1
+            i += 1
+
+        result = 0
+        while i < n and '0' <= s[i] <= '9':
+            d = ord(s[i]) - ord('0')
+            # Python ints never overflow, so clamp to the 32-bit range by hand.
+            if result > INT_MAX // 10 or (result == INT_MAX // 10 and d > INT_MAX % 10):
+                return INT_MAX if sign == 1 else INT_MIN
+            result = result * 10 + d
+            i += 1
+        return sign * result
 ```

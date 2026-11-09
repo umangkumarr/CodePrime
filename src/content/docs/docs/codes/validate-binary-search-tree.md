@@ -84,7 +84,7 @@ Node values span the full `int` range, so the "no bound yet" values must lie out
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     // Every value in this subtree must lie strictly between lo and hi.
     bool valid(TreeNode* node, long long lo, long long hi) {
@@ -96,4 +96,35 @@ class Solution {
    public:
     bool isValidBST(TreeNode* root) { return valid(root, LLONG_MIN, LLONG_MAX); }
 };
+```
+
+```java
+class Solution {
+    // Every value in this subtree must lie strictly between lo and hi.
+    private boolean valid(TreeNode node, long lo, long hi) {
+        if (node == null) return true;
+        if (node.val <= lo || node.val >= hi) return false;
+        return valid(node.left, lo, node.val) && valid(node.right, node.val, hi);
+    }
+
+    public boolean isValidBST(TreeNode root) {
+        return valid(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+}
+```
+
+```python
+class Solution:
+    def isValidBST(self, root: TreeNode | None) -> bool:
+        # Every value in a node's subtree must lie strictly between its lo and hi.
+        stack = [(root, float('-inf'), float('inf'))]
+        while stack:
+            node, lo, hi = stack.pop()
+            if not node:
+                continue
+            if node.val <= lo or node.val >= hi:
+                return False
+            stack.append((node.right, node.val, hi))
+            stack.append((node.left, lo, node.val))
+        return True
 ```

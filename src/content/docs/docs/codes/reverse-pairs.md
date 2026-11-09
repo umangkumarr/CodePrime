@@ -59,7 +59,7 @@ Once both halves are sorted, counting cross pairs is a two-pointer sweep. For a 
 1. `sortAndCount(begin, end)` returns `0` for a range of size 0 or 1.
 2. Split at `mid`; `count = sortAndCount(begin, mid) + sortAndCount(mid, end)`. Both halves are now sorted.
 3. Keep `j = mid`. For each `i` in `[begin, mid)`: advance `j` while `j != end` and `*i > 2LL * *j`. Every element in `[mid, j)` pairs with `*i`, so add `j - mid`. The `2LL` makes the doubling happen in 64-bit arithmetic: $2 \times (2^{31} - 1)$ does not fit in an `int`.
-4. `inplace_merge(begin, mid, end)` merges the halves, and the function returns `count`.
+4. Merge the two sorted halves (`inplace_merge` in C++), and the function returns `count`.
 
 ### Walkthrough
 
@@ -70,7 +70,7 @@ Each frame is one step of the counting sweep inside a merge. Purple is the sorte
 ### Complexity
 
 - **Time:** $O(n \log n)$ — the recursion has $\log n$ levels and each level does a linear sweep and a linear merge.
-- **Space:** $O(n)$ — `inplace_merge` allocates a temporary buffer, plus an $O(\log n)$ recursion stack.
+- **Space:** $O(n)$ — the merge uses a temporary buffer, plus an $O(\log n)$ recursion stack.
 
 ### Edge cases
 
@@ -80,7 +80,7 @@ Each frame is one step of the counting sweep inside a merge. Purple is the sorte
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int reversePairs(vector<int>& nums) { return sortAndCount(nums.begin(), nums.end()); }
@@ -99,4 +99,58 @@ class Solution {
         return count;
     }
 };
+```
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        return sortAndCount(nums, new int[nums.length], 0, nums.length);
+    }
+
+    private int sortAndCount(int[] a, int[] buf, int begin, int end) {
+        if (end - begin <= 1) return 0;
+        int mid = begin + (end - begin) / 2;
+        int count = sortAndCount(a, buf, begin, mid) + sortAndCount(a, buf, mid, end);
+        int j = mid;
+        for (int i = begin; i < mid; i++) {
+            while (j < end && a[i] > 2L * a[j]) j++;
+            count += j - mid;
+        }
+        // merge the two sorted halves
+        int i = begin, k = begin;
+        j = mid;
+        while (i < mid || j < end) buf[k++] = (j == end || (i < mid && a[i] <= a[j])) ? a[i++] : a[j++];
+        System.arraycopy(buf, begin, a, begin, end - begin);
+        return count;
+    }
+}
+```
+
+```python
+class Solution:
+    def reversePairs(self, nums: list[int]) -> int:
+        def sort_and_count(begin: int, end: int) -> int:
+            if end - begin <= 1:
+                return 0
+            mid = (begin + end) // 2
+            count = sort_and_count(begin, mid) + sort_and_count(mid, end)
+            j = mid
+            for i in range(begin, mid):
+                while j < end and nums[i] > 2 * nums[j]:
+                    j += 1
+                count += j - mid
+            # merge the two sorted halves
+            merged, i, j = [], begin, mid
+            while i < mid and j < end:
+                if nums[i] <= nums[j]:
+                    merged.append(nums[i])
+                    i += 1
+                else:
+                    merged.append(nums[j])
+                    j += 1
+            merged += nums[i:mid] or nums[j:end]
+            nums[begin:end] = merged
+            return count
+
+        return sort_and_count(0, len(nums))
 ```

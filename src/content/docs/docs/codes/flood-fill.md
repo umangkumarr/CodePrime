@@ -84,7 +84,7 @@ Recolouring at push time (rather than at pop time) guarantees that every pixel e
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {
@@ -110,4 +110,52 @@ class Solution {
         return image;
     }
 };
+```
+
+```java
+class Solution {
+    public int[][] floodFill(int[][] image, int sr, int sc, int color) {
+        int original = image[sr][sc];
+        if (original == color) return image;
+
+        int m = image.length, n = image[0].length;
+        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+        image[sr][sc] = color;
+        q.add(new int[] {sr, sc});
+        while (!q.isEmpty()) {
+            int[] cell = q.poll();
+            for (int[] d : dirs) {
+                int nr = cell[0] + d[0], nc = cell[1] + d[1];
+                if (nr >= 0 && nr < m && nc >= 0 && nc < n && image[nr][nc] == original) {
+                    image[nr][nc] = color;
+                    q.add(new int[] {nr, nc});
+                }
+            }
+        }
+        return image;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def floodFill(self, image: list[list[int]], sr: int, sc: int, color: int) -> list[list[int]]:
+        original = image[sr][sc]
+        if original == color:
+            return image
+
+        m, n = len(image), len(image[0])
+        image[sr][sc] = color
+        q = deque([(sr, sc)])
+        while q:
+            r, c = q.popleft()
+            for nr, nc in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= nr < m and 0 <= nc < n and image[nr][nc] == original:
+                    image[nr][nc] = color
+                    q.append((nr, nc))
+        return image
 ```

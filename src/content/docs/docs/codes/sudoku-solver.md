@@ -56,7 +56,7 @@ The search is exhaustive over legal choices, so it is guaranteed to find the (un
 1. Scan the board: for each digit, set its bit in `rows`, `cols`, `boxes`; collect every `'.'` cell into `empties`.
 2. `solve(board, k)` fills `empties[k..]`:
    - If `k == empties.size()`, every cell is filled: return `true`.
-   - Among `empties[k..]`, find the cell with the fewest candidates (`__builtin_popcount` of the candidate mask) and swap it into position `k`. If it has none, return `false`.
+   - Among `empties[k..]`, find the cell with the fewest candidates (the popcount of the candidate mask) and swap it into position `k`. If it has none, return `false`.
    - For each candidate bit in its mask: place the digit (set the three bits, write the character), recurse with `k + 1`, and return `true` if that succeeds; otherwise clear the three bits and try the next candidate.
    - If no candidate works, reset the cell to `'.'` and return `false`.
 
@@ -80,7 +80,7 @@ Let `m` be the number of empty cells (at most 81).
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     int rows[9] = {}, cols[9] = {}, boxes[9] = {};  // bit d set => digit d + 1 is used
     vector<pair<int, int>> empties;
@@ -135,4 +135,115 @@ class Solution {
         solve(board, 0);
     }
 };
+```
+
+```java
+class Solution {
+    private final int[] rows = new int[9], cols = new int[9], boxes = new int[9];  // bit d set => digit d + 1 is used
+    private final int[] empties = new int[81];  // empty cells, encoded as r * 9 + c
+    private int emptyCount = 0;
+
+    private static int box(int r, int c) { return r / 3 * 3 + c / 3; }
+    private int candidates(int r, int c) { return ~(rows[r] | cols[c] | boxes[box(r, c)]) & 0x1FF; }
+
+    private void toggle(int r, int c, int bit) {
+        rows[r] ^= bit;
+        cols[c] ^= bit;
+        boxes[box(r, c)] ^= bit;
+    }
+
+    private boolean solve(char[][] board, int k) {
+        if (k == emptyCount) return true;
+
+        // Branch on the empty cell with the fewest legal digits.
+        int best = k, bestCount = 10;
+        for (int t = k; t < emptyCount; t++) {
+            int cnt = Integer.bitCount(candidates(empties[t] / 9, empties[t] % 9));
+            if (cnt < bestCount) {
+                bestCount = cnt;
+                best = t;
+            }
+        }
+        if (bestCount == 0) return false;
+        int tmp = empties[k];
+        empties[k] = empties[best];
+        empties[best] = tmp;
+
+        int r = empties[k] / 9, c = empties[k] % 9;
+        for (int mask = candidates(r, c); mask != 0; mask &= mask - 1) {
+            int bit = mask & -mask;
+            toggle(r, c, bit);
+            board[r][c] = (char) ('1' + Integer.numberOfTrailingZeros(bit));
+            if (solve(board, k + 1)) return true;
+            toggle(r, c, bit);
+        }
+        board[r][c] = '.';
+        return false;
+    }
+
+    public void solveSudoku(char[][] board) {
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (board[r][c] == '.') {
+                    empties[emptyCount++] = r * 9 + c;
+                } else {
+                    toggle(r, c, 1 << (board[r][c] - '1'));
+                }
+            }
+        }
+        solve(board, 0);
+    }
+}
+```
+
+```python
+class Solution:
+    def solveSudoku(self, board: list[list[str]]) -> None:
+        rows, cols, boxes = [0] * 9, [0] * 9, [0] * 9  # bit d set => digit d + 1 is used
+        empties = []  # (row, col, box) of each empty cell
+        popcount = [bin(m).count('1') for m in range(512)]
+
+        def candidates(r, c, b):
+            return ~(rows[r] | cols[c] | boxes[b]) & 0x1FF
+
+        def toggle(r, c, b, bit):
+            rows[r] ^= bit
+            cols[c] ^= bit
+            boxes[b] ^= bit
+
+        def solve(k):
+            if k == len(empties):
+                return True
+
+            # Branch on the empty cell with the fewest legal digits.
+            best, best_count = k, 10
+            for t in range(k, len(empties)):
+                cnt = popcount[candidates(*empties[t])]
+                if cnt < best_count:
+                    best_count, best = cnt, t
+            if best_count == 0:
+                return False
+            empties[k], empties[best] = empties[best], empties[k]
+
+            r, c, b = empties[k]
+            mask = candidates(r, c, b)
+            while mask:
+                bit = mask & -mask
+                toggle(r, c, b, bit)
+                board[r][c] = str(bit.bit_length())
+                if solve(k + 1):
+                    return True
+                toggle(r, c, b, bit)
+                mask &= mask - 1
+            board[r][c] = '.'
+            return False
+
+        for r in range(9):
+            for c in range(9):
+                b = r // 3 * 3 + c // 3
+                if board[r][c] == '.':
+                    empties.append((r, c, b))
+                else:
+                    toggle(r, c, b, 1 << (int(board[r][c]) - 1))
+        solve(0)
 ```

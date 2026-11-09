@@ -88,7 +88,7 @@ For Example 1: the first round reads `a = 1`, `b = 1`; the second reads `a = 2`,
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int compareVersion(string version1, string version2) {
@@ -104,4 +104,41 @@ class Solution {
         return 0;
     }
 };
+```
+
+```java
+class Solution {
+    public int compareVersion(String version1, String version2) {
+        int i = 0, j = 0, n = version1.length(), m = version2.length();
+        while (i < n || j < m) {
+            int a = 0, b = 0;
+            while (i < n && version1.charAt(i) != '.') a = a * 10 + (version1.charAt(i++) - '0');
+            while (j < m && version2.charAt(j) != '.') b = b * 10 + (version2.charAt(j++) - '0');
+            if (a != b) return a < b ? -1 : 1;
+            i++;  // skip the '.'
+            j++;
+        }
+        return 0;
+    }
+}
+```
+
+```python
+class Solution:
+    def compareVersion(self, version1: str, version2: str) -> int:
+        i = j = 0
+        n, m = len(version1), len(version2)
+        while i < n or j < m:
+            a = b = 0
+            while i < n and version1[i] != '.':
+                a = a * 10 + int(version1[i])
+                i += 1
+            while j < m and version2[j] != '.':
+                b = b * 10 + int(version2[j])
+                j += 1
+            if a != b:
+                return -1 if a < b else 1
+            i += 1  # skip the '.'
+            j += 1
+        return 0
 ```

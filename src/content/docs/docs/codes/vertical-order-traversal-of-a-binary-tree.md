@@ -79,7 +79,7 @@ Any traversal works for collecting the triples, because the sort, not the visiti
 ### Algorithm
 
 1. `collect(node, row, col, nodes)` does a DFS: append `{col, row, node->val}` to `nodes`, then recurse into `node->left` with `(row + 1, col - 1)` and `node->right` with `(row + 1, col + 1)`.
-2. Sort `nodes` (`std::array` compares lexicographically: `col`, then `row`, then `val`).
+2. Sort `nodes` (the triples compare lexicographically: `col`, then `row`, then `val`).
 3. Scan the sorted triples; start a new list in `ans` whenever `col` differs from the previous triple's, and append `val` to the last list.
 4. Return `ans`.
 
@@ -110,7 +110,7 @@ Node `6` is the right child of `2` and `5` the left child of `3`; both land at `
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     void collect(TreeNode* node, int row, int col, vector<array<int, 3>>& nodes) {
         if (!node) return;
@@ -133,4 +133,50 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private void collect(TreeNode node, int row, int col, List<int[]> nodes) {
+        if (node == null) return;
+        nodes.add(new int[] {col, row, node.val});
+        collect(node.left, row + 1, col - 1, nodes);
+        collect(node.right, row + 1, col + 1, nodes);
+    }
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        List<int[]> nodes = new ArrayList<>();  // {col, row, val}
+        collect(root, 0, 0, nodes);
+        nodes.sort(Arrays::compare);  // lexicographic: col, then row, then val
+
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            if (i == 0 || nodes.get(i)[0] != nodes.get(i - 1)[0]) ans.add(new ArrayList<>());
+            ans.get(ans.size() - 1).add(nodes.get(i)[2]);
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def verticalTraversal(self, root: TreeNode | None) -> list[list[int]]:
+        nodes = []  # (col, row, val)
+        stack = [(root, 0, 0)] if root else []
+        while stack:
+            node, row, col = stack.pop()
+            nodes.append((col, row, node.val))
+            if node.left:
+                stack.append((node.left, row + 1, col - 1))
+            if node.right:
+                stack.append((node.right, row + 1, col + 1))
+        nodes.sort()
+
+        ans = []
+        for i, (col, _, val) in enumerate(nodes):
+            if i == 0 or col != nodes[i - 1][0]:
+                ans.append([])
+            ans[-1].append(val)
+        return ans
 ```

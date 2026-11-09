@@ -72,7 +72,7 @@ On Example 1, the second level is popped as `9, 20` but written right to left, s
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
@@ -97,4 +97,55 @@ class Solution {
         return levels;
     }
 };
+```
+
+```java
+class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> levels = new ArrayList<>();
+        if (root == null) return levels;
+        ArrayDeque<TreeNode> q = new ArrayDeque<>();
+        q.add(root);
+        boolean leftToRight = true;
+        while (!q.isEmpty()) {
+            int size = q.size();
+            Integer[] level = new Integer[size];
+            for (int i = 0; i < size; i++) {
+                TreeNode node = q.poll();
+                level[leftToRight ? i : size - 1 - i] = node.val;
+                if (node.left != null) q.add(node.left);
+                if (node.right != null) q.add(node.right);
+            }
+            levels.add(Arrays.asList(level));
+            leftToRight = !leftToRight;
+        }
+        return levels;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def zigzagLevelOrder(self, root: TreeNode | None) -> list[list[int]]:
+        levels = []
+        if not root:
+            return levels
+        q = deque([root])
+        left_to_right = True
+        while q:
+            size = len(q)
+            level = [0] * size
+            for i in range(size):
+                node = q.popleft()
+                level[i if left_to_right else size - 1 - i] = node.val
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            levels.append(level)
+            left_to_right = not left_to_right
+        return levels
 ```

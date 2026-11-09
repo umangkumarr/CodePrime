@@ -85,7 +85,7 @@ Example 1:
 
 ### Complexity
 
-- **Time:** $O(1)$ for every operation — each does a constant number of `std::stack` operations.
+- **Time:** $O(1)$ for every operation — each does a constant number of stack operations.
 - **Space:** $O(n)$ — `st` holds all `n` elements and `mins` at most `n` (only when values arrive in non-increasing order).
 
 ### Edge cases
@@ -95,7 +95,7 @@ Example 1:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class MinStack {
    public:
     void push(int val) {
@@ -116,4 +116,55 @@ class MinStack {
     stack<int> st;
     stack<int> mins;  // mins.top() is the minimum of st
 };
+```
+
+```java
+class MinStack {
+    private final Deque<Integer> st = new ArrayDeque<>();
+    private final Deque<Integer> mins = new ArrayDeque<>();  // mins.peek() is the minimum of st
+
+    public MinStack() {
+    }
+
+    public void push(int value) {
+        st.push(value);
+        if (mins.isEmpty() || value <= mins.peek()) mins.push(value);
+    }
+
+    public void pop() {
+        int x = st.pop();
+        if (x == mins.peek()) mins.pop();
+    }
+
+    public int top() {
+        return st.peek();
+    }
+
+    public int getMin() {
+        return mins.peek();
+    }
+}
+```
+
+```python
+class MinStack:
+
+    def __init__(self):
+        self.st = []
+        self.mins = []  # mins[-1] is the minimum of st
+
+    def push(self, value: int) -> None:
+        self.st.append(value)
+        if not self.mins or value <= self.mins[-1]:
+            self.mins.append(value)
+
+    def pop(self) -> None:
+        if self.st.pop() == self.mins[-1]:
+            self.mins.pop()
+
+    def top(self) -> int:
+        return self.st[-1]
+
+    def getMin(self) -> int:
+        return self.mins[-1]
 ```

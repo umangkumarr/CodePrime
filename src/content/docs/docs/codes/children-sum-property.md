@@ -115,7 +115,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 void changeTree(BinaryTreeNode<int> *root) {
     if (!root) return;
     BinaryTreeNode<int> *l = root->left, *r = root->right;
@@ -133,4 +133,48 @@ void changeTree(BinaryTreeNode<int> *root) {
 
     if (l || r) root->data = (l ? l->data : 0) + (r ? r->data : 0);
 }
+```
+
+```java
+public class Solution {
+    public static void changeTree(BinaryTreeNode<Integer> root) {
+        if (root == null) return;
+        BinaryTreeNode<Integer> l = root.left, r = root.right;
+
+        int childSum = (l != null ? l.data : 0) + (r != null ? r.data : 0);
+        if (childSum >= root.data) {
+            root.data = childSum;
+        } else {
+            if (l != null) l.data = root.data;
+            if (r != null) r.data = root.data;
+        }
+
+        changeTree(l);
+        changeTree(r);
+
+        if (l != null || r != null) root.data = (l != null ? l.data : 0) + (r != null ? r.data : 0);
+    }
+}
+```
+
+```python
+def changeTree(root):
+    if not root:
+        return
+    l, r = root.left, root.right
+
+    child_sum = (l.data if l else 0) + (r.data if r else 0)
+    if child_sum >= root.data:
+        root.data = child_sum
+    else:
+        if l:
+            l.data = root.data
+        if r:
+            r.data = root.data
+
+    changeTree(l)
+    changeTree(r)
+
+    if l or r:
+        root.data = (l.data if l else 0) + (r.data if r else 0)
 ```

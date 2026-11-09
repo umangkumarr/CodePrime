@@ -94,7 +94,7 @@ After `4` has no unvisited neighbours, the recursion returns to `2`, then to `0`
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     void visit(int u, const vector<vector<int>>& adj, vector<bool>& visited, vector<int>& order) {
         visited[u] = true;
@@ -111,4 +111,51 @@ class Solution {
         return order;
     }
 };
+```
+
+```java
+class Solution {
+    public ArrayList<Integer> dfs(ArrayList<ArrayList<Integer>> adj) {
+        boolean[] visited = new boolean[adj.size()];
+        ArrayList<Integer> order = new ArrayList<>();
+        // One neighbour iterator per vertex on the DFS path (explicit stack, so deep graphs can't overflow).
+        Deque<Iterator<Integer>> stack = new ArrayDeque<>();
+        visited[0] = true;
+        order.add(0);
+        stack.push(adj.get(0).iterator());
+        while (!stack.isEmpty()) {
+            Iterator<Integer> it = stack.peek();
+            if (!it.hasNext()) {
+                stack.pop();  // all neighbours done: backtrack
+                continue;
+            }
+            int v = it.next();
+            if (!visited[v]) {
+                visited[v] = true;
+                order.add(v);
+                stack.push(adj.get(v).iterator());
+            }
+        }
+        return order;
+    }
+}
+```
+
+```python
+class Solution:
+    def dfs(self, adj):
+        visited = [False] * len(adj)
+        visited[0] = True
+        order = [0]
+        stack = [iter(adj[0])]  # one neighbour iterator per vertex on the DFS path
+        while stack:
+            for v in stack[-1]:
+                if not visited[v]:
+                    visited[v] = True
+                    order.append(v)
+                    stack.append(iter(adj[v]))
+                    break
+            else:
+                stack.pop()  # all neighbours done: backtrack
+        return order
 ```

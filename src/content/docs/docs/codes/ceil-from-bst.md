@@ -109,7 +109,7 @@ On the picture tree with `X = 12`: `8 < 12` → right to `10`; `10 < 12` → rig
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int findCeil(BinaryTreeNode<int> *node, int x) {
     int ceil = -1;
     while (node) {
@@ -123,4 +123,37 @@ int findCeil(BinaryTreeNode<int> *node, int x) {
     }
     return ceil;
 }
+```
+
+```java
+public class Solution {
+    public static int findCeil(BinaryTreeNode<Integer> node, int x) {
+        int ceil = -1;
+        while (node != null) {
+            int val = node.data;
+            if (val == x) return x;
+            if (val > x) {
+                ceil = val;
+                node = node.left;
+            } else {
+                node = node.right;
+            }
+        }
+        return ceil;
+    }
+}
+```
+
+```python
+def findCeil(node, x):
+    ceil = -1
+    while node:
+        if node.data == x:
+            return x
+        if node.data > x:
+            ceil = node.data
+            node = node.left
+        else:
+            node = node.right
+    return ceil
 ```

@@ -107,7 +107,7 @@ On Example 1 the heap starts with the four heads `{5, 10, 19, 28}`:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     Node* flatten(Node* head) {
@@ -128,4 +128,51 @@ class Solution {
         return dummy.bottom;
     }
 };
+```
+
+```java
+class Solution {
+    public Node flatten(Node head) {
+        PriorityQueue<Node> pq = new PriorityQueue<>((a, b) -> Integer.compare(a.data, b.data));
+        for (Node list = head; list != null; list = list.next) pq.add(list);
+
+        Node dummy = new Node(0);
+        Node tail = dummy;
+        while (!pq.isEmpty()) {
+            Node node = pq.poll();
+            if (node.bottom != null) pq.add(node.bottom);
+            node.next = null;
+            tail.bottom = node;
+            tail = node;
+        }
+        return dummy.bottom;
+    }
+}
+```
+
+```python
+import heapq
+
+
+class Solution:
+    def flatten(self, head):
+        # (data, list index, node): the index breaks ties, since nodes are not comparable.
+        pq = []
+        i, lst = 0, head
+        while lst:
+            pq.append((lst.data, i, lst))
+            i += 1
+            lst = lst.next
+        heapq.heapify(pq)
+
+        dummy = Node(0)
+        tail = dummy
+        while pq:
+            _, i, node = heapq.heappop(pq)
+            if node.bottom:
+                heapq.heappush(pq, (node.bottom.data, i, node.bottom))
+            node.next = None
+            tail.bottom = node
+            tail = node
+        return dummy.bottom
 ```

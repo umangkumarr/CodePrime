@@ -82,7 +82,7 @@ Example 1. Purple cells are on the stack, the orange cell is the bar being settl
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int largestRectangleArea(vector<int>& heights) {
@@ -101,4 +101,39 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        int n = heights.length, best = 0;
+        int[] st = new int[n];  // indices of bars with increasing heights
+        int top = 0;
+        for (int i = 0; i <= n; i++) {
+            int h = (i == n) ? 0 : heights[i];
+            while (top > 0 && heights[st[top - 1]] >= h) {
+                int height = heights[st[--top]];
+                int left = top == 0 ? -1 : st[top - 1];
+                best = Math.max(best, height * (i - left - 1));
+            }
+            if (i < n) st[top++] = i;
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def largestRectangleArea(self, heights: list[int]) -> int:
+        n, best = len(heights), 0
+        st = []  # indices of bars with increasing heights
+        for i in range(n + 1):
+            h = 0 if i == n else heights[i]
+            while st and heights[st[-1]] >= h:
+                height = heights[st.pop()]
+                left = st[-1] if st else -1
+                best = max(best, height * (i - left - 1))
+            st.append(i)
+        return best
 ```

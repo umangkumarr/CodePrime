@@ -85,7 +85,7 @@ In Example 1 the very first pair already gives `2 + 7 = 9`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     // Pushes node and its chain of left (or right) children.
     void pushSpine(stack<TreeNode*>& st, TreeNode* node, bool leftward) {
@@ -117,4 +117,57 @@ class Solution {
         return false;
     }
 };
+```
+
+```java
+class Solution {
+    // Pushes node and its chain of left (or right) children.
+    private void pushSpine(ArrayDeque<TreeNode> st, TreeNode node, boolean leftward) {
+        while (node != null) {
+            st.push(node);
+            node = leftward ? node.left : node.right;
+        }
+    }
+
+    public boolean findTarget(TreeNode root, int k) {
+        ArrayDeque<TreeNode> lo = new ArrayDeque<>(), hi = new ArrayDeque<>();  // lo yields ascending values, hi descending
+        pushSpine(lo, root, true);
+        pushSpine(hi, root, false);
+
+        while (lo.peek() != hi.peek()) {
+            int sum = lo.peek().val + hi.peek().val;
+            if (sum == k) return true;
+            if (sum < k) {
+                pushSpine(lo, lo.pop().right, true);
+            } else {
+                pushSpine(hi, hi.pop().left, false);
+            }
+        }
+        return false;
+    }
+}
+```
+
+```python
+class Solution:
+    def findTarget(self, root: Optional[TreeNode], k: int) -> bool:
+        # Pushes node and its chain of left (or right) children.
+        def push_spine(stack, node, leftward):
+            while node:
+                stack.append(node)
+                node = node.left if leftward else node.right
+
+        lo, hi = [], []  # lo yields ascending values, hi descending
+        push_spine(lo, root, True)
+        push_spine(hi, root, False)
+
+        while lo[-1] is not hi[-1]:
+            total = lo[-1].val + hi[-1].val
+            if total == k:
+                return True
+            if total < k:
+                push_spine(lo, lo.pop().right, True)
+            else:
+                push_spine(hi, hi.pop().left, False)
+        return False
 ```

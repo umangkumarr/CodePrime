@@ -73,7 +73,7 @@ Scanning column by column stops at the first mismatch, so we never read characte
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string longestCommonPrefix(vector<string>& strs) {
@@ -86,4 +86,29 @@ class Solution {
         return first;
     }
 };
+```
+
+```java
+class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        String first = strs[0];
+        for (int k = 0; k < first.length(); k++) {
+            for (String s : strs) {
+                if (k == s.length() || s.charAt(k) != first.charAt(k)) return first.substring(0, k);
+            }
+        }
+        return first;
+    }
+}
+```
+
+```python
+class Solution:
+    def longestCommonPrefix(self, strs: list[str]) -> str:
+        first = strs[0]
+        for k, c in enumerate(first):
+            for s in strs:
+                if k == len(s) or s[k] != c:
+                    return first[:k]
+        return first
 ```

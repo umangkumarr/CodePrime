@@ -78,7 +78,7 @@ Blue is `mid`, orange is its partner `mid + 1`, grey indices have been ruled out
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int singleNonDuplicate(vector<int>& nums) {
@@ -95,4 +95,37 @@ class Solution {
         return nums[lo];
     }
 };
+```
+
+```java
+class Solution {
+    public int singleNonDuplicate(int[] nums) {
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (mid % 2 == 1) mid--;  // compare from the start of a pair
+            if (nums[mid] == nums[mid + 1]) {
+                lo = mid + 2;
+            } else {
+                hi = mid;
+            }
+        }
+        return nums[lo];
+    }
+}
+```
+
+```python
+class Solution:
+    def singleNonDuplicate(self, nums: List[int]) -> int:
+        lo, hi = 0, len(nums) - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if mid % 2 == 1:
+                mid -= 1  # compare from the start of a pair
+            if nums[mid] == nums[mid + 1]:
+                lo = mid + 2
+            else:
+                hi = mid
+        return nums[lo]
 ```

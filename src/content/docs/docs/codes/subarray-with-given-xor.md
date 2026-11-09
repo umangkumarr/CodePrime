@@ -73,11 +73,11 @@ Example 1. Blue is the current element, `xorr` is the prefix XOR up to it, and `
 ### Edge cases
 
 - **Subarray starting at index 0:** found through the initial `freq[0] = 1`.
-- **Many answers:** the count can grow like $n^2 / 2$, so it is accumulated in a `long long` to avoid signed overflow; the judge's return type is `int`.
+- **Many answers:** the count can grow like $n^2 / 2$, so it is accumulated in a 64-bit integer to avoid signed overflow; the judge's return type is `int`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int Solution::solve(vector<int> &A, int B) {
     unordered_map<int, int> freq;  // prefix XOR -> number of prefixes with that XOR
     freq[0] = 1;
@@ -91,4 +91,37 @@ int Solution::solve(vector<int> &A, int B) {
     }
     return ans;
 }
+```
+
+```java
+public class Solution {
+    public int solve(ArrayList<Integer> A, int B) {
+        HashMap<Integer, Integer> freq = new HashMap<>();  // prefix XOR -> number of prefixes with that XOR
+        freq.put(0, 1);
+        int xorr = 0;
+        long ans = 0;
+        for (int a : A) {
+            xorr ^= a;
+            ans += freq.getOrDefault(xorr ^ B, 0);
+            freq.merge(xorr, 1, Integer::sum);
+        }
+        return (int) ans;
+    }
+}
+```
+
+```python
+from collections import defaultdict
+
+
+class Solution:
+    def solve(self, A, B):
+        freq = defaultdict(int)  # prefix XOR -> number of prefixes with that XOR
+        freq[0] = 1
+        xorr = ans = 0
+        for a in A:
+            xorr ^= a
+            ans += freq.get(xorr ^ B, 0)
+            freq[xorr] += 1
+        return ans
 ```

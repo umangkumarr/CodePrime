@@ -9,8 +9,6 @@ complexity:
   space: "O(V + E)"
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
 ## Problem
 
 Given a weighted, undirected, and connected graph represented by an adjacency list **`adj[][][]`**, where `adj[u]` contains pairs `[v, w]` representing an edge from `u` to `v` with weight `w`.
@@ -119,9 +117,6 @@ On a dense graph ($E \approx V^2/2$ is allowed here) an array-based Prim that sc
 
 ## Code
 
-<Tabs>
-<TabItem label="Kruskal">
-
 ```cpp title="Approach 1: Kruskal's algorithm"
 class Solution {
     vector<int> parent, sz;
@@ -168,8 +163,87 @@ class Solution {
 };
 ```
 
-</TabItem>
-<TabItem label="Prim">
+```java title="Approach 1: Kruskal's algorithm"
+class Solution {
+    private int[] parent, sz;
+
+    private int find(int x) {
+        while (parent[x] != x) {
+            parent[x] = parent[parent[x]];  // path halving
+            x = parent[x];
+        }
+        return x;
+    }
+
+    private boolean unite(int a, int b) {
+        a = find(a);
+        b = find(b);
+        if (a == b) return false;
+        if (sz[a] < sz[b]) {
+            int t = a;
+            a = b;
+            b = t;
+        }
+        parent[b] = a;
+        sz[a] += sz[b];
+        return true;
+    }
+
+    public int primMST(ArrayList<ArrayList<ArrayList<Integer>>> adj) {
+        int V = adj.size();
+        List<int[]> edges = new ArrayList<>();  // {w, u, v}
+        for (int u = 0; u < V; u++)
+            for (List<Integer> e : adj.get(u))
+                if (u < e.get(0)) edges.add(new int[] {e.get(1), u, e.get(0)});
+        edges.sort((x, y) -> Integer.compare(x[0], y[0]));
+
+        parent = new int[V];
+        sz = new int[V];
+        for (int i = 0; i < V; i++) {
+            parent[i] = i;
+            sz[i] = 1;
+        }
+
+        int total = 0, taken = 0;
+        for (int[] e : edges) {
+            if (!unite(e[1], e[2])) continue;
+            total += e[0];
+            if (++taken == V - 1) break;
+        }
+        return total;
+    }
+}
+```
+
+```python title="Approach 1: Kruskal's algorithm"
+class Solution:
+    def primMST(self, adj: list[list[list[int]]]) -> int:
+        V = len(adj)
+        edges = sorted((w, u, v) for u in range(V) for v, w in adj[u] if u < v)
+        parent = list(range(V))
+        sz = [1] * V
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]  # path halving
+                x = parent[x]
+            return x
+
+        total = taken = 0
+        for w, u, v in edges:
+            a, b = find(u), find(v)
+            if a == b:
+                continue
+            if sz[a] < sz[b]:
+                a, b = b, a
+            parent[b] = a
+            sz[a] += sz[b]
+            total += w
+            taken += 1
+            if taken == V - 1:
+                break
+        return total
+```
 
 ```cpp title="Approach 2: Prim's algorithm"
 class Solution {
@@ -201,5 +275,58 @@ class Solution {
 };
 ```
 
-</TabItem>
-</Tabs>
+```java title="Approach 2: Prim's algorithm"
+class Solution {
+    public int primMST(ArrayList<ArrayList<ArrayList<Integer>>> adj) {
+        int V = adj.size();
+        int[] key = new int[V];
+        Arrays.fill(key, Integer.MAX_VALUE);
+        boolean[] inMST = new boolean[V];
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));  // {key, vertex}
+        key[0] = 0;
+        pq.add(new int[] {0, 0});
+        int total = 0;
+        while (!pq.isEmpty()) {
+            int[] top = pq.poll();
+            int k = top[0], u = top[1];
+            if (inMST[u]) continue;  // stale entry
+            inMST[u] = true;
+            total += k;
+            for (List<Integer> e : adj.get(u)) {
+                int v = e.get(0), w = e.get(1);
+                if (!inMST[v] && w < key[v]) {
+                    key[v] = w;
+                    pq.add(new int[] {w, v});
+                }
+            }
+        }
+        return total;
+    }
+}
+```
+
+```python title="Approach 2: Prim's algorithm"
+import heapq
+from math import inf
+
+
+class Solution:
+    def primMST(self, adj: list[list[list[int]]]) -> int:
+        V = len(adj)
+        key = [inf] * V
+        in_mst = [False] * V
+        key[0] = 0
+        pq = [(0, 0)]  # (key, vertex)
+        total = 0
+        while pq:
+            k, u = heapq.heappop(pq)
+            if in_mst[u]:
+                continue  # stale entry
+            in_mst[u] = True
+            total += k
+            for v, w in adj[u]:
+                if not in_mst[v] and w < key[v]:
+                    key[v] = w
+                    heapq.heappush(pq, (w, v))
+        return total
+```

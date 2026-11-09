@@ -102,7 +102,7 @@ Example 1: node `0` gets colour 0 (blue), so `1`, `2` and `3` all get colour 1. 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool isBipartite(vector<vector<int>>& graph) {
@@ -129,4 +129,55 @@ class Solution {
         return true;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean isBipartite(int[][] graph) {
+        int n = graph.length;
+        int[] color = new int[n];
+        Arrays.fill(color, -1);
+        ArrayDeque<Integer> q = new ArrayDeque<>();
+        for (int start = 0; start < n; start++) {
+            if (color[start] != -1) continue;
+            color[start] = 0;
+            q.offer(start);
+            while (!q.isEmpty()) {
+                int u = q.poll();
+                for (int v : graph[u]) {
+                    if (color[v] == -1) {
+                        color[v] = 1 - color[u];
+                        q.offer(v);
+                    } else if (color[v] == color[u]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def isBipartite(self, graph: list[list[int]]) -> bool:
+        color = [-1] * len(graph)
+        for start in range(len(graph)):
+            if color[start] != -1:
+                continue
+            color[start] = 0
+            q = deque([start])
+            while q:
+                u = q.popleft()
+                for v in graph[u]:
+                    if color[v] == -1:
+                        color[v] = 1 - color[u]
+                        q.append(v)
+                    elif color[v] == color[u]:
+                        return False
+        return True
 ```

@@ -111,7 +111,7 @@ The node `4` fails because its right child has the same key (`4 < R.mn` is false
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     struct Info {
         bool isBST;
@@ -136,4 +136,60 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    private record Info(boolean isBST, int mn, int mx, int sum) {}
+
+    private int best = 0;
+
+    private Info dfs(TreeNode node) {
+        if (node == null) return new Info(true, Integer.MAX_VALUE, Integer.MIN_VALUE, 0);
+        Info L = dfs(node.left), R = dfs(node.right);
+        if (L.isBST() && R.isBST() && L.mx() < node.val && node.val < R.mn()) {
+            int sum = L.sum() + R.sum() + node.val;
+            best = Math.max(best, sum);
+            return new Info(true, Math.min(L.mn(), node.val), Math.max(R.mx(), node.val), sum);
+        }
+        return new Info(false, 0, 0, 0);
+    }
+
+    public int maxSumBST(TreeNode root) {
+        dfs(root);
+        return best;
+    }
+}
+```
+
+```python
+from math import inf
+
+
+class Solution:
+    def maxSumBST(self, root: TreeNode | None) -> int:
+        # Post-order DFS with an explicit stack (a skewed tree is too deep for recursion).
+        # info[node] = (isBST, mn, mx, sum); an empty child is (True, inf, -inf, 0).
+        empty = (True, inf, -inf, 0)
+        info = {}
+        best = 0
+        stack = [(root, False)]
+        while stack:
+            node, children_done = stack.pop()
+            if node is None:
+                continue
+            if not children_done:
+                stack.append((node, True))
+                stack.append((node.right, False))
+                stack.append((node.left, False))
+                continue
+            l_bst, l_mn, l_mx, l_sum = info.pop(node.left, empty)
+            r_bst, r_mn, r_mx, r_sum = info.pop(node.right, empty)
+            if l_bst and r_bst and l_mx < node.val < r_mn:
+                s = l_sum + r_sum + node.val
+                best = max(best, s)
+                info[node] = (True, min(l_mn, node.val), max(r_mx, node.val), s)
+            else:
+                info[node] = (False, 0, 0, 0)
+        return best
 ```

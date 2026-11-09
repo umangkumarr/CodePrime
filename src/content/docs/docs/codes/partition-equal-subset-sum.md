@@ -74,7 +74,7 @@ Let `S` be the bitset size (`10001`) and `w = 64` the word size.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool canPartition(vector<int>& nums) {
@@ -88,4 +88,43 @@ class Solution {
         return reach[target];
     }
 };
+```
+
+```java
+class Solution {
+    public boolean canPartition(int[] nums) {
+        int total = 0;
+        for (int x : nums) total += x;
+        if (total % 2 != 0) return false;
+        int target = total / 2;
+
+        // a 10001-bit bitset in 64-bit words: bit s set <=> some subset sums to s
+        long[] reach = new long[(10001 + 63) / 64];
+        reach[0] = 1;
+        for (int x : nums) {
+            int q = x >> 6, r = x & 63;
+            // reach |= reach << x, from the top word down so sources are still unchanged
+            for (int i = reach.length - 1; i >= q; i--) {
+                long shifted = reach[i - q] << r;
+                if (r != 0 && i - q - 1 >= 0) shifted |= reach[i - q - 1] >>> (64 - r);
+                reach[i] |= shifted;
+            }
+        }
+        return (reach[target >> 6] >>> (target & 63) & 1) == 1;
+    }
+}
+```
+
+```python
+class Solution:
+    def canPartition(self, nums: list[int]) -> bool:
+        total = sum(nums)
+        if total % 2 != 0:
+            return False
+        target = total // 2
+
+        reach = 1  # bit s set <=> some subset sums to s
+        for x in nums:
+            reach |= reach << x
+        return (reach >> target) & 1 == 1
 ```

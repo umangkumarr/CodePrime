@@ -98,7 +98,7 @@ Note how `4` waits in `in` until `3`, which is older, has left `out`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class MyQueue {
     stack<int> in, out;  // out's top is the front of the queue
 
@@ -125,4 +125,55 @@ class MyQueue {
 
     bool empty() { return in.empty() && out.empty(); }
 };
+```
+
+```java
+class MyQueue {
+    private final ArrayDeque<Integer> in = new ArrayDeque<>();
+    private final ArrayDeque<Integer> out = new ArrayDeque<>();  // out's top is the front of the queue
+
+    public MyQueue() {}
+
+    public void push(int x) { in.push(x); }
+
+    public int pop() {
+        int front = peek();
+        out.pop();
+        return front;
+    }
+
+    public int peek() {
+        if (out.isEmpty()) {
+            while (!in.isEmpty()) out.push(in.pop());
+        }
+        return out.peek();
+    }
+
+    public boolean empty() { return in.isEmpty() && out.isEmpty(); }
+}
+```
+
+```python
+class MyQueue:
+
+    def __init__(self):
+        self.inbox = []
+        self.outbox = []  # outbox's top (last element) is the front of the queue
+
+    def push(self, x: int) -> None:
+        self.inbox.append(x)
+
+    def pop(self) -> int:
+        front = self.peek()
+        self.outbox.pop()
+        return front
+
+    def peek(self) -> int:
+        if not self.outbox:
+            while self.inbox:
+                self.outbox.append(self.inbox.pop())
+        return self.outbox[-1]
+
+    def empty(self) -> bool:
+        return not self.inbox and not self.outbox
 ```

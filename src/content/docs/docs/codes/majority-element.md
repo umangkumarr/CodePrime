@@ -80,7 +80,7 @@ The `1`s briefly take over, but the extra `2`s cancel them, and `2` is the survi
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int majorityElement(vector<int>& nums) {
@@ -92,4 +92,28 @@ class Solution {
         return candidate;
     }
 };
+```
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int candidate = 0, count = 0;
+        for (int x : nums) {
+            if (count == 0) candidate = x;
+            count += (x == candidate) ? 1 : -1;
+        }
+        return candidate;
+    }
+}
+```
+
+```python
+class Solution:
+    def majorityElement(self, nums: list[int]) -> int:
+        candidate, count = 0, 0
+        for x in nums:
+            if count == 0:
+                candidate = x
+            count += 1 if x == candidate else -1
+        return candidate
 ```

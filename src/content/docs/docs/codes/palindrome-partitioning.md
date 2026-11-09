@@ -78,7 +78,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     vector<vector<bool>> pal;
     vector<string> cur;
@@ -111,4 +111,64 @@ class Solution {
         return result;
     }
 };
+```
+
+```java
+class Solution {
+    private boolean[][] pal;
+    private final List<String> cur = new ArrayList<>();
+    private final List<List<String>> result = new ArrayList<>();
+
+    private void dfs(String s, int start) {
+        int n = s.length();
+        if (start == n) {
+            result.add(new ArrayList<>(cur));
+            return;
+        }
+        for (int j = start; j < n; j++) {
+            if (!pal[start][j]) continue;
+            cur.add(s.substring(start, j + 1));
+            dfs(s, j + 1);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
+    public List<List<String>> partition(String s) {
+        int n = s.length();
+        pal = new boolean[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                pal[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 2 || pal[i + 1][j - 1]);
+            }
+        }
+        dfs(s, 0);
+        return result;
+    }
+}
+```
+
+```python
+class Solution:
+    def partition(self, s: str) -> list[list[str]]:
+        n = len(s)
+        pal = [[False] * n for _ in range(n)]
+        for i in range(n - 1, -1, -1):
+            for j in range(i, n):
+                pal[i][j] = s[i] == s[j] and (j - i < 2 or pal[i + 1][j - 1])
+
+        result, cur = [], []
+
+        def dfs(start: int) -> None:
+            if start == n:
+                result.append(cur[:])
+                return
+            for j in range(start, n):
+                if not pal[start][j]:
+                    continue
+                cur.append(s[start:j + 1])
+                dfs(j + 1)
+                cur.pop()
+
+        dfs(0)
+        return result
 ```

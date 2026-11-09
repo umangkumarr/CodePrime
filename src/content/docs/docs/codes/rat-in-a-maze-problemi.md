@@ -82,7 +82,7 @@ Example 1. Blue is the current path (blocked while on it), red is a dead end bei
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     int n;
     string path;
@@ -116,4 +116,67 @@ class Solution {
         return result;
     }
 };
+```
+
+```java
+class Solution {
+    private static final int[] DR = {1, 0, 0, -1};
+    private static final int[] DC = {0, -1, 1, 0};
+    private static final char[] DIR = {'D', 'L', 'R', 'U'};
+
+    private int n;
+    private final StringBuilder path = new StringBuilder();
+    private final ArrayList<String> result = new ArrayList<>();
+
+    private void dfs(int[][] maze, int r, int c) {
+        if (r == n - 1 && c == n - 1) {
+            result.add(path.toString());
+            return;
+        }
+        maze[r][c] = 0;
+        for (int k = 0; k < 4; k++) {
+            int nr = r + DR[k], nc = c + DC[k];
+            if (nr >= 0 && nr < n && nc >= 0 && nc < n && maze[nr][nc] == 1) {
+                path.append(DIR[k]);
+                dfs(maze, nr, nc);
+                path.deleteCharAt(path.length() - 1);
+            }
+        }
+        maze[r][c] = 1;
+    }
+
+    public ArrayList<String> ratInMaze(int[][] maze) {
+        n = maze.length;
+        if (maze[0][0] == 0 || maze[n - 1][n - 1] == 0) return new ArrayList<>();
+        dfs(maze, 0, 0);
+        return result;
+    }
+}
+```
+
+```python
+class Solution:
+    def ratInMaze(self, maze: list[list[int]]) -> list[str]:
+        n = len(maze)
+        if maze[0][0] == 0 or maze[n - 1][n - 1] == 0:
+            return []
+        # directions in lexicographic order of their letters
+        moves = ((1, 0, 'D'), (0, -1, 'L'), (0, 1, 'R'), (-1, 0, 'U'))
+        path, result = [], []
+
+        def dfs(r: int, c: int) -> None:
+            if r == n - 1 and c == n - 1:
+                result.append(''.join(path))
+                return
+            maze[r][c] = 0
+            for dr, dc, d in moves:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < n and 0 <= nc < n and maze[nr][nc] == 1:
+                    path.append(d)
+                    dfs(nr, nc)
+                    path.pop()
+            maze[r][c] = 1
+
+        dfs(0, 0)
+        return result
 ```

@@ -81,7 +81,7 @@ Example 1, one cell per line height. Blue cells are the current pair `l`, `r`; g
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int maxArea(vector<int>& height) {
@@ -96,4 +96,33 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public int maxArea(int[] height) {
+        int l = 0, r = height.length - 1, ans = 0;
+        while (l < r) {
+            ans = Math.max(ans, Math.min(height[l], height[r]) * (r - l));
+            if (height[l] > height[r])
+                r--;
+            else
+                l++;
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def maxArea(self, height: list[int]) -> int:
+        l, r, ans = 0, len(height) - 1, 0
+        while l < r:
+            ans = max(ans, min(height[l], height[r]) * (r - l))
+            if height[l] > height[r]:
+                r -= 1
+            else:
+                l += 1
+        return ans
 ```

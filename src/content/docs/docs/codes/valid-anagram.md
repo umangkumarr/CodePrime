@@ -66,7 +66,7 @@ With Unicode the alphabet is no longer 26 letters, so replace the array by a has
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool isAnagram(string s, string t) {
@@ -81,4 +81,32 @@ class Solution {
         return true;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean isAnagram(String s, String t) {
+        if (s.length() != t.length()) return false;
+        int[] count = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            count[s.charAt(i) - 'a']++;
+            count[t.charAt(i) - 'a']--;
+        }
+        for (int c : count)
+            if (c != 0) return false;
+        return true;
+    }
+}
+```
+
+```python
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+        count = [0] * 26
+        for a, b in zip(s, t):
+            count[ord(a) - ord('a')] += 1
+            count[ord(b) - ord('a')] -= 1
+        return not any(count)
 ```

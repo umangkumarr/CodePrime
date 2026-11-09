@@ -97,7 +97,7 @@ Example 1. The blue cell is `A[i]`; the `stack` line lists the candidates from b
 
 ## Code
 
-```cpp title="C++"
+```cpp
 vector<int> Solution::prevSmaller(vector<int> &A) {
     int n = A.size();
     vector<int> G(n);
@@ -109,4 +109,32 @@ vector<int> Solution::prevSmaller(vector<int> &A) {
     }
     return G;
 }
+```
+
+```java
+public class Solution {
+    public ArrayList<Integer> prevSmaller(List<Integer> A) {
+        ArrayList<Integer> G = new ArrayList<>(A.size());
+        Deque<Integer> st = new ArrayDeque<>();  // strictly increasing from bottom to top
+        for (int x : A) {
+            while (!st.isEmpty() && st.peek() >= x) st.pop();
+            G.add(st.isEmpty() ? -1 : st.peek());
+            st.push(x);
+        }
+        return G;
+    }
+}
+```
+
+```python
+class Solution:
+    def prevSmaller(self, A: list[int]) -> list[int]:
+        G = []
+        st = []  # strictly increasing from bottom to top
+        for x in A:
+            while st and st[-1] >= x:
+                st.pop()
+            G.append(st[-1] if st else -1)
+            st.append(x)
+        return G
 ```

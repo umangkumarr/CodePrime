@@ -98,7 +98,7 @@ Every branch fails, so the answer is `false`. In Example 1 the first successful 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     vector<vector<int>> adj;
     vector<int> color;  // 0 = uncoloured, otherwise 1..m
@@ -133,4 +133,66 @@ class Solution {
         return solve(0);
     }
 };
+```
+
+```java
+class Solution {
+    private List<List<Integer>> adj;
+    private int[] color;  // 0 = uncoloured, otherwise 1..m
+    private int m;
+
+    private boolean solve(int v) {
+        if (v == adj.size()) return true;
+        for (int c = 1; c <= m; c++) {
+            boolean clash = false;
+            for (int u : adj.get(v))
+                if (color[u] == c) {
+                    clash = true;
+                    break;
+                }
+            if (clash) continue;
+            color[v] = c;
+            if (solve(v + 1)) return true;
+        }
+        color[v] = 0;
+        return false;
+    }
+
+    boolean graphColoring(int v, int[][] edges, int m) {
+        adj = new ArrayList<>();
+        for (int i = 0; i < v; i++) adj.add(new ArrayList<>());
+        for (int[] e : edges) {
+            adj.get(e[0]).add(e[1]);
+            adj.get(e[1]).add(e[0]);
+        }
+        color = new int[v];
+        this.m = m;
+        return solve(0);
+    }
+}
+```
+
+```python
+class Solution:
+    def graphColoring(self, v, edges, m):
+        adj = [[] for _ in range(v)]
+        for a, b in edges:
+            adj[a].append(b)
+            adj[b].append(a)
+        color = [0] * v  # 0 = uncoloured, otherwise 1..m
+
+        def solve(x):
+            if x == v:
+                return True
+            taken = {color[u] for u in adj[x]}  # colours of x's neighbours
+            for c in range(1, m + 1):
+                if c in taken:
+                    continue
+                color[x] = c
+                if solve(x + 1):
+                    return True
+            color[x] = 0
+            return False
+
+        return solve(0)
 ```

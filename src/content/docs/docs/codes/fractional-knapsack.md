@@ -86,7 +86,7 @@ Example 1: the densities are `60/10 = 6`, `100/20 = 5` and `120/30 = 4`, so the 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     double fractionalKnapsack(vector<int>& val, vector<int>& wt, int capacity) {
@@ -112,4 +112,48 @@ class Solution {
         return total;
     }
 };
+```
+
+```java
+class Solution {
+    public double fractionalKnapsack(int[] val, int[] wt, int capacity) {
+        int n = val.length;
+        Integer[] order = new Integer[n];
+        for (int i = 0; i < n; i++) order[i] = i;
+        // a is denser than b  <=>  val[a] / wt[a] > val[b] / wt[b]
+        Arrays.sort(order, (a, b) -> Long.compare((long) val[b] * wt[a], (long) val[a] * wt[b]));
+
+        long left = capacity;
+        double total = 0;
+        for (int i : order) {
+            if (wt[i] <= left) {
+                total += val[i];
+                left -= wt[i];
+            } else {
+                total += (double) val[i] * left / wt[i];
+                break;
+            }
+        }
+        return total;
+    }
+}
+```
+
+```python
+class Solution:
+    def fractionalKnapsack(self, val, wt, capacity):
+        # Values and weights are at most 10^4, so two different densities differ by at least
+        # 10^-8 -- far above float rounding error. Sorting by the float val[i] / wt[i] is exact.
+        order = sorted(range(len(val)), key=lambda i: val[i] / wt[i], reverse=True)
+
+        left = capacity
+        total = 0.0
+        for i in order:
+            if wt[i] <= left:
+                total += val[i]
+                left -= wt[i]
+            else:
+                total += val[i] * left / wt[i]
+                break
+        return total
 ```

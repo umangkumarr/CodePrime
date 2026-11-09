@@ -65,7 +65,7 @@ For Example 2, the columns from the right are `0+1`, `1+1`, `0+0+carry`, `1+1`, 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string addBinary(string a, string b) {
@@ -81,4 +81,37 @@ class Solution {
         return res;
     }
 };
+```
+
+```java
+class Solution {
+    public String addBinary(String a, String b) {
+        StringBuilder res = new StringBuilder();
+        int i = a.length() - 1, j = b.length() - 1, carry = 0;
+        while (i >= 0 || j >= 0 || carry > 0) {
+            if (i >= 0) carry += a.charAt(i--) - '0';
+            if (j >= 0) carry += b.charAt(j--) - '0';
+            res.append((char) ('0' + carry % 2));
+            carry /= 2;
+        }
+        return res.reverse().toString();
+    }
+}
+```
+
+```python
+class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        res = []
+        i, j, carry = len(a) - 1, len(b) - 1, 0
+        while i >= 0 or j >= 0 or carry:
+            if i >= 0:
+                carry += ord(a[i]) - ord('0')
+                i -= 1
+            if j >= 0:
+                carry += ord(b[j]) - ord('0')
+                j -= 1
+            res.append('1' if carry % 2 else '0')
+            carry //= 2
+        return ''.join(reversed(res))
 ```

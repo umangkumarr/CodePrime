@@ -86,7 +86,7 @@ After the mismatch at `i = 4`, the matched `"abab"` ends with `"ab"`, which is a
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     int strStr(string haystack, string needle) {
@@ -108,4 +108,53 @@ class Solution {
         return -1;
     }
 };
+```
+
+```java
+class Solution {
+    public int strStr(String haystack, String needle) {
+        int n = haystack.length(), m = needle.length();
+
+        // lps[i]: longest proper prefix of needle[0..i] that is also a suffix of it.
+        int[] lps = new int[m];
+        for (int i = 1, len = 0; i < m; i++) {
+            while (len > 0 && needle.charAt(i) != needle.charAt(len)) len = lps[len - 1];
+            if (needle.charAt(i) == needle.charAt(len)) len++;
+            lps[i] = len;
+        }
+
+        for (int i = 0, j = 0; i < n; i++) {
+            while (j > 0 && haystack.charAt(i) != needle.charAt(j)) j = lps[j - 1];
+            if (haystack.charAt(i) == needle.charAt(j)) j++;
+            if (j == m) return i - m + 1;
+        }
+        return -1;
+    }
+}
+```
+
+```python
+class Solution:
+    def strStr(self, haystack: str, needle: str) -> int:
+        m = len(needle)
+
+        # lps[i]: longest proper prefix of needle[0..i] that is also a suffix of it.
+        lps = [0] * m
+        length = 0
+        for i in range(1, m):
+            while length > 0 and needle[i] != needle[length]:
+                length = lps[length - 1]
+            if needle[i] == needle[length]:
+                length += 1
+            lps[i] = length
+
+        j = 0
+        for i, ch in enumerate(haystack):
+            while j > 0 and ch != needle[j]:
+                j = lps[j - 1]
+            if ch == needle[j]:
+                j += 1
+            if j == m:
+                return i - m + 1
+        return -1
 ```

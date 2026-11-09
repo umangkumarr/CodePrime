@@ -116,6 +116,50 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Expand around centre"
+class Solution {
+    private int expand(String s, int l, int r) {
+        while (l >= 0 && r < s.length() && s.charAt(l) == s.charAt(r)) {
+            l--;
+            r++;
+        }
+        return r - l - 1;  // length of s[l+1 .. r-1]
+    }
+
+    public String longestPalindrome(String s) {
+        int start = 0, bestLen = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int len = Math.max(expand(s, i, i), expand(s, i, i + 1));
+            if (len > bestLen) {
+                bestLen = len;
+                start = i - (len - 1) / 2;
+            }
+        }
+        return s.substring(start, start + bestLen);
+    }
+}
+```
+
+```python title="Approach 1: Expand around centre"
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        n = len(s)
+
+        def expand(l: int, r: int) -> int:
+            while l >= 0 and r < n and s[l] == s[r]:
+                l -= 1
+                r += 1
+            return r - l - 1  # length of s[l+1 .. r-1]
+
+        start = best_len = 0
+        for i in range(n):
+            length = max(expand(i, i), expand(i, i + 1))
+            if length > best_len:
+                best_len = length
+                start = i - (length - 1) // 2
+        return s[start:start + best_len]
+```
+
 ```cpp title="Approach 2: Manacher's algorithm"
 class Solution {
    public:
@@ -145,4 +189,54 @@ class Solution {
         return s.substr((bestCenter - bestLen) / 2, bestLen);
     }
 };
+```
+
+```java title="Approach 2: Manacher's algorithm"
+class Solution {
+    public String longestPalindrome(String s) {
+        int m = 2 * s.length() + 1;
+        char[] t = new char[m];  // "#c#b#b#d#"
+        Arrays.fill(t, '#');
+        for (int i = 0; i < s.length(); i++) t[2 * i + 1] = s.charAt(i);
+        int[] rad = new int[m];
+        int center = 0, right = 0;  // palindrome reaching furthest right: t[2*center-right .. right]
+        int bestLen = 0, bestCenter = 0;
+        for (int i = 0; i < m; i++) {
+            if (i < right) rad[i] = Math.min(right - i, rad[2 * center - i]);
+            while (i - rad[i] - 1 >= 0 && i + rad[i] + 1 < m && t[i - rad[i] - 1] == t[i + rad[i] + 1])
+                rad[i]++;
+            if (i + rad[i] > right) {
+                center = i;
+                right = i + rad[i];
+            }
+            if (rad[i] > bestLen) {
+                bestLen = rad[i];
+                bestCenter = i;
+            }
+        }
+        int start = (bestCenter - bestLen) / 2;
+        return s.substring(start, start + bestLen);
+    }
+}
+```
+
+```python title="Approach 2: Manacher's algorithm"
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        t = "#" + "#".join(s) + "#"
+        m = len(t)
+        rad = [0] * m
+        center = right = 0  # palindrome reaching furthest right: t[2*center-right .. right]
+        best_len = best_center = 0
+        for i in range(m):
+            r = min(right - i, rad[2 * center - i]) if i < right else 0
+            while i - r - 1 >= 0 and i + r + 1 < m and t[i - r - 1] == t[i + r + 1]:
+                r += 1
+            rad[i] = r
+            if i + r > right:
+                center, right = i, i + r
+            if r > best_len:
+                best_len, best_center = r, i
+        start = (best_center - best_len) // 2
+        return s[start:start + best_len]
 ```

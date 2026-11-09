@@ -73,7 +73,7 @@ Example 2. Orange cells are swapped across the blue diagonal; green cells are fi
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void rotate(vector<vector<int>>& matrix) {
@@ -83,4 +83,35 @@ class Solution {
         for (auto& row : matrix) reverse(row.begin(), row.end());
     }
 };
+```
+
+```java
+class Solution {
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++) {
+                int t = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = t;
+            }
+        for (int[] row : matrix)
+            for (int lo = 0, hi = n - 1; lo < hi; lo++, hi--) {
+                int t = row[lo];
+                row[lo] = row[hi];
+                row[hi] = t;
+            }
+    }
+}
+```
+
+```python
+class Solution:
+    def rotate(self, matrix: list[list[int]]) -> None:
+        n = len(matrix)
+        for i in range(n):
+            for j in range(i + 1, n):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        for row in matrix:
+            row.reverse()
 ```

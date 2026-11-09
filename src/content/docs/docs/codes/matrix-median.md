@@ -91,7 +91,7 @@ Example 1, `half = 5`. Green cells are the elements `<= mid` counted in that ste
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int Solution::findMedian(vector<vector<int> >& A) {
     int n = A.size(), m = A[0].size();
     int lo = INT_MAX, hi = INT_MIN;
@@ -113,4 +113,65 @@ int Solution::findMedian(vector<vector<int> >& A) {
     }
     return lo;
 }
+```
+
+```java
+public class Solution {
+    public int findMedian(ArrayList<ArrayList<Integer>> A) {
+        int n = A.size(), m = A.get(0).size();
+        int lo = Integer.MAX_VALUE, hi = Integer.MIN_VALUE;
+        for (List<Integer> row : A) {
+            lo = Math.min(lo, row.get(0));
+            hi = Math.max(hi, row.get(m - 1));
+        }
+
+        int half = (n * m + 1) / 2;  // 1-based position of the median
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            int cnt = 0;  // number of elements <= mid
+            for (List<Integer> row : A) cnt += upperBound(row, mid);
+            if (cnt < half)
+                lo = mid + 1;
+            else
+                hi = mid;
+        }
+        return lo;
+    }
+
+    // number of elements <= x in the sorted row
+    private int upperBound(List<Integer> row, int x) {
+        int l = 0, r = row.size();
+        while (l < r) {
+            int mid = (l + r) >>> 1;
+            if (row.get(mid) <= x)
+                l = mid + 1;
+            else
+                r = mid;
+        }
+        return l;
+    }
+}
+```
+
+```python
+from bisect import bisect_right
+
+
+class Solution:
+    # @param A : list of list of integers
+    # @return an integer
+    def findMedian(self, A):
+        n, m = len(A), len(A[0])
+        lo = min(row[0] for row in A)
+        hi = max(row[-1] for row in A)
+
+        half = (n * m + 1) // 2  # 1-based position of the median
+        while lo < hi:
+            mid = (lo + hi) // 2
+            cnt = sum(bisect_right(row, mid) for row in A)  # number of elements <= mid
+            if cnt < half:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
 ```

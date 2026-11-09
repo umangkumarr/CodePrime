@@ -93,7 +93,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     int best;
 
@@ -114,4 +114,50 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    private int best;
+
+    public int maxPathSum(TreeNode root) {
+        best = Integer.MIN_VALUE;
+        gain(root);
+        return best;
+    }
+
+    // Largest sum of a downward chain starting at node; updates best with the
+    // largest path whose highest node is node.
+    private int gain(TreeNode node) {
+        if (node == null) return 0;
+        int left = Math.max(0, gain(node.left));
+        int right = Math.max(0, gain(node.right));
+        best = Math.max(best, node.val + left + right);
+        return node.val + Math.max(left, right);
+    }
+}
+```
+
+```python
+class Solution:
+    def maxPathSum(self, root: TreeNode | None) -> int:
+        # Post-order with an explicit stack. gain[node] is the largest sum of a
+        # downward chain starting at node, kept until its parent is processed.
+        best = float('-inf')
+        gain = {}
+        stack = [(root, False)]
+        while stack:
+            node, children_done = stack.pop()
+            if not node:
+                continue
+            if children_done:
+                left = max(0, gain.pop(node.left, 0))
+                right = max(0, gain.pop(node.right, 0))
+                best = max(best, node.val + left + right)
+                gain[node] = node.val + max(left, right)
+            else:
+                stack.append((node, True))
+                stack.append((node.right, False))
+                stack.append((node.left, False))
+        return best
 ```

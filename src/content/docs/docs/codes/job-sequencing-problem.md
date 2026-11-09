@@ -91,7 +91,7 @@ Example 3, slots `1..3`, each cell shows the profit of the job placed there:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     vector<int> parent;  // parent[t] leads to the latest free slot <= t (0 = none)
 
@@ -127,4 +127,63 @@ class Solution {
         return {count, total};
     }
 };
+```
+
+```java
+class Solution {
+    private int[] parent;  // parent[t] leads to the latest free slot <= t (0 = none)
+
+    private int find(int x) {
+        while (parent[x] != x) {
+            parent[x] = parent[parent[x]];
+            x = parent[x];
+        }
+        return x;
+    }
+
+    public ArrayList<Integer> jobSequencing(int[] deadline, int[] profit) {
+        int n = deadline.length;
+        Integer[] order = new Integer[n];
+        for (int i = 0; i < n; i++) order[i] = i;
+        Arrays.sort(order, (a, b) -> Integer.compare(profit[b], profit[a]));
+
+        int maxD = 0;
+        for (int d : deadline) maxD = Math.max(maxD, d);
+        parent = new int[maxD + 1];
+        for (int t = 0; t <= maxD; t++) parent[t] = t;
+
+        int count = 0, total = 0;
+        for (int i : order) {
+            int slot = find(deadline[i]);
+            if (slot > 0) {
+                count++;
+                total += profit[i];
+                parent[slot] = slot - 1;
+            }
+        }
+        return new ArrayList<>(List.of(count, total));
+    }
+}
+```
+
+```python
+class Solution:
+    def jobSequencing(self, deadline, profit):
+        # parent[t] leads to the latest free slot <= t (0 = none)
+        parent = list(range(max(deadline) + 1))
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        count = total = 0
+        for i in sorted(range(len(deadline)), key=profit.__getitem__, reverse=True):
+            slot = find(deadline[i])
+            if slot > 0:
+                count += 1
+                total += profit[i]
+                parent[slot] = slot - 1
+        return [count, total]
 ```

@@ -566,3 +566,64 @@
     font-size: 0.8rem;
   }
 }
+
+/* ---------- Language tabs (C++ / Java / Python) ---------- */
+
+.cp-code-tabs {
+  display: block;
+}
+
+.cp-code-tabs + .cp-code-tabs,
+.cp-code-tabs + .expressive-code,
+.expressive-code + .cp-code-tabs {
+  margin-top: 1.5rem;
+}
+
+/* Without JavaScript every version stays visible, stacked. */
+.cp-code-tabs > .expressive-code + .expressive-code {
+  margin-top: 1rem;
+}
+
+.cp-code-tabs__list {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid var(--cp-border);
+  border-radius: 999px;
+  background: var(--cp-surface);
+}
+
+.cp-code-tabs__tab {
+  min-height: 2rem;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--cp-text-2);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cp-code-tabs__tab:hover {
+  color: var(--sl-color-white);
+}
+
+.cp-code-tabs__tab[aria-selected='true'] {
+  background: var(--cp-surface-2);
+  color: var(--sl-color-white);
+  box-shadow: inset 0 0 0 1px var(--cp-border-strong);
+}
+
+.cp-code-tabs__tab:focus-visible {
+  outline: 2px solid var(--cp-accent);
+  outline-offset: 2px;
+}
+
+/* When the tabs are active, only the selected version takes space. */
+.cp-code-tabs > .cp-code-tabs__list + .expressive-code,
+.cp-code-tabs > [role='tabpanel'] {
+  margin-top: 0;
+}

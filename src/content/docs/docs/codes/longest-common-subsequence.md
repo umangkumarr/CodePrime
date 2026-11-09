@@ -91,7 +91,7 @@ Example 1 (`text1 = "abcde"`, `text2 = "ace"`). Each frame fills one row: green 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int longestCommonSubsequence(string text1, string text2) {
@@ -111,4 +111,49 @@ class Solution {
         return prev[m];
     }
 };
+```
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        if (text2.length() > text1.length()) {
+            String t = text1;
+            text1 = text2;
+            text2 = t;
+        }
+        int n = text1.length(), m = text2.length();
+        int[] prev = new int[m + 1], cur = new int[m + 1];
+        for (int i = 1; i <= n; i++) {
+            char c = text1.charAt(i - 1);
+            for (int j = 1; j <= m; j++) {
+                if (c == text2.charAt(j - 1)) {
+                    cur[j] = prev[j - 1] + 1;
+                } else {
+                    cur[j] = Math.max(prev[j], cur[j - 1]);
+                }
+            }
+            int[] t = prev;
+            prev = cur;
+            cur = t;
+        }
+        return prev[m];
+    }
+}
+```
+
+```python
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        if len(text2) > len(text1):
+            text1, text2 = text2, text1
+        m = len(text2)
+        prev, cur = [0] * (m + 1), [0] * (m + 1)
+        for c in text1:
+            for j in range(1, m + 1):
+                if c == text2[j - 1]:
+                    cur[j] = prev[j - 1] + 1
+                else:
+                    cur[j] = max(prev[j], cur[j - 1])
+            prev, cur = cur, prev
+        return prev[m]
 ```

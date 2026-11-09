@@ -80,7 +80,7 @@ Pre-order (the order `ans` is filled): `[]`, `[1]`, `[1,2]`, `[1,2,3]`, `[1,3]`,
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     vector<vector<int>> ans;
     vector<int> cur;
@@ -100,4 +100,41 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private final List<List<Integer>> ans = new ArrayList<>();
+    private final List<Integer> cur = new ArrayList<>();
+
+    private void backtrack(int[] nums, int start) {
+        ans.add(new ArrayList<>(cur));
+        for (int i = start; i < nums.length; i++) {
+            cur.add(nums[i]);
+            backtrack(nums, i + 1);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
+    public List<List<Integer>> subsets(int[] nums) {
+        backtrack(nums, 0);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def subsets(self, nums: list[int]) -> list[list[int]]:
+        ans, cur = [], []
+
+        def backtrack(start):
+            ans.append(cur[:])
+            for i in range(start, len(nums)):
+                cur.append(nums[i])
+                backtrack(i + 1)
+                cur.pop()
+
+        backtrack(0)
+        return ans
 ```

@@ -107,7 +107,7 @@ Step 3 then unzips `1 → 1' → 2 → 2'` back into `1 → 2` and `1' → 2'`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     Node* copyRandomList(Node* head) {
@@ -133,4 +133,57 @@ class Solution {
         return dummy.next;
     }
 };
+```
+
+```java
+class Solution {
+    public Node copyRandomList(Node head) {
+        // 1. Insert each copy right after its original: A -> A' -> B -> B' ...
+        for (Node cur = head; cur != null; cur = cur.next.next) {
+            Node copy = new Node(cur.val);
+            copy.next = cur.next;
+            cur.next = copy;
+        }
+        // 2. The copy of X is X.next, so the copy of X.random is X.random.next.
+        for (Node cur = head; cur != null; cur = cur.next.next) {
+            if (cur.random != null) cur.next.random = cur.random.next;
+        }
+        // 3. Unzip the two lists, restoring the original.
+        Node dummy = new Node(0);
+        Node tail = dummy;
+        for (Node cur = head; cur != null; cur = cur.next) {
+            Node copy = cur.next;
+            cur.next = copy.next;
+            tail.next = copy;
+            tail = copy;
+        }
+        return dummy.next;
+    }
+}
+```
+
+```python
+class Solution:
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        # 1. Insert each copy right after its original: A -> A' -> B -> B' ...
+        cur = head
+        while cur:
+            cur.next = Node(cur.val, cur.next)
+            cur = cur.next.next
+        # 2. The copy of X is X.next, so the copy of X.random is X.random.next.
+        cur = head
+        while cur:
+            if cur.random:
+                cur.next.random = cur.random.next
+            cur = cur.next.next
+        # 3. Unzip the two lists, restoring the original.
+        dummy = tail = Node(0)
+        cur = head
+        while cur:
+            copy = cur.next
+            cur.next = copy.next
+            tail.next = copy
+            tail = copy
+            cur = cur.next
+        return dummy.next
 ```

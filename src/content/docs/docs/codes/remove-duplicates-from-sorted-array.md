@@ -92,7 +92,7 @@ Example 2. Green cells are the compacted unique prefix `nums[0..k-1]`, blue is t
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int removeDuplicates(vector<int>& nums) {
@@ -103,4 +103,27 @@ class Solution {
         return k;
     }
 };
+```
+
+```java
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        int k = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] != nums[k - 1]) nums[k++] = nums[i];
+        }
+        return k;
+    }
+}
+```
+
+```python
+class Solution:
+    def removeDuplicates(self, nums: list[int]) -> int:
+        k = 1
+        for i in range(1, len(nums)):
+            if nums[i] != nums[k - 1]:
+                nums[k] = nums[i]
+                k += 1
+        return k
 ```

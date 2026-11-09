@@ -3,8 +3,6 @@ title: "Modular Exponentiation"
 description: "Compute (a^n) mod m in O(log n) without overflow by reducing modulo m after every multiplication in binary exponentiation."
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
 ## Problem
 
 Given integers `a`, `n` and `m` with $n \ge 0$ and $m \ge 1$, compute $a^n \bmod m$.
@@ -51,9 +49,6 @@ So every intermediate value stays in $[0, m)$, and the final result is the same 
 
 ## Code
 
-<Tabs syncKey="lang">
-<TabItem label="C++">
-
 ```cpp
 #include <iostream>
 using namespace std;
@@ -76,10 +71,28 @@ int main() {
 }
 ```
 
-</TabItem>
-<TabItem label="Python">
+```java
+public class Main {
+    // (a^n) mod m for n >= 0 and 1 <= m <= ~3e9.
+    static long modPow(long a, long n, long m) {
+        a = (a % m + m) % m;  // bring the base into [0, m)
+        long ans = 1 % m;     // 0 when m == 1
+        while (n > 0) {
+            if ((n & 1) == 1) ans = ans * a % m;
+            a = a * a % m;
+            n >>= 1;
+        }
+        return ans;
+    }
 
-```py
+    public static void main(String[] args) {
+        System.out.println(modPow(2, 3, 3));             // 2
+        System.out.println(modPow(3, 200, 1000000007));  // 136318165
+    }
+}
+```
+
+```python
 def mod_pow(a, n, m):
     """(a ** n) % m for n >= 0 and m >= 1, by binary exponentiation."""
     a %= m          # Python's % is already non-negative for m > 0
@@ -97,9 +110,6 @@ print(mod_pow(3, 200, 1000000007))  # 136318165
 ```
 
 Python also has this built in: `pow(a, n, m)`.
-
-</TabItem>
-</Tabs>
 
 ## Output
 

@@ -88,7 +88,7 @@ The range is empty: $2^4 = 16 < 69 < 81 = 3^4$, so there is no integer root and 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 // 1 if mid^n > m, 0 if mid^n == m, -1 if mid^n < m (stops before overflowing)
 int compare(long long mid, int n, int m) {
     long long p = 1;
@@ -112,4 +112,57 @@ int NthRoot(int n, int m) {
     }
     return -1;
 }
+```
+
+```java
+public class Solution {
+    // 1 if mid^n > m, 0 if mid^n == m, -1 if mid^n < m (stops before overflowing)
+    private static int compare(long mid, int n, int m) {
+        long p = 1;
+        for (int i = 0; i < n; i++) {
+            p *= mid;
+            if (p > m) return 1;
+        }
+        return p == m ? 0 : -1;
+    }
+
+    public static int NthRoot(int n, int m) {
+        int lo = 1, hi = m;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            int c = compare(mid, n, m);
+            if (c == 0) return mid;
+            if (c < 0)
+                lo = mid + 1;
+            else
+                hi = mid - 1;
+        }
+        return -1;
+    }
+}
+```
+
+```python
+# 1 if mid^n > m, 0 if mid^n == m, -1 if mid^n < m (stops as soon as the product exceeds m)
+def compare(mid: int, n: int, m: int) -> int:
+    p = 1
+    for _ in range(n):
+        p *= mid
+        if p > m:
+            return 1
+    return 0 if p == m else -1
+
+
+def NthRoot(n: int, m: int) -> int:
+    lo, hi = 1, m
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        c = compare(mid, n, m)
+        if c == 0:
+            return mid
+        if c < 0:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1
 ```

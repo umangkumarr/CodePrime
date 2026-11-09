@@ -103,7 +103,7 @@ The table `F(m, j)` for Example 3 (`k = 3`, `n = 14`), filled row by row with th
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     // Floors that m moves and k eggs can fully resolve: sum of C(m, i) for i = 1..k, capped at n.
     static int floorsCovered(int m, int k, int n) {
@@ -130,4 +130,55 @@ class Solution {
         return lo;
     }
 };
+```
+
+```java
+class Solution {
+    // Floors that m moves and k eggs can fully resolve: sum of C(m, i) for i = 1..k, capped at n.
+    private static int floorsCovered(int m, int k, int n) {
+        long total = 0, c = 1;  // c = C(m, i)
+        for (int i = 1; i <= k && i <= m; i++) {
+            c = c * (m - i + 1) / i;
+            total += c;
+            if (total >= n) return n;
+        }
+        return (int) total;
+    }
+
+    public int superEggDrop(int k, int n) {
+        int lo = 1, hi = n;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (floorsCovered(mid, k, n) >= n) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return lo;
+    }
+}
+```
+
+```python
+class Solution:
+    def superEggDrop(self, k: int, n: int) -> int:
+        # Floors that m moves and k eggs can fully resolve: sum of C(m, i) for i = 1..k, capped at n.
+        def floors_covered(m):
+            total, c = 0, 1  # c = C(m, i)
+            for i in range(1, min(k, m) + 1):
+                c = c * (m - i + 1) // i
+                total += c
+                if total >= n:
+                    return n
+            return total
+
+        lo, hi = 1, n
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if floors_covered(mid) >= n:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
 ```

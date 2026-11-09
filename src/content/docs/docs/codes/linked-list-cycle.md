@@ -100,7 +100,7 @@ To find **where** the cycle starts as well, see [Linked List Cycle II](/docs/cod
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool hasCycle(ListNode *head) {
@@ -113,4 +113,30 @@ class Solution {
         return false;
     }
 };
+```
+
+```java
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+}
+```
+
+```python
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        slow = fast = head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow is fast:
+                return True
+        return False
 ```

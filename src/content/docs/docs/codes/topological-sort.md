@@ -106,7 +106,7 @@ flowchart LR
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> topoSort(vector<vector<int>>& adj) {
@@ -129,4 +129,44 @@ class Solution {
         return order;
     }
 };
+```
+
+```java
+class Solution {
+    ArrayList<Integer> topoSort(ArrayList<ArrayList<Integer>> adj) {
+        int V = adj.size();
+        int[] indegree = new int[V];
+        for (ArrayList<Integer> edges : adj)
+            for (int v : edges) indegree[v]++;
+
+        ArrayList<Integer> order = new ArrayList<>(V);
+        for (int u = 0; u < V; u++)
+            if (indegree[u] == 0) order.add(u);
+
+        // order doubles as the BFS queue: order[head..] still have edges to remove.
+        for (int head = 0; head < order.size(); head++) {
+            for (int v : adj.get(order.get(head)))
+                if (--indegree[v] == 0) order.add(v);
+        }
+        return order;
+    }
+}
+```
+
+```python
+class Solution:
+    def topoSort(self, adj: list[list[int]]) -> list[int]:
+        indegree = [0] * len(adj)
+        for edges in adj:
+            for v in edges:
+                indegree[v] += 1
+
+        order = [u for u in range(len(adj)) if indegree[u] == 0]
+        # order doubles as the BFS queue: the loop also visits vertices appended during it.
+        for u in order:
+            for v in adj[u]:
+                indegree[v] -= 1
+                if indegree[v] == 0:
+                    order.append(v)
+        return order
 ```

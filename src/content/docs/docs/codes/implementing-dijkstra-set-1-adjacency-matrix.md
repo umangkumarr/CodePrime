@@ -101,7 +101,7 @@ Example 2 with `src = 0`:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     vector<int> dijkstra(vector<vector<vector<int>>> &adj, int src) {
@@ -126,4 +126,102 @@ class Solution {
         return dist;
     }
 };
+```
+
+```java
+class Solution {
+    public ArrayList<Integer> dijkstra(ArrayList<ArrayList<ArrayList<Integer>>> adj,
+                                       int src) {
+        int V = adj.size();
+        int[] dist = new int[V];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        // (tentative distance, vertex), at most one entry per vertex
+        TreeSet<int[]> frontier = new TreeSet<>((a, b) ->
+                a[0] != b[0] ? Integer.compare(a[0], b[0]) : Integer.compare(a[1], b[1]));
+        dist[src] = 0;
+        frontier.add(new int[] {0, src});
+
+        while (!frontier.isEmpty()) {
+            int[] top = frontier.pollFirst();
+            int d = top[0], u = top[1];
+            for (ArrayList<Integer> edge : adj.get(u)) {
+                int v = edge.get(0), w = edge.get(1);
+                if ((long) d + w < dist[v]) {
+                    if (dist[v] != Integer.MAX_VALUE) frontier.remove(new int[] {dist[v], v});
+                    dist[v] = d + w;
+                    frontier.add(new int[] {dist[v], v});
+                }
+            }
+        }
+
+        ArrayList<Integer> ans = new ArrayList<>(V);
+        for (int x : dist) ans.add(x);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def dijkstra(self, adj: list[list[list[int]]], src: int) -> list[int]:
+        INF = 2**31 - 1
+        V = len(adj)
+        dist = [INF] * V
+        # Python has no ordered set, so the frontier is an indexed binary min-heap keyed by
+        # dist: pos[v] is v's slot in heap (-1 if absent). Decrease-key moves v in place,
+        # so every vertex is stored at most once, just like the erase-then-insert above.
+        heap = []
+        pos = [-1] * V
+
+        def sift_up(i):
+            v = heap[i]
+            dv = dist[v]
+            while i > 0:
+                p = (i - 1) >> 1
+                if dist[heap[p]] <= dv:
+                    break
+                heap[i] = heap[p]
+                pos[heap[i]] = i
+                i = p
+            heap[i] = v
+            pos[v] = i
+
+        def sift_down(i):
+            n = len(heap)
+            v = heap[i]
+            dv = dist[v]
+            while True:
+                c = 2 * i + 1
+                if c >= n:
+                    break
+                if c + 1 < n and dist[heap[c + 1]] < dist[heap[c]]:
+                    c += 1
+                if dist[heap[c]] >= dv:
+                    break
+                heap[i] = heap[c]
+                pos[heap[i]] = i
+                i = c
+            heap[i] = v
+            pos[v] = i
+
+        dist[src] = 0
+        heap.append(src)
+        pos[src] = 0
+        while heap:
+            u = heap[0]
+            last = heap.pop()
+            pos[u] = -1
+            if heap:
+                heap[0] = last
+                sift_down(0)
+            d = dist[u]
+            for v, w in adj[u]:
+                if d + w < dist[v]:
+                    dist[v] = d + w
+                    if pos[v] == -1:
+                        heap.append(v)
+                        sift_up(len(heap) - 1)
+                    else:
+                        sift_up(pos[v])
+        return dist
 ```

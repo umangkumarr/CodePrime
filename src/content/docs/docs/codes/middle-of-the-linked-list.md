@@ -72,7 +72,7 @@ Example 2, with `slow` in blue and `fast` in orange (the trailing `null` is wher
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode* middleNode(ListNode* head) {
@@ -85,4 +85,28 @@ class Solution {
         return slow;
     }
 };
+```
+
+```java
+class Solution {
+    public ListNode middleNode(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+}
+```
+
+```python
+class Solution:
+    def middleNode(self, head: ListNode | None) -> ListNode | None:
+        slow = fast = head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow
 ```

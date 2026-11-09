@@ -109,7 +109,7 @@ Blue: visited and both values on one side; green: the split point (the answer); 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
@@ -124,4 +124,33 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        TreeNode cur = root;
+        while (true) {
+            if (p.val < cur.val && q.val < cur.val)
+                cur = cur.left;
+            else if (p.val > cur.val && q.val > cur.val)
+                cur = cur.right;
+            else
+                return cur;  // p and q split here (or one of them is cur)
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        cur = root
+        while True:
+            if p.val < cur.val and q.val < cur.val:
+                cur = cur.left
+            elif p.val > cur.val and q.val > cur.val:
+                cur = cur.right
+            else:
+                return cur  # p and q split here (or one of them is cur)
 ```

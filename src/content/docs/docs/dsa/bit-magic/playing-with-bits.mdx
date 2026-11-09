@@ -3,8 +3,6 @@ title: "Set Bits from a to b"
 description: "Count the total number of set bits in every integer from a to b by counting, for each bit position, how many numbers up to N have it set."
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
 ## Problem
 
 *Playing with Bits* (Coding Blocks, bitmasking).
@@ -65,9 +63,6 @@ Check with $N = 5$ (`000, 001, 010, 011, 100, 101`, seven set bits): bit 0 gives
 
 ## Code
 
-<Tabs syncKey="lang">
-<TabItem label="C++">
-
 ```cpp
 #include <algorithm>
 #include <iostream>
@@ -95,10 +90,48 @@ int main() {
 }
 ```
 
-</TabItem>
-<TabItem label="Python">
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
-```py
+public class Main {
+    // Total number of set bits in all integers from 0 to N.
+    static long setBitsUpTo(long N) {
+        long total = 0;
+        for (long period = 2; period / 2 <= N; period *= 2) {
+            long half = period / 2;
+            total += (N + 1) / period * half;               // complete periods
+            total += Math.max(0L, (N + 1) % period - half); // leftover part
+        }
+        return total;
+    }
+
+    static final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    static StringTokenizer tokens = new StringTokenizer("");
+
+    static long next() throws IOException {
+        while (!tokens.hasMoreTokens()) tokens = new StringTokenizer(in.readLine());
+        return Long.parseLong(tokens.nextToken());
+    }
+
+    public static void main(String[] args) throws IOException {
+        int q = (int) next();
+        StringBuilder out = new StringBuilder();
+        while (q-- > 0) {
+            long a = next(), b = next();
+            out.append(setBitsUpTo(b) - setBitsUpTo(a - 1)).append('\n');
+        }
+        System.out.print(out);
+    }
+}
+```
+
+```python
+import sys
+
+
 def set_bits_up_to(n):
     """Total number of set bits in all integers from 0 to n."""
     total = 0
@@ -111,10 +144,11 @@ def set_bits_up_to(n):
     return total
 
 
-for _ in range(int(input())):
-    a, b = map(int, input().split())
-    print(set_bits_up_to(b) - set_bits_up_to(a - 1))
+data = sys.stdin.buffer.read().split()   # read all queries at once: much faster than input() per line
+q = int(data[0])
+answers = []
+for i in range(q):
+    a, b = int(data[1 + 2 * i]), int(data[2 + 2 * i])
+    answers.append(set_bits_up_to(b) - set_bits_up_to(a - 1))
+print("\n".join(map(str, answers)))
 ```
-
-</TabItem>
-</Tabs>

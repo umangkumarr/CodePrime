@@ -83,7 +83,7 @@ Blue is the current element; the line below shows both candidates and counts aft
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> majorityElement(vector<int>& nums) {
@@ -112,4 +112,64 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        int cand1 = 0, cand2 = 0, cnt1 = 0, cnt2 = 0;
+        for (int x : nums) {
+            if (cnt1 > 0 && x == cand1) {
+                cnt1++;
+            } else if (cnt2 > 0 && x == cand2) {
+                cnt2++;
+            } else if (cnt1 == 0) {
+                cand1 = x;
+                cnt1 = 1;
+            } else if (cnt2 == 0) {
+                cand2 = x;
+                cnt2 = 1;
+            } else {
+                cnt1--;  // x, cand1 and cand2 are three different values: cancel them
+                cnt2--;
+            }
+        }
+
+        int n = nums.length, c1 = 0, c2 = 0;
+        for (int x : nums) {
+            if (x == cand1) c1++;
+            if (x == cand2) c2++;
+        }
+        List<Integer> ans = new ArrayList<>();
+        if (c1 > n / 3) ans.add(cand1);
+        if (cand2 != cand1 && c2 > n / 3) ans.add(cand2);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def majorityElement(self, nums: list[int]) -> list[int]:
+        cand1 = cand2 = cnt1 = cnt2 = 0
+        for x in nums:
+            if cnt1 > 0 and x == cand1:
+                cnt1 += 1
+            elif cnt2 > 0 and x == cand2:
+                cnt2 += 1
+            elif cnt1 == 0:
+                cand1, cnt1 = x, 1
+            elif cnt2 == 0:
+                cand2, cnt2 = x, 1
+            else:
+                cnt1 -= 1  # x, cand1 and cand2 are three different values: cancel them
+                cnt2 -= 1
+
+        n = len(nums)
+        ans = []
+        if nums.count(cand1) > n // 3:
+            ans.append(cand1)
+        if cand2 != cand1 and nums.count(cand2) > n // 3:
+            ans.append(cand2)
+        return ans
 ```

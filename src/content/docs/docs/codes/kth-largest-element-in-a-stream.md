@@ -105,7 +105,7 @@ Example 1 with `k = 3`, showing the heap contents (sorted) after each step:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class KthLargest {
     int k;
     priority_queue<int, vector<int>, greater<int>> heap;  // the k largest values
@@ -121,4 +121,42 @@ class KthLargest {
         return heap.top();
     }
 };
+```
+
+```java
+class KthLargest {
+    private final int k;
+    private final PriorityQueue<Integer> heap = new PriorityQueue<>();  // the k largest values
+
+    public KthLargest(int k, int[] nums) {
+        this.k = k;
+        for (int x : nums) add(x);
+    }
+
+    public int add(int val) {
+        heap.offer(val);
+        if (heap.size() > k) heap.poll();
+        return heap.peek();
+    }
+}
+```
+
+```python
+import heapq
+
+
+class KthLargest:
+
+    def __init__(self, k: int, nums: list[int]):
+        self.k = k
+        self.heap = []  # min-heap of the k largest values
+        for x in nums:
+            self.add(x)
+
+    def add(self, val: int) -> int:
+        if len(self.heap) < self.k:
+            heapq.heappush(self.heap, val)
+        elif val > self.heap[0]:
+            heapq.heapreplace(self.heap, val)
+        return self.heap[0]
 ```

@@ -86,7 +86,7 @@ Example 1, `target = 0`. Blue is `mid`, purple is the half that is sorted, grey 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int search(vector<int>& nums, int target) {
@@ -109,4 +109,49 @@ class Solution {
         return -1;
     }
 };
+```
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int lo = 0, hi = nums.length - 1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[lo] <= nums[mid]) {  // [lo, mid] is sorted
+                if (nums[lo] <= target && target < nums[mid])
+                    hi = mid - 1;
+                else
+                    lo = mid + 1;
+            } else {  // [mid, hi] is sorted
+                if (nums[mid] < target && target <= nums[hi])
+                    lo = mid + 1;
+                else
+                    hi = mid - 1;
+            }
+        }
+        return -1;
+    }
+}
+```
+
+```python
+class Solution:
+    def search(self, nums: list[int], target: int) -> int:
+        lo, hi = 0, len(nums) - 1
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if nums[mid] == target:
+                return mid
+            if nums[lo] <= nums[mid]:  # [lo, mid] is sorted
+                if nums[lo] <= target < nums[mid]:
+                    hi = mid - 1
+                else:
+                    lo = mid + 1
+            else:  # [mid, hi] is sorted
+                if nums[mid] < target <= nums[hi]:
+                    lo = mid + 1
+                else:
+                    hi = mid - 1
+        return -1
 ```

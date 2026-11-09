@@ -132,6 +132,42 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Explicit stack"
+class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> order = new ArrayList<>();
+        ArrayDeque<TreeNode> st = new ArrayDeque<>();
+        TreeNode cur = root;
+        while (cur != null || !st.isEmpty()) {
+            while (cur != null) {
+                st.push(cur);
+                cur = cur.left;
+            }
+            cur = st.pop();
+            order.add(cur.val);
+            cur = cur.right;
+        }
+        return order;
+    }
+}
+```
+
+```python title="Approach 1: Explicit stack"
+class Solution:
+    def inorderTraversal(self, root: TreeNode | None) -> list[int]:
+        order = []
+        st = []
+        cur = root
+        while cur or st:
+            while cur:
+                st.append(cur)
+                cur = cur.left
+            cur = st.pop()
+            order.append(cur.val)
+            cur = cur.right
+        return order
+```
+
 ```cpp title="Approach 2: Morris traversal"
 class Solution {
    public:
@@ -158,4 +194,54 @@ class Solution {
         return order;
     }
 };
+```
+
+```java title="Approach 2: Morris traversal"
+class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> order = new ArrayList<>();
+        TreeNode cur = root;
+        while (cur != null) {
+            if (cur.left == null) {
+                order.add(cur.val);
+                cur = cur.right;
+                continue;
+            }
+            TreeNode prev = cur.left;
+            while (prev.right != null && prev.right != cur) prev = prev.right;
+            if (prev.right == null) {
+                prev.right = cur;  // thread back to cur
+                cur = cur.left;
+            } else {
+                prev.right = null;  // left subtree done: remove the thread
+                order.add(cur.val);
+                cur = cur.right;
+            }
+        }
+        return order;
+    }
+}
+```
+
+```python title="Approach 2: Morris traversal"
+class Solution:
+    def inorderTraversal(self, root: TreeNode | None) -> list[int]:
+        order = []
+        cur = root
+        while cur:
+            if not cur.left:
+                order.append(cur.val)
+                cur = cur.right
+                continue
+            prev = cur.left
+            while prev.right and prev.right is not cur:
+                prev = prev.right
+            if not prev.right:
+                prev.right = cur  # thread back to cur
+                cur = cur.left
+            else:
+                prev.right = None  # left subtree done: remove the thread
+                order.append(cur.val)
+                cur = cur.right
+        return order
 ```

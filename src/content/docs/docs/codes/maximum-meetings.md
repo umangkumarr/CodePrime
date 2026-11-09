@@ -81,7 +81,7 @@ Example 1, with meetings sorted by end time. Green meetings are selected; red on
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int maxMeetings(int n, int start[], int end[]) {
@@ -99,4 +99,35 @@ class Solution {
         return count;
     }
 };
+```
+
+```java
+class Solution {
+    public int maxMeetings(int n, int[] start, int[] end) {
+        int[][] meetings = new int[n][];  // {end, start}, so sorting orders by end time
+        for (int i = 0; i < n; i++) meetings[i] = new int[] {end[i], start[i]};
+        Arrays.sort(meetings, (a, b) -> a[0] != b[0] ? Integer.compare(a[0], b[0]) : Integer.compare(a[1], b[1]));
+
+        int count = 0, lastEnd = -1;
+        for (int[] m : meetings) {
+            if (m[1] > lastEnd) {  // must start strictly after the last chosen meeting ends
+                count++;
+                lastEnd = m[0];
+            }
+        }
+        return count;
+    }
+}
+```
+
+```python
+class Solution:
+    def maxMeetings(self, n, start, end):
+        meetings = sorted(zip(end, start))  # (end, start), so sorting orders by end time
+        count, last_end = 0, -1
+        for e, s in meetings:
+            if s > last_end:  # must start strictly after the last chosen meeting ends
+                count += 1
+                last_end = e
+        return count
 ```

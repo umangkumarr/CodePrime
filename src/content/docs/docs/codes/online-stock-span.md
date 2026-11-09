@@ -83,7 +83,7 @@ Example 1. Orange cells are the days on the stack (prices decreasing left to rig
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class StockSpanner {
     stack<pair<int, int>> st;  // {price, day}, prices strictly decreasing
     int day = 0;
@@ -98,4 +98,42 @@ class StockSpanner {
         return span;
     }
 };
+```
+
+```java
+class StockSpanner {
+    private final ArrayDeque<int[]> st = new ArrayDeque<>();  // {price, day}, prices strictly decreasing
+    private int day = 0;
+
+    public StockSpanner() {
+        st.push(new int[] {Integer.MAX_VALUE, -1});
+    }
+
+    public int next(int price) {
+        while (st.peek()[0] <= price) st.pop();
+        int span = day - st.peek()[1];
+        st.push(new int[] {price, day++});
+        return span;
+    }
+}
+```
+
+```python
+import math
+
+
+class StockSpanner:
+
+    def __init__(self):
+        self.st = [(math.inf, -1)]  # (price, day), prices strictly decreasing
+        self.day = 0
+
+    def next(self, price: int) -> int:
+        st = self.st
+        while st[-1][0] <= price:
+            st.pop()
+        span = self.day - st[-1][1]
+        st.append((price, self.day))
+        self.day += 1
+        return span
 ```

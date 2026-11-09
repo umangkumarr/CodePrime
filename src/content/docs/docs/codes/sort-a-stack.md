@@ -90,7 +90,7 @@ The stack is drawn bottom to top (the right-most cell is the top). `sortStack` f
 
 ## Code
 
-```cpp title="C++"
+```cpp
 void insert(stack<int> &st, int temp) {
     if (st.empty() || st.top() <= temp) {
         st.push(temp);
@@ -109,4 +109,44 @@ void sortStack(stack<int> &stack) {
     sortStack(stack);
     insert(stack, temp);
 }
+```
+
+```java
+public class Solution {
+    private static void insert(Stack<Integer> st, int temp) {
+        if (st.isEmpty() || st.peek() <= temp) {
+            st.push(temp);
+            return;
+        }
+        int t = st.pop();
+        insert(st, temp);
+        st.push(t);
+    }
+
+    public static void sortStack(Stack<Integer> stack) {
+        if (stack.size() <= 1) return;
+        int temp = stack.pop();
+        sortStack(stack);
+        insert(stack, temp);
+    }
+}
+```
+
+```python
+# The stack is a list whose last element is the top.
+def insert(st, temp):
+    if not st or st[-1] <= temp:
+        st.append(temp)
+        return
+    t = st.pop()
+    insert(st, temp)
+    st.append(t)
+
+
+def sortStack(stack):
+    if len(stack) <= 1:
+        return
+    temp = stack.pop()
+    sortStack(stack)
+    insert(stack, temp)
 ```

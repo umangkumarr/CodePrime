@@ -98,7 +98,7 @@ Let $L$ = `word.length`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     bool dfs(vector<vector<char>>& board, const string& word, int i, int r, int c) {
         if (r < 0 || c < 0 || r >= (int)board.size() || c >= (int)board[0].size()) return false;
@@ -134,4 +134,79 @@ class Solution {
         return false;
     }
 };
+```
+
+```java
+class Solution {
+    private boolean dfs(char[][] board, char[] word, int i, int r, int c) {
+        if (r < 0 || c < 0 || r >= board.length || c >= board[0].length) return false;
+        if (board[r][c] != word[i]) return false;  // also rejects cells marked '#'
+        if (i + 1 == word.length) return true;
+
+        char ch = board[r][c];
+        board[r][c] = '#';
+        boolean found = dfs(board, word, i + 1, r + 1, c) || dfs(board, word, i + 1, r - 1, c)
+                || dfs(board, word, i + 1, r, c + 1) || dfs(board, word, i + 1, r, c - 1);
+        board[r][c] = ch;
+        return found;
+    }
+
+    public boolean exist(char[][] board, String word) {
+        int m = board.length, n = board[0].length;
+        if (word.length() > m * n) return false;
+
+        int[] count = new int[128];
+        for (char[] row : board)
+            for (char ch : row) count[ch]++;
+        int[] need = new int[128];
+        for (char ch : word.toCharArray())
+            if (++need[ch] > count[ch]) return false;
+
+        // Start from the end whose letter is rarer on the board.
+        if (count[word.charAt(0)] > count[word.charAt(word.length() - 1)])
+            word = new StringBuilder(word).reverse().toString();
+        char[] w = word.toCharArray();
+
+        for (int r = 0; r < m; r++)
+            for (int c = 0; c < n; c++)
+                if (dfs(board, w, 0, r, c)) return true;
+        return false;
+    }
+}
+```
+
+```python
+from collections import Counter
+
+
+class Solution:
+    def exist(self, board: list[list[str]], word: str) -> bool:
+        m, n = len(board), len(board[0])
+        if len(word) > m * n:
+            return False
+
+        count = Counter(ch for row in board for ch in row)
+        if any(k > count[ch] for ch, k in Counter(word).items()):
+            return False
+
+        # Start from the end whose letter is rarer on the board.
+        if count[word[0]] > count[word[-1]]:
+            word = word[::-1]
+
+        def dfs(i: int, r: int, c: int) -> bool:
+            if r < 0 or c < 0 or r >= m or c >= n:
+                return False
+            if board[r][c] != word[i]:  # also rejects cells marked '#'
+                return False
+            if i + 1 == len(word):
+                return True
+
+            ch = board[r][c]
+            board[r][c] = '#'
+            found = (dfs(i + 1, r + 1, c) or dfs(i + 1, r - 1, c) or
+                     dfs(i + 1, r, c + 1) or dfs(i + 1, r, c - 1))
+            board[r][c] = ch
+            return found
+
+        return any(dfs(0, r, c) for r in range(m) for c in range(n))
 ```

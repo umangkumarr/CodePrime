@@ -80,7 +80,7 @@ Example 1 with `B = 3`. Blue cells form the current window, and `freq` lists the
 
 ## Code
 
-```cpp title="C++"
+```cpp
 vector<int> Solution::dNums(vector<int> &A, int B) {
     int n = A.size();
     if (B > n) return {};
@@ -96,4 +96,46 @@ vector<int> Solution::dNums(vector<int> &A, int B) {
     }
     return ans;
 }
+```
+
+```java
+public class Solution {
+    public ArrayList<Integer> dNums(ArrayList<Integer> A, int B) {
+        int n = A.size();
+        ArrayList<Integer> ans = new ArrayList<>();
+        if (B > n) return ans;
+
+        HashMap<Integer, Integer> freq = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            freq.merge(A.get(i), 1, Integer::sum);
+            if (i >= B) {
+                int out = A.get(i - B);
+                if (freq.merge(out, -1, Integer::sum) == 0) freq.remove(out);
+            }
+            if (i >= B - 1) ans.add(freq.size());
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def dNums(self, A, B):
+        n = len(A)
+        if B > n:
+            return []
+
+        freq = {}
+        ans = []
+        for i, x in enumerate(A):
+            freq[x] = freq.get(x, 0) + 1
+            if i >= B:
+                out = A[i - B]
+                freq[out] -= 1
+                if freq[out] == 0:
+                    del freq[out]
+            if i >= B - 1:
+                ans.append(len(freq))
+        return ans
 ```

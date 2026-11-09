@@ -83,7 +83,7 @@ Example 2: green cells are the elements taken by the current cuts, orange cells 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int kthElement(vector<int>& a, vector<int>& b, int k) {
@@ -108,4 +108,53 @@ class Solution {
         return -1;  // unreachable for 1 <= k <= n + m
     }
 };
+```
+
+```java
+class Solution {
+    public int kthElement(int a[], int b[], int k) {
+        if (a.length > b.length) return kthElement(b, a, k);
+        int n = a.length, m = b.length;
+        int lo = Math.max(0, k - m), hi = Math.min(k, n);
+        while (lo <= hi) {
+            int cutA = lo + (hi - lo) / 2;  // elements taken from a
+            int cutB = k - cutA;            // elements taken from b
+            int aLeft = cutA > 0 ? a[cutA - 1] : Integer.MIN_VALUE;
+            int aRight = cutA < n ? a[cutA] : Integer.MAX_VALUE;
+            int bLeft = cutB > 0 ? b[cutB - 1] : Integer.MIN_VALUE;
+            int bRight = cutB < m ? b[cutB] : Integer.MAX_VALUE;
+            if (aLeft > bRight) {
+                hi = cutA - 1;
+            } else if (bLeft > aRight) {
+                lo = cutA + 1;
+            } else {
+                return Math.max(aLeft, bLeft);
+            }
+        }
+        return -1;  // unreachable for 1 <= k <= n + m
+    }
+}
+```
+
+```python
+class Solution:
+    def kthElement(self, a, b, k):
+        if len(a) > len(b):
+            a, b = b, a
+        n, m = len(a), len(b)
+        lo, hi = max(0, k - m), min(k, n)
+        while lo <= hi:
+            cut_a = (lo + hi) // 2  # elements taken from a
+            cut_b = k - cut_a       # elements taken from b
+            a_left = a[cut_a - 1] if cut_a > 0 else float('-inf')
+            a_right = a[cut_a] if cut_a < n else float('inf')
+            b_left = b[cut_b - 1] if cut_b > 0 else float('-inf')
+            b_right = b[cut_b] if cut_b < m else float('inf')
+            if a_left > b_right:
+                hi = cut_a - 1
+            elif b_left > a_right:
+                lo = cut_a + 1
+            else:
+                return max(a_left, b_left)
+        return -1  # unreachable for 1 <= k <= n + m
 ```

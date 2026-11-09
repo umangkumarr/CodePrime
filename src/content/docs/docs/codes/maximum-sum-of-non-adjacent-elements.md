@@ -99,7 +99,7 @@ The answer is `max(11, 6) = 11`, which corresponds to taking `2` and `9`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int maximumNonAdjacentSum(vector<int> &nums) {
     int take = 0, skip = 0;  // best sums with / without the current element
     for (int x : nums) {
@@ -109,4 +109,26 @@ int maximumNonAdjacentSum(vector<int> &nums) {
     }
     return max(take, skip);
 }
+```
+
+```java
+public class Solution {
+    public static int maximumNonAdjacentSum(ArrayList<Integer> nums) {
+        int take = 0, skip = 0;  // best sums with / without the current element
+        for (int x : nums) {
+            int newTake = skip + x;
+            skip = Math.max(take, skip);
+            take = newTake;
+        }
+        return Math.max(take, skip);
+    }
+}
+```
+
+```python
+def maximumNonAdjacentSum(nums):
+    take, skip = 0, 0  # best sums with / without the current element
+    for x in nums:
+        take, skip = skip + x, max(take, skip)
+    return max(take, skip)
 ```

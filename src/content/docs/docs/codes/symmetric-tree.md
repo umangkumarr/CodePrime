@@ -119,6 +119,30 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Recursion"
+class Solution {
+    private boolean isMirror(TreeNode a, TreeNode b) {
+        if (a == null || b == null) return a == b;  // both null -> true, exactly one null -> false
+        return a.val == b.val && isMirror(a.left, b.right) && isMirror(a.right, b.left);
+    }
+
+    public boolean isSymmetric(TreeNode root) {
+        return isMirror(root.left, root.right);
+    }
+}
+```
+
+```python title="Approach 1: Recursion"
+class Solution:
+    def isSymmetric(self, root: TreeNode | None) -> bool:
+        def is_mirror(a, b):
+            if not a or not b:
+                return a is b  # both None -> True, exactly one None -> False
+            return a.val == b.val and is_mirror(a.left, b.right) and is_mirror(a.right, b.left)
+
+        return is_mirror(root.left, root.right)
+```
+
 ```cpp title="Approach 2: Iterative with a queue"
 class Solution {
    public:
@@ -136,4 +160,41 @@ class Solution {
         return true;
     }
 };
+```
+
+```java title="Approach 2: Iterative with a queue"
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        // ArrayDeque rejects null elements, so each pair travels as a two-element array.
+        ArrayDeque<TreeNode[]> pending = new ArrayDeque<>();
+        pending.offer(new TreeNode[] {root.left, root.right});
+        while (!pending.isEmpty()) {
+            TreeNode[] pair = pending.poll();
+            TreeNode a = pair[0], b = pair[1];
+            if (a == null && b == null) continue;
+            if (a == null || b == null || a.val != b.val) return false;
+            pending.offer(new TreeNode[] {a.left, b.right});
+            pending.offer(new TreeNode[] {a.right, b.left});
+        }
+        return true;
+    }
+}
+```
+
+```python title="Approach 2: Iterative with a queue"
+from collections import deque
+
+
+class Solution:
+    def isSymmetric(self, root: TreeNode | None) -> bool:
+        pending = deque([(root.left, root.right)])
+        while pending:
+            a, b = pending.popleft()
+            if not a and not b:
+                continue
+            if not a or not b or a.val != b.val:
+                return False
+            pending.append((a.left, b.right))
+            pending.append((a.right, b.left))
+        return True
 ```

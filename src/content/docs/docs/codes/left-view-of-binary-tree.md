@@ -76,7 +76,7 @@ A level-order traversal (BFS) processes the tree one level at a time, and within
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> leftView(Node* root) {
@@ -97,4 +97,47 @@ class Solution {
         return view;
     }
 };
+```
+
+```java
+class Solution {
+    public ArrayList<Integer> leftView(Node root) {
+        ArrayList<Integer> view = new ArrayList<>();
+        if (root == null) return view;
+        ArrayDeque<Node> q = new ArrayDeque<>();
+        q.offer(root);
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                Node node = q.poll();
+                if (i == 0) view.add(node.data);
+                if (node.left != null) q.offer(node.left);
+                if (node.right != null) q.offer(node.right);
+            }
+        }
+        return view;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def leftView(self, root):
+        view = []
+        if not root:
+            return view
+        q = deque([root])
+        while q:
+            for i in range(len(q)):
+                node = q.popleft()
+                if i == 0:
+                    view.append(node.data)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+        return view
 ```

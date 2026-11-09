@@ -82,7 +82,7 @@ The last merge of Example 2. The left half `[2, 5, 1]` has already been sorted t
 
 ## Code
 
-```cpp title="C++"
+```cpp
 long long sortCount(long long* arr, vector<long long>& buf, int lo, int hi) {
     if (hi - lo < 2) return 0;
     int mid = lo + (hi - lo) / 2;
@@ -107,4 +107,61 @@ long long getInversions(long long* arr, int n) {
     vector<long long> buf(n);
     return sortCount(arr, buf, 0, n);
 }
+```
+
+```java
+public class Solution {
+    public static long getInversions(long arr[], int n) {
+        return sortCount(arr, new long[n], 0, n);
+    }
+
+    private static long sortCount(long[] arr, long[] buf, int lo, int hi) {
+        if (hi - lo < 2) return 0;
+        int mid = lo + (hi - lo) / 2;
+        long count = sortCount(arr, buf, lo, mid) + sortCount(arr, buf, mid, hi);
+
+        int i = lo, j = mid, k = lo;
+        while (i < mid && j < hi) {
+            if (arr[i] <= arr[j]) {
+                buf[k++] = arr[i++];
+            } else {
+                count += mid - i;  // arr[j] is smaller than every element left in [i, mid)
+                buf[k++] = arr[j++];
+            }
+        }
+        while (i < mid) buf[k++] = arr[i++];
+        while (j < hi) buf[k++] = arr[j++];
+        System.arraycopy(buf, lo, arr, lo, hi - lo);
+        return count;
+    }
+}
+```
+
+```python
+def getInversions(arr, n):
+    buf = [0] * n
+
+    def sort_count(lo, hi):
+        if hi - lo < 2:
+            return 0
+        mid = (lo + hi) // 2
+        count = sort_count(lo, mid) + sort_count(mid, hi)
+
+        i, j, k = lo, mid, lo
+        while i < mid and j < hi:
+            if arr[i] <= arr[j]:
+                buf[k] = arr[i]
+                i += 1
+            else:
+                count += mid - i  # arr[j] is smaller than every element left in [i, mid)
+                buf[k] = arr[j]
+                j += 1
+            k += 1
+        buf[k:k + mid - i] = arr[i:mid]
+        k += mid - i
+        buf[k:hi] = arr[j:hi]
+        arr[lo:hi] = buf[lo:hi]
+        return count
+
+    return sort_count(0, n)
 ```

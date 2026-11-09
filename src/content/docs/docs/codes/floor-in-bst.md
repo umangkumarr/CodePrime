@@ -118,7 +118,7 @@ At 6 we record `floorVal = 6` and step right into an empty subtree, so the loop 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int floorInBST(TreeNode<int>* root, int X) {
     int floorVal = -1;
     while (root) {
@@ -132,4 +132,36 @@ int floorInBST(TreeNode<int>* root, int X) {
     }
     return floorVal;
 }
+```
+
+```java
+public class Solution {
+    public static int floorInBST(TreeNode<Integer> root, int X) {
+        int floorVal = -1;
+        while (root != null) {
+            if (root.val == X) return X;
+            if (root.val < X) {
+                floorVal = root.val;
+                root = root.right;
+            } else {
+                root = root.left;
+            }
+        }
+        return floorVal;
+    }
+}
+```
+
+```python
+def floorInBST(root, X):
+    floor_val = -1
+    while root:
+        if root.val == X:
+            return X
+        if root.val < X:
+            floor_val = root.val
+            root = root.right
+        else:
+            root = root.left
+    return floor_val
 ```

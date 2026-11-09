@@ -95,7 +95,7 @@ Example 2, `[4,5,6,7,0,1,2]`:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findMin(vector<int>& nums) {
@@ -110,4 +110,33 @@ class Solution {
         return nums[lo];
     }
 };
+```
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] > nums[hi])
+                lo = mid + 1;  // mid is in the left (larger) run
+            else
+                hi = mid;  // mid..hi is ascending; the minimum is at or left of mid
+        }
+        return nums[lo];
+    }
+}
+```
+
+```python
+class Solution:
+    def findMin(self, nums: list[int]) -> int:
+        lo, hi = 0, len(nums) - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if nums[mid] > nums[hi]:
+                lo = mid + 1  # mid is in the left (larger) run
+            else:
+                hi = mid  # mid..hi is ascending; the minimum is at or left of mid
+        return nums[lo]
 ```

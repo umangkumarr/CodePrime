@@ -86,7 +86,7 @@ Let $n$ = `s.length` and $L$ = `maxLen` $\le 20$.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool wordBreak(string s, vector<string>& wordDict) {
@@ -108,4 +108,42 @@ class Solution {
         return dp[n];
     }
 };
+```
+
+```java
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        Set<String> dict = new HashSet<>(wordDict);
+        int maxLen = 0;
+        for (String w : wordDict) maxLen = Math.max(maxLen, w.length());
+
+        int n = s.length();
+        boolean[] dp = new boolean[n + 1];  // dp[i]: s[0, i) can be segmented
+        dp[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = i - 1; j >= Math.max(0, i - maxLen); j--) {
+                if (dp[j] && dict.contains(s.substring(j, i))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```python
+class Solution:
+    def wordBreak(self, s: str, wordDict: list[str]) -> bool:
+        words = set(wordDict)
+        max_len = max(map(len, wordDict))
+        n = len(s)
+
+        dp = [False] * (n + 1)  # dp[i]: s[:i] can be segmented
+        dp[0] = True
+        for i in range(1, n + 1):
+            dp[i] = any(dp[j] and s[j:i] in words
+                        for j in range(i - 1, max(0, i - max_len) - 1, -1))
+        return dp[n]
 ```

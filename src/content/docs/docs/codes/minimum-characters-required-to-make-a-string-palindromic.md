@@ -84,7 +84,7 @@ The scan ends with `j = 7`: the prefix `"AACECAA"` is a palindrome, so `9 - 7 = 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int Solution::solve(string A) {
     int n = A.size();
 
@@ -105,4 +105,55 @@ int Solution::solve(string A) {
     }
     return n - j;
 }
+```
+
+```java
+public class Solution {
+    public int solve(String A) {
+        int n = A.length();
+
+        // fail[i]: longest proper prefix of A[0..i] that is also its suffix
+        int[] fail = new int[n];
+        for (int i = 1, k = 0; i < n; i++) {
+            while (k > 0 && A.charAt(i) != A.charAt(k)) k = fail[k - 1];
+            if (A.charAt(i) == A.charAt(k)) k++;
+            fail[i] = k;
+        }
+
+        // Match A against reverse(A); j ends as the longest prefix of A that is
+        // a suffix of reverse(A), i.e. the longest palindromic prefix of A.
+        int j = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            while (j > 0 && A.charAt(i) != A.charAt(j)) j = fail[j - 1];
+            if (A.charAt(i) == A.charAt(j)) j++;
+        }
+        return n - j;
+    }
+}
+```
+
+```python
+class Solution:
+    def solve(self, A: str) -> int:
+        n = len(A)
+
+        # fail[i]: longest proper prefix of A[0..i] that is also its suffix
+        fail = [0] * n
+        k = 0
+        for i in range(1, n):
+            while k > 0 and A[i] != A[k]:
+                k = fail[k - 1]
+            if A[i] == A[k]:
+                k += 1
+            fail[i] = k
+
+        # Match A against reverse(A); j ends as the longest prefix of A that is
+        # a suffix of reverse(A), i.e. the longest palindromic prefix of A.
+        j = 0
+        for i in range(n - 1, -1, -1):
+            while j > 0 and A[i] != A[j]:
+                j = fail[j - 1]
+            if A[i] == A[j]:
+                j += 1
+        return n - j
 ```

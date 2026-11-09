@@ -108,7 +108,7 @@ The calls on `5` and `1` return immediately because those nodes are targets (gre
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
@@ -119,4 +119,38 @@ class Solution {
         return left ? left : right;
     }
 };
+```
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) return root;
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if (left != null && right != null) return root;  // p and q are on different sides
+        return left != null ? left : right;
+    }
+}
+```
+
+```python
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        # The same post-order recursion, run on an explicit stack (the tree can be 10^5 levels deep).
+        found = {}  # node -> what the recursive call on it returns (None when neither target is below)
+        stack = [(root, False)]
+        while stack:
+            node, children_done = stack.pop()
+            if node is p or node is q:
+                found[node] = node
+            elif children_done:
+                left = found.pop(node.left, None)
+                right = found.pop(node.right, None)
+                found[node] = node if left and right else left or right  # both sides -> node is the LCA
+            else:
+                stack.append((node, True))
+                for child in (node.left, node.right):
+                    if child:
+                        stack.append((child, False))
+        return found[root]
 ```

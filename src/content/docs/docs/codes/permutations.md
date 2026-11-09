@@ -88,7 +88,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     void backtrack(vector<int>& nums, int start, vector<vector<int>>& result) {
         if (start == (int)nums.size()) {
@@ -109,4 +109,52 @@ class Solution {
         return result;
     }
 };
+```
+
+```java
+class Solution {
+    private void backtrack(int[] nums, int start, List<List<Integer>> result) {
+        if (start == nums.length) {
+            List<Integer> perm = new ArrayList<>(nums.length);
+            for (int x : nums) perm.add(x);
+            result.add(perm);
+            return;
+        }
+        for (int i = start; i < nums.length; i++) {
+            swap(nums, start, i);
+            backtrack(nums, start + 1, result);
+            swap(nums, start, i);
+        }
+    }
+
+    private void swap(int[] a, int i, int j) {
+        int t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
+
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        backtrack(nums, 0, result);
+        return result;
+    }
+}
+```
+
+```python
+class Solution:
+    def permute(self, nums: list[int]) -> list[list[int]]:
+        result = []
+
+        def backtrack(start: int) -> None:
+            if start == len(nums):
+                result.append(nums[:])
+                return
+            for i in range(start, len(nums)):
+                nums[start], nums[i] = nums[i], nums[start]
+                backtrack(start + 1)
+                nums[start], nums[i] = nums[i], nums[start]
+
+        backtrack(0)
+        return result
 ```

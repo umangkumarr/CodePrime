@@ -88,7 +88,7 @@ The blue cell is the value being placed; the line below shows `tails` after plac
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int lengthOfLIS(vector<int>& nums) {
@@ -103,4 +103,37 @@ class Solution {
         return tails.size();
     }
 };
+```
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int[] tails = new int[nums.length];  // tails[k] = smallest tail of an increasing subsequence of length k + 1
+        int size = 0;
+        for (int x : nums) {
+            // tails[0..size) is strictly increasing, so this is the first tail >= x
+            int i = Arrays.binarySearch(tails, 0, size, x);
+            if (i < 0) i = -i - 1;
+            tails[i] = x;
+            if (i == size) size++;
+        }
+        return size;
+    }
+}
+```
+
+```python
+from bisect import bisect_left
+
+
+class Solution:
+    def lengthOfLIS(self, nums: list[int]) -> int:
+        tails = []  # tails[k] = smallest tail of an increasing subsequence of length k + 1
+        for x in nums:
+            i = bisect_left(tails, x)
+            if i == len(tails):
+                tails.append(x)
+            else:
+                tails[i] = x
+        return len(tails)
 ```

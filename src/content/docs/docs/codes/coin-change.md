@@ -85,7 +85,7 @@ Example 1 (`coins = [1, 2, 5]`, `amount = 11`). Blue is the cell being filled, o
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int coinChange(vector<int>& coins, int amount) {
@@ -100,4 +100,33 @@ class Solution {
         return dp[amount] == INF ? -1 : dp[amount];
     }
 };
+```
+
+```java
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        final int INF = amount + 1;
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, INF);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            for (int coin : coins) {
+                if (coin <= i) dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }
+        return dp[amount] == INF ? -1 : dp[amount];
+    }
+}
+```
+
+```python
+class Solution:
+    def coinChange(self, coins: list[int], amount: int) -> int:
+        INF = amount + 1
+        dp = [0] + [INF] * amount
+        for i in range(1, amount + 1):
+            for coin in coins:
+                if coin <= i and dp[i - coin] + 1 < dp[i]:
+                    dp[i] = dp[i - coin] + 1
+        return -1 if dp[amount] == INF else dp[amount]
 ```

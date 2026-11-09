@@ -130,7 +130,7 @@ A sign is legal only at the very start or immediately after `e`/`E`. Every rule 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool isNumber(string s) {
@@ -155,4 +155,54 @@ class Solution {
         return seenDigit;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean isNumber(String s) {
+        boolean seenDigit = false, seenDot = false, seenExp = false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c >= '0' && c <= '9') {
+                seenDigit = true;
+            } else if (c == '+' || c == '-') {
+                if (i > 0 && s.charAt(i - 1) != 'e' && s.charAt(i - 1) != 'E') return false;
+            } else if (c == 'e' || c == 'E') {
+                if (seenExp || !seenDigit) return false;
+                seenExp = true;
+                seenDigit = false;  // the exponent needs its own digits
+            } else if (c == '.') {
+                if (seenDot || seenExp) return false;
+                seenDot = true;
+            } else {
+                return false;
+            }
+        }
+        return seenDigit;
+    }
+}
+```
+
+```python
+class Solution:
+    def isNumber(self, s: str) -> bool:
+        seen_digit = seen_dot = seen_exp = False
+        for i, c in enumerate(s):
+            if '0' <= c <= '9':
+                seen_digit = True
+            elif c in '+-':
+                if i > 0 and s[i - 1] not in 'eE':
+                    return False
+            elif c in 'eE':
+                if seen_exp or not seen_digit:
+                    return False
+                seen_exp = True
+                seen_digit = False  # the exponent needs its own digits
+            elif c == '.':
+                if seen_dot or seen_exp:
+                    return False
+                seen_dot = True
+            else:
+                return False
+        return seen_digit
 ```

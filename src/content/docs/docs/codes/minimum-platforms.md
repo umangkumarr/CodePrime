@@ -15,7 +15,7 @@ Given arrival **`arr[]`** and departure **`dep[]`** times of trains on the same 
 
 **Note:** Time intervals are in the 24-hour format (HHMM), where the first two characters represent hour (between 00 to 23) and the last two characters represent minutes (this will be `<= 59` and `>= 0`). Leading zeros for hours less than 10 are optional (e.g., 0900 is the same as 900).
 
-Complete the function `findPlatform()`, which takes the arrays `arr[]` and `dep[]` and returns the minimum number of platforms required.
+Complete the function `minPlatform()`, which takes the arrays `arr[]` and `dep[]` and returns the minimum number of platforms required.
 
 **Example 1:**
 
@@ -90,10 +90,10 @@ Example 1 after sorting. The top row is `arr`, the bottom row is `dep`; blue mar
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
-    int findPlatform(vector<int>& arr, vector<int>& dep) {
+    int minPlatform(vector<int>& arr, vector<int>& dep) {
         sort(arr.begin(), arr.end());
         sort(dep.begin(), dep.end());
         int n = arr.size();
@@ -111,4 +111,44 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public int minPlatform(int[] arr, int[] dep) {
+        Arrays.sort(arr);
+        Arrays.sort(dep);
+        int n = arr.length;
+        int i = 0, j = 0, platforms = 0, ans = 0;
+        while (i < n) {
+            if (arr[i] <= dep[j]) {
+                platforms++;
+                i++;
+                ans = Math.max(ans, platforms);
+            } else {
+                platforms--;
+                j++;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def minPlatform(self, arr: list[int], dep: list[int]) -> int:
+        arr.sort()
+        dep.sort()
+        n = len(arr)
+        i = j = platforms = ans = 0
+        while i < n:
+            if arr[i] <= dep[j]:
+                platforms += 1
+                i += 1
+                ans = max(ans, platforms)
+            else:
+                platforms -= 1
+                j += 1
+        return ans
 ```

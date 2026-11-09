@@ -82,7 +82,7 @@ Example 1 after sorting is `[-4,-1,-1,0,1,2]`. Blue is the fixed element `i`, or
 ### Complexity
 
 - **Time:** $O(n^2)$ — sorting costs $O(n \log n)$; for each of the $n$ choices of `i` the pointers `lo` and `hi` together move at most $n$ steps.
-- **Space:** $O(\log n)$ — the stack space of `std::sort`; the output list is not counted.
+- **Space:** $O(\log n)$ — the stack space of the sort in C++ and Java (Python's `sort` may use $O(n)$); the output list is not counted.
 
 ### Edge cases
 
@@ -92,7 +92,7 @@ Example 1 after sorting is `[-4,-1,-1,0,1,2]`. Blue is the fixed element `i`, or
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> threeSum(vector<int>& nums) {
@@ -118,4 +118,59 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i + 2 < n && nums[i] <= 0; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int lo = i + 1, hi = n - 1;
+            while (lo < hi) {
+                int sum = nums[i] + nums[lo] + nums[hi];
+                if (sum < 0) {
+                    lo++;
+                } else if (sum > 0) {
+                    hi--;
+                } else {
+                    ans.add(List.of(nums[i], nums[lo], nums[hi]));
+                    lo++;
+                    hi--;
+                    while (lo < hi && nums[lo] == nums[lo - 1]) lo++;
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def threeSum(self, nums: list[int]) -> list[list[int]]:
+        nums.sort()
+        n = len(nums)
+        ans = []
+        for i in range(n - 2):
+            if nums[i] > 0:
+                break
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            lo, hi = i + 1, n - 1
+            while lo < hi:
+                total = nums[i] + nums[lo] + nums[hi]
+                if total < 0:
+                    lo += 1
+                elif total > 0:
+                    hi -= 1
+                else:
+                    ans.append([nums[i], nums[lo], nums[hi]])
+                    lo += 1
+                    hi -= 1
+                    while lo < hi and nums[lo] == nums[lo - 1]:
+                        lo += 1
+        return ans
 ```

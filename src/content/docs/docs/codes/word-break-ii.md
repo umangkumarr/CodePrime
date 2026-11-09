@@ -99,7 +99,7 @@ Let $n$ = `s.length` $\le 20$, $L$ = `maxLen` $\le 10$, $W$ = total dictionary l
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     string s;
     unordered_set<string> dict;
@@ -144,4 +144,79 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private String s;
+    private Set<String> dict;
+    private int maxLen;
+    private boolean[] canEnd;  // canEnd[i]: s[i..] can be segmented
+    private final List<String> path = new ArrayList<>();
+    private List<String> ans;
+
+    private void dfs(int start) {
+        int n = s.length();
+        if (start == n) {
+            ans.add(String.join(" ", path));
+            return;
+        }
+        for (int end = start + 1; end <= Math.min(n, start + maxLen); end++) {
+            if (!canEnd[end]) continue;
+            String word = s.substring(start, end);
+            if (!dict.contains(word)) continue;
+            path.add(word);
+            dfs(end);
+            path.remove(path.size() - 1);
+        }
+    }
+
+    public List<String> wordBreak(String s, List<String> wordDict) {
+        this.s = s;
+        dict = new HashSet<>(wordDict);
+        maxLen = 0;
+        for (String w : wordDict) maxLen = Math.max(maxLen, w.length());
+
+        int n = s.length();
+        canEnd = new boolean[n + 1];
+        canEnd[n] = true;
+        for (int i = n - 1; i >= 0; i--)
+            for (int end = i + 1; end <= Math.min(n, i + maxLen) && !canEnd[i]; end++)
+                canEnd[i] = canEnd[end] && dict.contains(s.substring(i, end));
+
+        ans = new ArrayList<>();
+        if (canEnd[0]) dfs(0);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def wordBreak(self, s: str, wordDict: list[str]) -> list[str]:
+        words = set(wordDict)
+        max_len = max(map(len, wordDict))
+        n = len(s)
+
+        can_end = [False] * (n + 1)  # can_end[i]: s[i:] can be segmented
+        can_end[n] = True
+        for i in range(n - 1, -1, -1):
+            can_end[i] = any(can_end[end] and s[i:end] in words
+                             for end in range(i + 1, min(n, i + max_len) + 1))
+
+        path, ans = [], []
+
+        def dfs(start: int) -> None:
+            if start == n:
+                ans.append(' '.join(path))
+                return
+            for end in range(start + 1, min(n, start + max_len) + 1):
+                if can_end[end] and s[start:end] in words:
+                    path.append(s[start:end])
+                    dfs(end)
+                    path.pop()
+
+        if can_end[0]:
+            dfs(0)
+        return ans
 ```

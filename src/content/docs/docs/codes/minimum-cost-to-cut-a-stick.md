@@ -106,7 +106,7 @@ Example 1, `pos = [0, 1, 3, 4, 5, 7]`. Row `i`, column `j` is `dp[i][j]`; the bl
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int minCost(int n, vector<int>& cuts) {
@@ -129,4 +129,43 @@ class Solution {
         return dp[0][m - 1];
     }
 };
+```
+
+```java
+class Solution {
+    public int minCost(int n, int[] cuts) {
+        int m = cuts.length + 2;
+        int[] pos = Arrays.copyOf(cuts, m);
+        pos[m - 2] = 0;
+        pos[m - 1] = n;
+        Arrays.sort(pos);
+
+        // dp[i][j]: min cost to make all cuts strictly between pos[i] and pos[j]
+        int[][] dp = new int[m][m];
+        for (int len = 2; len < m; len++) {
+            for (int i = 0; i + len < m; i++) {
+                int j = i + len;
+                int best = Integer.MAX_VALUE;
+                for (int k = i + 1; k < j; k++) best = Math.min(best, dp[i][k] + dp[k][j]);
+                dp[i][j] = best + pos[j] - pos[i];
+            }
+        }
+        return dp[0][m - 1];
+    }
+}
+```
+
+```python
+class Solution:
+    def minCost(self, n: int, cuts: list[int]) -> int:
+        pos = sorted(cuts + [0, n])
+        m = len(pos)
+
+        # dp[i][j]: min cost to make all cuts strictly between pos[i] and pos[j]
+        dp = [[0] * m for _ in range(m)]
+        for length in range(2, m):
+            for i in range(m - length):
+                j = i + length
+                dp[i][j] = min(dp[i][k] + dp[k][j] for k in range(i + 1, j)) + pos[j] - pos[i]
+        return dp[0][m - 1]
 ```

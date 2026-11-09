@@ -89,7 +89,7 @@ Example 2 (`k = 4`, so `target = 5`). The animation uses the pivots `3`, `5`, `4
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findKthLargest(vector<int>& nums, int k) {
@@ -119,4 +119,72 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    private static final Random RNG = new Random();
+
+    public int findKthLargest(int[] nums, int k) {
+        int target = nums.length - k;  // index of the answer in ascending order
+        int lo = 0, hi = nums.length - 1;
+        while (true) {
+            int pivot = nums[lo + RNG.nextInt(hi - lo + 1)];
+            // nums[lo, lt) < pivot, nums[lt, i) == pivot, nums(gt, hi] > pivot
+            int lt = lo, i = lo, gt = hi;
+            while (i <= gt) {
+                if (nums[i] < pivot) {
+                    swap(nums, lt++, i++);
+                } else if (nums[i] > pivot) {
+                    swap(nums, i, gt--);
+                } else {
+                    i++;
+                }
+            }
+            if (target < lt) {
+                hi = lt - 1;
+            } else if (target > gt) {
+                lo = gt + 1;
+            } else {
+                return pivot;
+            }
+        }
+    }
+
+    private static void swap(int[] a, int i, int j) {
+        int t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
+}
+```
+
+```python
+import random
+
+
+class Solution:
+    def findKthLargest(self, nums: list[int], k: int) -> int:
+        target = len(nums) - k  # index of the answer in ascending order
+        lo, hi = 0, len(nums) - 1
+        while True:
+            pivot = nums[random.randint(lo, hi)]
+            # nums[lo, lt) < pivot, nums[lt, i) == pivot, nums(gt, hi] > pivot
+            lt, i, gt = lo, lo, hi
+            while i <= gt:
+                if nums[i] < pivot:
+                    nums[lt], nums[i] = nums[i], nums[lt]
+                    lt += 1
+                    i += 1
+                elif nums[i] > pivot:
+                    nums[i], nums[gt] = nums[gt], nums[i]
+                    gt -= 1
+                else:
+                    i += 1
+            if target < lt:
+                hi = lt - 1
+            elif target > gt:
+                lo = gt + 1
+            else:
+                return pivot
 ```

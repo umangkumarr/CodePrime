@@ -101,7 +101,7 @@ Let $K$ = total number of letters in `words` (at most $3 \times 10^5$) and $L$ =
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     vector<array<int, 26>> next;  // trie edges; 0 means "no child" (node 0 is the root)
     vector<string> word;          // word ending at this node, or empty
@@ -161,4 +161,117 @@ class Solution {
         return found;
     }
 };
+```
+
+```java
+class Solution {
+    private int[][] next;        // trie edges; 0 means "no child" (node 0 is the root)
+    private String[] word;       // word ending at this node, or null
+    private int[] remaining;     // words in this node's subtree not found yet
+    private List<String> found;
+    private static final int[] DR = {1, -1, 0, 0}, DC = {0, 0, 1, -1};
+
+    // Returns the number of new words found by paths starting at (r, c).
+    private int dfs(char[][] board, int r, int c, int node) {
+        char ch = board[r][c];
+        if (ch == '#') return 0;
+        int cur = next[node][ch - 'a'];
+        if (cur == 0 || remaining[cur] == 0) return 0;
+
+        int got = 0;
+        if (word[cur] != null) {
+            found.add(word[cur]);
+            word[cur] = null;
+            got++;
+        }
+        board[r][c] = '#';
+        for (int k = 0; k < 4; k++) {
+            int nr = r + DR[k], nc = c + DC[k];
+            if (nr >= 0 && nr < board.length && nc >= 0 && nc < board[0].length)
+                got += dfs(board, nr, nc, cur);
+        }
+        board[r][c] = ch;
+        remaining[cur] -= got;
+        return got;
+    }
+
+    public List<String> findWords(char[][] board, String[] words) {
+        int capacity = 1;  // the trie has at most 1 + (total letters) nodes
+        for (String w : words) capacity += w.length();
+        next = new int[capacity][26];
+        word = new String[capacity];
+        remaining = new int[capacity];
+        found = new ArrayList<>();
+
+        int size = 1;
+        for (String w : words) {
+            int node = 0;
+            remaining[0]++;
+            for (char ch : w.toCharArray()) {
+                if (next[node][ch - 'a'] == 0) next[node][ch - 'a'] = size++;
+                node = next[node][ch - 'a'];
+                remaining[node]++;
+            }
+            word[node] = w;
+        }
+
+        for (int r = 0; r < board.length && remaining[0] > 0; r++)
+            for (int c = 0; c < board[0].length && remaining[0] > 0; c++)
+                remaining[0] -= dfs(board, r, c, 0);
+        return found;
+    }
+}
+```
+
+```python
+class Solution:
+    def findWords(self, board: list[list[str]], words: list[str]) -> list[str]:
+        nxt = [[0] * 26]  # trie edges; 0 means "no child" (node 0 is the root)
+        word = ['']       # word ending at this node, or empty
+        remaining = [0]   # words in this node's subtree not found yet
+        for w in words:
+            node = 0
+            remaining[0] += 1
+            for ch in w:
+                i = ord(ch) - ord('a')
+                if nxt[node][i] == 0:
+                    nxt[node][i] = len(nxt)
+                    nxt.append([0] * 26)
+                    word.append('')
+                    remaining.append(0)
+                node = nxt[node][i]
+                remaining[node] += 1
+            word[node] = w
+
+        m, n = len(board), len(board[0])
+        found = []
+
+        # Returns the number of new words found by paths starting at (r, c).
+        def dfs(r: int, c: int, node: int) -> int:
+            ch = board[r][c]
+            if ch == '#':
+                return 0
+            cur = nxt[node][ord(ch) - ord('a')]
+            if cur == 0 or remaining[cur] == 0:
+                return 0
+
+            got = 0
+            if word[cur]:
+                found.append(word[cur])
+                word[cur] = ''
+                got += 1
+            board[r][c] = '#'
+            for nr, nc in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= nr < m and 0 <= nc < n:
+                    got += dfs(nr, nc, cur)
+            board[r][c] = ch
+            remaining[cur] -= got
+            return got
+
+        for r in range(m):
+            for c in range(n):
+                if remaining[0] == 0:
+                    return found
+                remaining[0] -= dfs(r, c, 0)
+        return found
 ```

@@ -83,7 +83,7 @@ flowchart LR
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
@@ -109,4 +109,52 @@ class Solution {
         return taken == numCourses;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int c = 0; c < numCourses; c++) adj.add(new ArrayList<>());
+        int[] indeg = new int[numCourses];
+        for (int[] pre : prerequisites) {
+            adj.get(pre[1]).add(pre[0]);
+            indeg[pre[0]]++;
+        }
+
+        Deque<Integer> ready = new ArrayDeque<>();
+        for (int c = 0; c < numCourses; c++)
+            if (indeg[c] == 0) ready.push(c);
+
+        int taken = 0;
+        while (!ready.isEmpty()) {
+            int u = ready.pop();
+            taken++;
+            for (int v : adj.get(u))
+                if (--indeg[v] == 0) ready.push(v);
+        }
+        return taken == numCourses;
+    }
+}
+```
+
+```python
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: list[list[int]]) -> bool:
+        adj = [[] for _ in range(numCourses)]
+        indeg = [0] * numCourses
+        for a, b in prerequisites:
+            adj[b].append(a)
+            indeg[a] += 1
+
+        ready = [c for c in range(numCourses) if indeg[c] == 0]
+        taken = 0
+        while ready:
+            u = ready.pop()
+            taken += 1
+            for v in adj[u]:
+                indeg[v] -= 1
+                if indeg[v] == 0:
+                    ready.append(v)
+        return taken == numCourses
 ```

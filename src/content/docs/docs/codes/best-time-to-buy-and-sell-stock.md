@@ -69,7 +69,7 @@ On Example 1, `minPrice` becomes `7`, then `1`, and stays `1`; the profits after
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int maxProfit(vector<int>& prices) {
@@ -81,4 +81,27 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int minPrice = Integer.MAX_VALUE, best = 0;
+        for (int price : prices) {
+            minPrice = Math.min(minPrice, price);
+            best = Math.max(best, price - minPrice);
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def maxProfit(self, prices: list[int]) -> int:
+        min_price, best = float('inf'), 0
+        for price in prices:
+            min_price = min(min_price, price)
+            best = max(best, price - min_price)
+        return best
 ```

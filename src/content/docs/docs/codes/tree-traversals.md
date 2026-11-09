@@ -116,7 +116,7 @@ Example 1 (`1` with children `2` and `3`, `3` with right child `6`):
 
 ## Code
 
-```cpp title="C++"
+```cpp
 /*
     Following is the Binary Tree node structure:
 
@@ -152,4 +152,90 @@ vector<vector<int>> getTreeTraversal(BinaryTreeNode<int> *root) {
     }
     return {in, pre, post};
 }
+```
+
+```java
+/*
+    Following is the Binary Tree node structure:
+
+    class BinaryTreeNode<T> {
+        T data;
+        BinaryTreeNode<T> left;
+        BinaryTreeNode<T> right;
+    }
+*/
+
+import java.util.*;
+
+public class Solution {
+    public static List<List<Integer>> getTreeTraversal(BinaryTreeNode<Integer> root) {
+        List<Integer> in = new ArrayList<>(), pre = new ArrayList<>(), post = new ArrayList<>();
+        // state 1: before the left subtree, 2: between subtrees, 3: after the right subtree
+        ArrayDeque<BinaryTreeNode<Integer>> nodes = new ArrayDeque<>();
+        ArrayDeque<Integer> states = new ArrayDeque<>();  // states.peek() belongs to nodes.peek()
+        if (root != null) {
+            nodes.push(root);
+            states.push(1);
+        }
+
+        while (!nodes.isEmpty()) {
+            BinaryTreeNode<Integer> node = nodes.peek();
+            int state = states.pop();
+            if (state == 1) {
+                pre.add(node.data);
+                states.push(2);
+                if (node.left != null) {
+                    nodes.push(node.left);
+                    states.push(1);
+                }
+            } else if (state == 2) {
+                in.add(node.data);
+                states.push(3);
+                if (node.right != null) {
+                    nodes.push(node.right);
+                    states.push(1);
+                }
+            } else {
+                post.add(node.data);
+                nodes.pop();
+            }
+        }
+        return Arrays.asList(in, pre, post);
+    }
+}
+```
+
+```python
+'''
+    Following is the Binary Tree node structure:
+
+    class BinaryTreeNode:
+        def __init__(self, data):
+            self.data = data
+            self.left = None
+            self.right = None
+'''
+
+def getTreeTraversal(root) -> list[list[int]]:
+    inorder, preorder, postorder = [], [], []
+    # state 1: before the left subtree, 2: between subtrees, 3: after the right subtree
+    stack = [[root, 1]] if root else []
+
+    while stack:
+        top = stack[-1]
+        node, state = top
+        if state == 1:
+            preorder.append(node.data)
+            top[1] = 2
+            if node.left:
+                stack.append([node.left, 1])
+        elif state == 2:
+            inorder.append(node.data)
+            top[1] = 3
+            if node.right:
+                stack.append([node.right, 1])
+        else:
+            postorder.append(node.data)
+            stack.pop()
+    return [inorder, preorder, postorder]
 ```

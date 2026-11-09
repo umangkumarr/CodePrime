@@ -63,7 +63,7 @@ A plain list cannot find a node in $O(1)$, and a hash map has no order, so combi
 
 ### Algorithm
 
-- `order`: `list<pair<int, int>>` of `(key, value)`, most recently used first. `pos`: `unordered_map<int, list<...>::iterator>`.
+- `order`: a doubly linked list of `(key, value)` pairs, most recently used first. `pos`: a hash map from each key to its node in `order`.
 - `get(key)`: if `key` is not in `pos`, return `-1`. Otherwise splice its node to the front of `order` and return its value.
 - `put(key, value)`:
   1. If `key` exists, update the value in its node, splice the node to the front and return.
@@ -106,7 +106,7 @@ The next call, `get(2)`, misses. Then `put(4, 4)` finds the cache full and evict
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class LRUCache {
     int cap;
     list<pair<int, int>> order;  // (key, value), most recently used at the front
@@ -137,4 +137,96 @@ class LRUCache {
         pos[key] = order.begin();
     }
 };
+```
+
+```java
+class LRUCache {
+    private static class Node {
+        int key, value;
+        Node prev, next;
+
+        Node(int key, int value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    private final int cap;
+    private final Node head = new Node(0, 0);  // sentinels: head.next is the most recently used,
+    private final Node tail = new Node(0, 0);  // tail.prev the least recently used
+    private final Map<Integer, Node> pos = new HashMap<>();
+
+    public LRUCache(int capacity) {
+        cap = capacity;
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    public int get(int key) {
+        Node node = pos.get(key);
+        if (node == null) return -1;
+        moveToFront(node);  // mark as most recent
+        return node.value;
+    }
+
+    public void put(int key, int value) {
+        Node node = pos.get(key);
+        if (node != null) {
+            node.value = value;
+            moveToFront(node);
+            return;
+        }
+        if (pos.size() == cap) {
+            Node lru = tail.prev;  // evict the least recently used key
+            unlink(lru);
+            pos.remove(lru.key);
+        }
+        node = new Node(key, value);
+        linkFront(node);
+        pos.put(key, node);
+    }
+
+    private void unlink(Node node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    private void linkFront(Node node) {
+        node.prev = head;
+        node.next = head.next;
+        head.next.prev = node;
+        head.next = node;
+    }
+
+    private void moveToFront(Node node) {
+        unlink(node);
+        linkFront(node);
+    }
+}
+```
+
+```python
+from collections import OrderedDict
+
+
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.cap = capacity
+        self.order = OrderedDict()  # key -> value, least recently used first
+
+    def get(self, key: int) -> int:
+        if key not in self.order:
+            return -1
+        self.order.move_to_end(key)  # mark as most recent
+        return self.order[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.order:
+            self.order[key] = value
+            self.order.move_to_end(key)
+            return
+        if len(self.order) == self.cap:
+            self.order.popitem(last=False)  # evict the least recently used key
+        self.order[key] = value
 ```

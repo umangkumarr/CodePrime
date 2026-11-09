@@ -71,7 +71,7 @@ Example 2, `val = 5`: at `4`, go right to `7`; `5 < 7`, go left to null. Return 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     TreeNode* searchBST(TreeNode* root, int val) {
@@ -79,4 +79,21 @@ class Solution {
         return root;
     }
 };
+```
+
+```java
+class Solution {
+    public TreeNode searchBST(TreeNode root, int val) {
+        while (root != null && root.val != val) root = val < root.val ? root.left : root.right;
+        return root;
+    }
+}
+```
+
+```python
+class Solution:
+    def searchBST(self, root: TreeNode | None, val: int) -> TreeNode | None:
+        while root and root.val != val:
+            root = root.left if val < root.val else root.right
+        return root
 ```

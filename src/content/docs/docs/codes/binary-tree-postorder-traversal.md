@@ -98,7 +98,7 @@ Example 1, `root = [1,null,2,3]` (stack shown bottom to top):
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> postorderTraversal(TreeNode* root) {
@@ -122,4 +122,49 @@ class Solution {
         return order;
     }
 };
+```
+
+```java
+class Solution {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> order = new ArrayList<>();
+        ArrayDeque<TreeNode> st = new ArrayDeque<>();
+        TreeNode cur = root, last = null;
+        while (cur != null || !st.isEmpty()) {
+            while (cur != null) {
+                st.push(cur);
+                cur = cur.left;
+            }
+            TreeNode node = st.peek();
+            if (node.right != null && node.right != last) {
+                cur = node.right;
+            } else {
+                st.pop();
+                order.add(node.val);
+                last = node;
+            }
+        }
+        return order;
+    }
+}
+```
+
+```python
+class Solution:
+    def postorderTraversal(self, root: TreeNode | None) -> list[int]:
+        order = []
+        st = []
+        cur, last = root, None
+        while cur or st:
+            while cur:
+                st.append(cur)
+                cur = cur.left
+            node = st[-1]
+            if node.right and node.right is not last:
+                cur = node.right
+            else:
+                st.pop()
+                order.append(node.val)
+                last = node
+        return order
 ```

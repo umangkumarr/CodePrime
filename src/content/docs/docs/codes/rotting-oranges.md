@@ -93,7 +93,7 @@ Example 1, one frame per minute. Orange cells rotted during that minute; red cel
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int orangesRotting(vector<vector<int>>& grid) {
@@ -124,4 +124,64 @@ class Solution {
         return fresh == 0 ? minutes : -1;
     }
 };
+```
+
+```java
+class Solution {
+    public int orangesRotting(int[][] grid) {
+        int m = grid.length, n = grid[0].length, fresh = 0;
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 2) q.offer(new int[] {i, j});
+                else if (grid[i][j] == 1) fresh++;
+            }
+
+        int[] dr = {1, -1, 0, 0}, dc = {0, 0, 1, -1};
+        int minutes = 0;
+        while (!q.isEmpty() && fresh > 0) {
+            minutes++;
+            for (int sz = q.size(); sz > 0; sz--) {
+                int[] cell = q.poll();
+                for (int d = 0; d < 4; d++) {
+                    int x = cell[0] + dr[d], y = cell[1] + dc[d];
+                    if (x < 0 || x >= m || y < 0 || y >= n || grid[x][y] != 1) continue;
+                    grid[x][y] = 2;
+                    fresh--;
+                    q.offer(new int[] {x, y});
+                }
+            }
+        }
+        return fresh == 0 ? minutes : -1;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def orangesRotting(self, grid: list[list[int]]) -> int:
+        m, n = len(grid), len(grid[0])
+        q = deque()
+        fresh = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == 2:
+                    q.append((i, j))
+                elif grid[i][j] == 1:
+                    fresh += 1
+
+        minutes = 0
+        while q and fresh > 0:
+            minutes += 1
+            for _ in range(len(q)):
+                r, c = q.popleft()
+                for x, y in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                    if 0 <= x < m and 0 <= y < n and grid[x][y] == 1:
+                        grid[x][y] = 2
+                        fresh -= 1
+                        q.append((x, y))
+        return minutes if fresh == 0 else -1
 ```

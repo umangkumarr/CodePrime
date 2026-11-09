@@ -83,7 +83,7 @@ Result: `[1, 2]`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> topKFrequent(vector<int>& nums, int k) {
@@ -104,4 +104,50 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public int[] topKFrequent(int[] nums, int k) {
+        HashMap<Integer, Integer> freq = new HashMap<>();
+        for (int x : nums) freq.merge(x, 1, Integer::sum);
+
+        // buckets.get(f) = values that occur exactly f times
+        List<List<Integer>> buckets = new ArrayList<>(nums.length + 1);
+        for (int f = 0; f <= nums.length; f++) buckets.add(new ArrayList<>());
+        for (var e : freq.entrySet()) buckets.get(e.getValue()).add(e.getKey());
+
+        int[] ans = new int[k];
+        int size = 0;
+        for (int f = nums.length; f >= 1 && size < k; f--) {
+            for (int x : buckets.get(f)) {
+                ans[size++] = x;
+                if (size == k) break;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+from collections import Counter
+
+
+class Solution:
+    def topKFrequent(self, nums: list[int], k: int) -> list[int]:
+        freq = Counter(nums)
+
+        # buckets[f] = values that occur exactly f times
+        buckets = [[] for _ in range(len(nums) + 1)]
+        for x, f in freq.items():
+            buckets[f].append(x)
+
+        ans = []
+        for f in range(len(nums), 0, -1):
+            for x in buckets[f]:
+                ans.append(x)
+                if len(ans) == k:
+                    return ans
+        return ans
 ```

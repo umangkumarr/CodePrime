@@ -72,7 +72,7 @@ For `n = 3`: `ways(2) = 1 + 1 = 2`, `ways(3) = 2 + 1 = 3`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int climbStairs(int n) {
@@ -85,4 +85,27 @@ class Solution {
         return curr;
     }
 };
+```
+
+```java
+class Solution {
+    public int climbStairs(int n) {
+        int prev = 1, curr = 1;
+        for (int i = 2; i <= n; i++) {
+            int next = curr + prev;
+            prev = curr;
+            curr = next;
+        }
+        return curr;
+    }
+}
+```
+
+```python
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        prev, curr = 1, 1
+        for _ in range(2, n + 1):
+            prev, curr = curr, curr + prev
+        return curr
 ```

@@ -88,7 +88,7 @@ The leaves, left to right, give `[5, 2, 3, 0]`; any order is accepted.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     void collect(const vector<int>& arr, int i, int sum, vector<int>& sums) {
         if (i == (int)arr.size()) {
@@ -107,4 +107,39 @@ class Solution {
         return sums;
     }
 };
+```
+
+```java
+class Solution {
+    private void collect(int[] arr, int i, int sum, ArrayList<Integer> sums) {
+        if (i == arr.length) {
+            sums.add(sum);
+            return;
+        }
+        collect(arr, i + 1, sum + arr[i], sums);  // take arr[i]
+        collect(arr, i + 1, sum, sums);           // skip arr[i]
+    }
+
+    public ArrayList<Integer> subsetSums(int[] arr) {
+        ArrayList<Integer> sums = new ArrayList<>(1 << arr.length);
+        collect(arr, 0, 0, sums);
+        return sums;
+    }
+}
+```
+
+```python
+class Solution:
+    def subsetSums(self, arr):
+        sums = []
+
+        def collect(i, total):
+            if i == len(arr):
+                sums.append(total)
+                return
+            collect(i + 1, total + arr[i])  # take arr[i]
+            collect(i + 1, total)           # skip arr[i]
+
+        collect(0, 0)
+        return sums
 ```

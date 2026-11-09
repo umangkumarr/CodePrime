@@ -87,7 +87,7 @@ Example 2. Orange cells are the marker row/column, blue is the cell being looked
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void setZeroes(vector<vector<int>>& matrix) {
@@ -114,4 +114,60 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public void setZeroes(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        boolean firstColZero = false;
+
+        // Phase 1: record zero rows in column 0 and zero columns in row 0.
+        for (int i = 0; i < m; i++) {
+            if (matrix[i][0] == 0) firstColZero = true;
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        // Phase 2: clear bottom-up so the markers are read before they are overwritten.
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 1; j--) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) matrix[i][j] = 0;
+            }
+            if (firstColZero) matrix[i][0] = 0;
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def setZeroes(self, matrix: list[list[int]]) -> None:
+        m, n = len(matrix), len(matrix[0])
+        first_col_zero = False
+
+        # Phase 1: record zero rows in column 0 and zero columns in row 0.
+        for i in range(m):
+            row = matrix[i]
+            if row[0] == 0:
+                first_col_zero = True
+            for j in range(1, n):
+                if row[j] == 0:
+                    row[0] = 0
+                    matrix[0][j] = 0
+
+        # Phase 2: clear bottom-up so the markers are read before they are overwritten.
+        top = matrix[0]
+        for i in range(m - 1, -1, -1):
+            row = matrix[i]
+            row_zero = row[0] == 0
+            for j in range(n - 1, 0, -1):
+                if row_zero or top[j] == 0:
+                    row[j] = 0
+            if first_col_zero:
+                row[0] = 0
 ```

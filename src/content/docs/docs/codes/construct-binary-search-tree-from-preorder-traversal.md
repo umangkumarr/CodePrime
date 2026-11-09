@@ -53,13 +53,13 @@ We can avoid the scan by building the tree **in preorder itself**, consuming the
 - the left child of `root` must be smaller than `root->val`, so its bound is `root->val`;
 - the right child of `root` inherits `root`'s own bound.
 
-If `preorder[idx]` exceeds the bound, it is not part of this subtree: return `nullptr` and let an ancestor with a larger bound take it. Each value is consumed exactly once, so the whole build is linear.
+If `preorder[idx]` exceeds the bound, it is not part of this subtree: return null and let an ancestor with a larger bound take it. Each value is consumed exactly once, so the whole build is linear.
 
 ### Algorithm
 
 1. Set `idx = 0` and call `build(preorder, idx, INT_MAX)`.
 2. In `build(preorder, idx, bound)`:
-   - If `idx` is past the end, or `preorder[idx] > bound`, return `nullptr`.
+   - If `idx` is past the end, or `preorder[idx] > bound`, return null.
    - Create `root` from `preorder[idx]` and advance `idx`.
    - `root->left = build(preorder, idx, root->val)` — values smaller than the root.
    - `root->right = build(preorder, idx, bound)` — the remaining values up to the parent's bound.
@@ -67,7 +67,7 @@ If `preorder[idx]` exceeds the bound, it is not part of this subtree: return `nu
 
 ### Walkthrough
 
-Example 1, `preorder = [8, 5, 1, 7, 10, 12]`. Each node shows its value and the bound it was checked against; the dashed edges are the calls that returned `nullptr` because the next value was too large:
+Example 1, `preorder = [8, 5, 1, 7, 10, 12]`. Each node shows its value and the bound it was checked against; the dashed edges are the calls that returned null because the next value was too large:
 
 ```mermaid
 flowchart TD
@@ -87,7 +87,7 @@ flowchart TD
     class x1,x2,x3,x4,x5 nul
 ```
 
-The key moment is after `7`: its right call has bound `8` and sees `10`, so it returns `nullptr`; the recursion climbs back to `8`, whose right call has bound `∞` and accepts `10`.
+The key moment is after `7`: its right call has bound `8` and sees `10`, so it returns null; the recursion climbs back to `8`, whose right call has bound `∞` and accepts `10`.
 
 ### Complexity
 
@@ -96,13 +96,13 @@ The key moment is after `7`: its right call has bound `8` and sees `10`, so it r
 
 ### Edge cases
 
-- **Single element:** both child calls hit the end of the array and return `nullptr`.
+- **Single element:** both child calls hit the end of the array and return null.
 - **Strictly increasing input** (Example 2): every left call is rejected and the tree becomes a right chain.
 - **Strictly decreasing input:** every value fits its parent's left bound, giving a left chain.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     TreeNode* build(const vector<int>& preorder, int& idx, int bound) {
         if (idx == (int)preorder.size() || preorder[idx] > bound) return nullptr;
@@ -118,4 +118,41 @@ class Solution {
         return build(preorder, idx, INT_MAX);
     }
 };
+```
+
+```java
+class Solution {
+    private int idx;
+
+    private TreeNode build(int[] preorder, int bound) {
+        if (idx == preorder.length || preorder[idx] > bound) return null;
+        TreeNode root = new TreeNode(preorder[idx++]);
+        root.left = build(preorder, root.val);
+        root.right = build(preorder, bound);
+        return root;
+    }
+
+    public TreeNode bstFromPreorder(int[] preorder) {
+        idx = 0;
+        return build(preorder, Integer.MAX_VALUE);
+    }
+}
+```
+
+```python
+class Solution:
+    def bstFromPreorder(self, preorder: list[int]) -> TreeNode | None:
+        idx = 0
+
+        def build(bound):
+            nonlocal idx
+            if idx == len(preorder) or preorder[idx] > bound:
+                return None
+            root = TreeNode(preorder[idx])
+            idx += 1
+            root.left = build(root.val)
+            root.right = build(bound)
+            return root
+
+        return build(float('inf'))
 ```

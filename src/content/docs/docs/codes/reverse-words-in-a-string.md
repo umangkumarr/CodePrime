@@ -54,7 +54,7 @@ Explanation: You need to reduce multiple spaces between two words to a single sp
 
 ### Intuition
 
-Splitting into a `vector<string>` and joining in reverse order is easy but uses $O(n)$ extra space. The follow-up asks for in-place.
+Splitting into a list of words and joining in reverse order is easy but uses $O(n)$ extra space. The follow-up asks for in-place.
 
 The classic trick: **reversing the whole string puts the words in the right order, but each word is spelled backwards.** Reversing every word individually then fixes the spelling. For example `"the sky"` → `"yks eht"` → `"sky the"`.
 
@@ -88,7 +88,7 @@ Example 3 (`·` marks a space). Blue is the word just written, green is the fini
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string reverseWords(string s) {
@@ -108,4 +108,56 @@ class Solution {
         return s;
     }
 };
+```
+
+```java
+class Solution {
+    public String reverseWords(String s) {
+        char[] c = s.toCharArray();
+        int n = c.length, w = 0;
+        reverse(c, 0, n);
+        for (int i = 0; i < n;) {
+            if (c[i] == ' ') {
+                i++;
+                continue;
+            }
+            if (w > 0) c[w++] = ' ';
+            int start = w;
+            while (i < n && c[i] != ' ') c[w++] = c[i++];
+            reverse(c, start, w);
+        }
+        return new String(c, 0, w);
+    }
+
+    private void reverse(char[] c, int lo, int hi) {
+        for (hi--; lo < hi; lo++, hi--) {
+            char t = c[lo];
+            c[lo] = c[hi];
+            c[hi] = t;
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def reverseWords(self, s: str) -> str:
+        # Python strings are immutable: reverse the whole string, then
+        # reverse each word back while compacting into a list of chars.
+        c = list(s[::-1])
+        n, w, i = len(c), 0, 0
+        while i < n:
+            if c[i] == ' ':
+                i += 1
+                continue
+            if w > 0:
+                c[w] = ' '
+                w += 1
+            start = w
+            while i < n and c[i] != ' ':
+                c[w] = c[i]
+                w += 1
+                i += 1
+            c[start:w] = c[start:w][::-1]
+        return ''.join(c[:w])
 ```

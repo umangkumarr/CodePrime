@@ -63,7 +63,7 @@ For `nums = [1,1,0,1,1,1]`, `cur` takes the values `1, 2, 0, 1, 2, 3`, so `best 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findMaxConsecutiveOnes(vector<int>& nums) {
@@ -79,4 +79,34 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int findMaxConsecutiveOnes(int[] nums) {
+        int best = 0, cur = 0;  // cur = length of the run of 1s ending here
+        for (int x : nums) {
+            if (x == 1) {
+                cur++;
+                best = Math.max(best, cur);
+            } else {
+                cur = 0;
+            }
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def findMaxConsecutiveOnes(self, nums: list[int]) -> int:
+        best = cur = 0  # cur = length of the run of 1s ending here
+        for x in nums:
+            if x == 1:
+                cur += 1
+                best = max(best, cur)
+            else:
+                cur = 0
+        return best
 ```
