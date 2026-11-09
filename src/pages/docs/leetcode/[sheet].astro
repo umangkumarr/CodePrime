@@ -1,0 +1,33 @@
+---
+/** One page per LeetCode sheet (top-level sidebar group), e.g. /docs/leetcode/striver-sde-sheet/. */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import TrackOverview from '../../../components/TrackOverview.astro';
+import sidebar from '../../../data/sidebar.json';
+import {countLabel, groupSlug, topGroups} from '../../../lib/tracks.mjs';
+
+type Group = {label: string; items: (string | Group)[]};
+
+export function getStaticPaths() {
+  return (topGroups(sidebar.leetcode) as Group[]).map((g) => ({params: {sheet: groupSlug(g.label)}, props: {group: g}}));
+}
+
+const {group} = Astro.props as {group: Group};
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const sections = group.items.filter((i) => typeof i !== 'string').length;
+const summary = sections > 1 ? `${countLabel(group.items)} in ${sections} sections, in the order they are best solved.` : `${countLabel(group.items)}.`;
+---
+
+<StarlightPage
+  frontmatter={{
+    title: group.label,
+    description: `${group.label}: ${summary}`,
+    tableOfContents: false,
+    prev: false,
+    next: false,
+  }}
+>
+  <p class="cp-sheet-intro">
+    {summary} <a href={`${base}/docs/leetcode/`}>All sheets</a>
+  </p>
+  <TrackOverview topic="leetcode" group={Astro.params.sheet} />
+</StarlightPage>
