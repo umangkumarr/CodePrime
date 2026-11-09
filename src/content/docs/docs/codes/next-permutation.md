@@ -25,7 +25,7 @@ Examples:
 
 Given an array of integers `nums`, *find the next permutation of* `nums`.
 
-The replacement must be **[in place](http://en.wikipedia.org/wiki/In-place_algorithm)** and use only constant extra memory.
+The replacement must be **[in place](https://en.wikipedia.org/wiki/In-place_algorithm)** and use only constant extra memory.
 
 **Example 1:**
 

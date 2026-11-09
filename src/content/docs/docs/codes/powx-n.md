@@ -11,7 +11,7 @@ complexity:
 
 ## Problem
 
-Implement [pow(x, n)](http://www.cplusplus.com/reference/valarray/pow/), which calculates `x` raised to the power `n` (i.e., $x^n$).
+Implement [pow(x, n)](https://www.cplusplus.com/reference/valarray/pow/), which calculates `x` raised to the power `n` (i.e., $x^n$).
 
 **Example 1:**
 

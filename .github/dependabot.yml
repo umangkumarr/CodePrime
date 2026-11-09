@@ -1,0 +1,19 @@
+# Weekly update pull requests for npm packages and the pinned GitHub Actions.
+# Security updates for vulnerable dependencies are opened as soon as an alert appears.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      astro:
+        patterns: ['astro', '@astrojs/*', 'starlight-*', 'astro-*']
+      markdown:
+        patterns: ['katex', 'rehype-*', 'remark-*', 'mermaid']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

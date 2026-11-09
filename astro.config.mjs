@@ -35,7 +35,7 @@ export default defineConfig({
 
   integrations: [
     // Must come before Starlight so ```mermaid blocks are claimed first.
-    mermaid({theme: 'neutral', autoTheme: true, enableLog: false}),
+    mermaid({theme: 'neutral', autoTheme: true, enableLog: false, mermaidConfig: {securityLevel: 'strict'}}),
     starlight({
       title: 'CodePrime',
       description:
