@@ -1,38 +1,59 @@
 ---
 title: "Exponentiation"
+description: "Compute a^n with O(log n) multiplications by squaring the base and using the binary representation of the exponent."
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Problem statement
+## Problem
 
-Find the value of $a^n$.
+Given integers `a` and `n` with $n \ge 0$, compute $a^n$.
 
-### Example
-```
-Input: a = 2,  n = 3
+```txt
+Input:  a = 2, n = 3
 Output: 8
-2 raise to the power 3 is 8.
+
+Input:  a = 5, n = 6
+Output: 15625
 ```
 
-### Tages
-```Maths```, ```bitmask```
+Multiplying `a` by itself `n` times takes $O(n)$ multiplications. **Binary exponentiation** (also called fast power or exponentiation by squaring) needs only $O(\log n)$.
 
-## Solution
-Expected Time Complexity: $Log(n)$
+## Idea
 
-## Solution:
-Lets take $a = 5$ and $b = 6$.
+Write the exponent in binary. For $n = 6 = (110)_2 = 4 + 2$:
 
-Further $b$ in binary representation can be written as $(110)_2$
+$$5^6 = 5^{4 + 2} = 5^4 \cdot 5^2$$
 
-$b = 6 = 2^2 + 2^1 + 2^0*0 = 4 + 2 + 0$
+The powers $a^1, a^2, a^4, a^8, \dots$ are cheap to produce, because each is the square of the previous one: $a^{2^{i+1}} = \left(a^{2^i}\right)^2$. So walk through the bits of $n$ from lowest to highest while repeatedly squaring the base. Whenever bit $i$ of $n$ is 1, multiply the current power $a^{2^i}$ into the answer.
 
-$5^6 = 5^($$^4$$^+$$^2$$^+$$^0$$^) = 5^4*5^2*5^0$
+| bit $i$ | bit of $6$ | current power $a^{2^i}$ | answer after this step |
+| --- | --- | --- | --- |
+| 0 | 0 | $5^1 = 5$ | $1$ |
+| 1 | 1 | $5^2 = 25$ | $25$ |
+| 2 | 1 | $5^4 = 625$ | $25 \cdot 625 = 15625$ |
 
-To compute $a^n$ iterate over bits of $n$, if the $ith$ bit is set then multiple $2^i$ with answer.
+## Algorithm
 
-Time Complexity: $log(n)$
+1. Set `ans = 1`.
+2. While `n > 0`:
+   - if the lowest bit of `n` is 1, set `ans = ans * a`;
+   - drop the lowest bit: `n = n >> 1`;
+   - if bits remain, square the base: `a = a * a`.
+3. Return `ans`.
+
+## Complexity
+
+- **Time:** $O(\log n)$ multiplications, one loop iteration per bit of $n$.
+- **Space:** $O(1)$.
+
+## Edge cases
+
+- **`n = 0`:** the loop does not run and the answer is 1.
+- **Squaring one step too far:** the base is squared only while bits of `n` remain. Squaring unconditionally would compute $a^{2^{k}}$ beyond the last bit, for example $9^{32}$ while computing $9^{16}$, which overflows a `long long` (undefined behaviour in C++) even though the answer fits.
+- **Overflow:** $a^n$ grows very quickly. Even with 64-bit `long long`, $2^{63}$ already overflows, so this direct version is only for results that fit in the type. When the problem asks for the answer modulo a number, which is the usual case, use [modular exponentiation](/docs/dsa/number-theory/modular-exponentiation/). Python integers are unbounded, so the Python version is exact for any size.
+
+## Code
 
 <Tabs syncKey="lang">
 <TabItem label="C++">
@@ -41,24 +62,20 @@ Time Complexity: $log(n)$
 #include <iostream>
 using namespace std;
 
-int Exponent(int a, int n) {
-    int ans = 1;
+// a^n for n >= 0; the result must fit in a long long.
+long long power(long long a, long long n) {
+    long long ans = 1;
     while (n > 0) {
-        int bit = n & 1;
-        if (bit) {
-            ans = (ans * a);
-        }
+        if (n & 1) ans *= a;  // this bit of n is set: include a^(2^i)
         n >>= 1;
-        a *= a;
+        if (n) a *= a;        // a^(2^i) -> a^(2^(i+1)), only if it is still needed
     }
     return ans;
 }
 
 int main() {
-    
-    int a = 2;
-    int n = 3;
-    cout << Exponent(a, n) << "\n";
+    cout << power(2, 3) << '\n';  // 8
+    cout << power(5, 6) << '\n';  // 15625
 }
 ```
 
@@ -66,23 +83,28 @@ int main() {
 <TabItem label="Python">
 
 ```py
-def Exponent(a, n):
+def power(a, n):
+    """a ** n for n >= 0, by binary exponentiation."""
     ans = 1
-    while (n > 0):
-        bit = n & 1
-        if bit:
-            ans = (ans * a)
+    while n > 0:
+        if n & 1:      # this bit of n is set: include a^(2^i)
+            ans *= a
         n >>= 1
-        a *= a
+        if n:          # a^(2^i) -> a^(2^(i+1)), only if it is still needed
+            a *= a
     return ans
 
-print(Exponent(2, 3))
+
+print(power(2, 3))  # 8
+print(power(5, 6))  # 15625
 ```
 
 </TabItem>
 </Tabs>
 
 ## Output
+
 ```txt
 8
+15625
 ```

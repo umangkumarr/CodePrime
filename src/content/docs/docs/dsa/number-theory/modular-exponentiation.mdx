@@ -1,38 +1,55 @@
 ---
 title: "Modular Exponentiation"
+description: "Compute (a^n) mod m in O(log n) without overflow by reducing modulo m after every multiplication in binary exponentiation."
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Problem statement
+## Problem
 
-Find the value of $(a^n)$%$mod$.
+Given integers `a`, `n` and `m` with $n \ge 0$ and $m \ge 1$, compute $a^n \bmod m$.
 
-### Example
-```
-Input: a = 2,  n = 3, mod = 3
+```txt
+Input:  a = 2, n = 3, m = 3
 Output: 2
-2 raise to the power 3 is 8 and 8%3 = 2.
+Explanation: 2^3 = 8 and 8 mod 3 = 2.
+
+Input:  a = 3, n = 200, m = 1000000007
+Output: 136318165
 ```
 
-### Tages
-```Maths```, ```bitmask```
+$3^{200}$ has 96 digits, far beyond any built-in integer type, yet the answer is below $m$. The trick is to never build the full power.
 
-## Solution
-Expected Time Complexity: $Log(n)$
+## Idea
 
-## Solution:
-Lets take $a = 5$ and $b = 6$.
+This is [binary exponentiation](/docs/dsa/number-theory/exponentiation/) with one change: reduce modulo $m$ after **every** multiplication. That is allowed because taking the remainder commutes with multiplication:
 
-Further $b$ in binary representation can be written as $(110)_2$
+$$(x \cdot y) \bmod m = \big((x \bmod m) \cdot (y \bmod m)\big) \bmod m$$
 
-$b = 6 = 2^2 + 2^1 + 2^0*0 = 4 + 2 + 0$
+So every intermediate value stays in $[0, m)$, and the final result is the same as if we had computed $a^n$ exactly and reduced once at the end.
 
-$5^6 = 5^($$^4$$^+$$^2$$^+$$^0$$^) = 5^4*5^2*5^0$
+## Algorithm
 
-To compute $a^n$ iterate over bits of $n$, if the $ith$ bit is set then multiple $2^i$ with answer and do answer = answer % mod.
+1. Reduce the base first: `a = a mod m` (making it non-negative if `a` was negative).
+2. Set `ans = 1 mod m`.
+3. While `n > 0`:
+   - if the lowest bit of `n` is 1, set `ans = (ans * a) mod m`;
+   - set `a = (a * a) mod m`;
+   - set `n = n >> 1`.
+4. Return `ans`.
 
-Time Complexity: $log(n)$
+## Complexity
+
+- **Time:** $O(\log n)$ multiplications and remainders.
+- **Space:** $O(1)$.
+
+## Edge cases
+
+- **Overflow in the product:** both factors are below $m$, so a product is below $m^2$. With $m$ up to about $3 \cdot 10^9$ that fits in a 64-bit `long long` ($m^2 < 9.2 \times 10^{18}$). Common moduli such as $10^9 + 7$ are well inside this. Doing the multiplication in 32-bit `int` would overflow for any $m$ above about 46,341.
+- **`m = 1`:** every number is 0 modulo 1, so the answer must be 0. Starting from `ans = 1 % m` handles this, including when `n = 0`.
+- **`a` larger than `m` or negative:** reducing it first keeps the first product in range; the `+ m` makes a negative remainder non-negative in C++.
+
+## Code
 
 <Tabs syncKey="lang">
 <TabItem label="C++">
@@ -41,25 +58,21 @@ Time Complexity: $log(n)$
 #include <iostream>
 using namespace std;
 
-int ModularExponent(int a, int n, int mod) {
-    int ans = 1;
+// (a^n) mod m for n >= 0 and 1 <= m <= ~3e9.
+long long modPow(long long a, long long n, long long m) {
+    a = (a % m + m) % m;    // bring the base into [0, m)
+    long long ans = 1 % m;  // 0 when m == 1
     while (n > 0) {
-        int bit = n & 1;
-        if (bit) {
-            ans = (ans * a) % mod;
-        }
+        if (n & 1) ans = ans * a % m;
+        a = a * a % m;
         n >>= 1;
-        a = (a * a) % mod;
     }
     return ans;
 }
 
 int main() {
-    
-    int a = 2;
-    int n = 3;
-    int mod = 3
-    cout << ModularExponent(a, n, mod) << "\n";
+    cout << modPow(2, 3, 3) << '\n';            // 2
+    cout << modPow(3, 200, 1000000007) << '\n'; // 136318165
 }
 ```
 
@@ -67,24 +80,30 @@ int main() {
 <TabItem label="Python">
 
 ```py
-def ModularExponent(a, n, mod):
-    ans = 1
-    while (n > 0):
-        bit = n & 1
-        if bit:
-            ans = (ans * a) % mod
+def mod_pow(a, n, m):
+    """(a ** n) % m for n >= 0 and m >= 1, by binary exponentiation."""
+    a %= m          # Python's % is already non-negative for m > 0
+    ans = 1 % m     # 0 when m == 1
+    while n > 0:
+        if n & 1:
+            ans = ans * a % m
+        a = a * a % m
         n >>= 1
-        a *= a
-        a %= mod
     return ans
 
-print(ModularExponent(2, 3, 3))
+
+print(mod_pow(2, 3, 3))             # 2
+print(mod_pow(3, 200, 1000000007))  # 136318165
 ```
+
+Python also has this built in: `pow(a, n, m)`.
 
 </TabItem>
 </Tabs>
 
 ## Output
+
 ```txt
 2
+136318165
 ```

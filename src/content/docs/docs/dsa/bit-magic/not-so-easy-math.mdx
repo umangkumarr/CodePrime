@@ -1,25 +1,66 @@
 ---
-title: "Inclusive Exclusive Principle"
+title: "Inclusion–Exclusion Principle"
+description: "Count the numbers from 1 to n divisible by at least one prime below 20 by enumerating subsets of the primes with a bitmask."
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Problem statement
+## Problem
 
-After the release of Avengers, Ironman and Thor got into a fight and Ironman challenged Thor to find out the number of numbers between 1 and n which are divisible by any of the prime numbers less than 20. Ironman being great at maths quickly answered the question but then Thor asked him to write a program for it. Ironman however found it quite difficult as he did not wanted to write so many lines of code. He knows that you are smart and can code this up easily. Can you do it?
+*Not So Easy Math* (Coding Blocks, bitmasking).
 
-## Constraints
+After the release of Avengers, Iron Man challenged Thor to find how many numbers between 1 and `n` are divisible by **at least one** of the prime numbers less than 20. Write a program for it.
 
-$1 <= t <= 10$
+The input has `t` test cases; each is a single integer `n`. Print the answer for each.
 
-$1 <= n <= 10^1$$^8$
+```txt
+Input:
+2
+10
+15
 
-## Solution
-Use Inclusive and Exclusive Principle to solve the problem.
+Output:
+9
+14
+```
 
-*Links* - https://cp-algorithms.com/combinatorics/inclusion-exclusion.html
+For `n = 10` every number except 1 is divisible by 2, 3, 5 or 7, so the answer is 9. For `n = 15` likewise every number except 1 qualifies: 14.
 
-Time complexity: $O(2^8)$
+**Constraints:**
+
+- $1 \le t \le 10$
+- $1 \le n \le 10^{18}$
+
+## Idea
+
+Counting directly is impossible for $n$ up to $10^{18}$, but counting multiples of a single number is easy: there are $\lfloor n / d \rfloor$ multiples of $d$ in $[1, n]$.
+
+Let $A_p$ be the set of multiples of the prime $p$. We want the size of the union $A_2 \cup A_3 \cup \dots \cup A_{19}$. Adding up the $|A_p|$ counts numbers like 6 twice (in $A_2$ and $A_3$), so subtract the pairwise intersections; that removes numbers like 30 too often, so add back the triples, and so on. This is the **inclusion–exclusion principle**:
+
+$$\left|\bigcup_{p} A_p\right| = \sum_{\emptyset \ne S} (-1)^{|S|+1} \left\lfloor \frac{n}{\prod_{p \in S} p} \right\rfloor$$
+
+A number is divisible by every prime in $S$ exactly when it is divisible by their product (they are distinct primes), which is why the intersection of the sets in $S$ has $\lfloor n / \prod_{p \in S} p \rfloor$ elements.
+
+There are only 8 primes below 20 (2, 3, 5, 7, 11, 13, 17, 19), so there are $2^8 - 1 = 255$ non-empty subsets. A bitmask `mask` from 1 to 255 picks one subset: bit `j` set means prime `j` is in it.
+
+## Algorithm
+
+1. For each `mask` from 1 to $2^8 - 1$:
+   - multiply together the primes whose bit is set to get `product`;
+   - if the subset has an odd number of primes, add `n / product` to the answer; otherwise subtract it.
+2. Print the answer.
+
+## Complexity
+
+- **Time:** $O(2^k \cdot k)$ per test with $k = 8$ primes, about 2,000 operations, independent of $n$.
+- **Space:** $O(1)$.
+
+## Edge cases
+
+- **Overflow:** the largest product, $2 \cdot 3 \cdot 5 \cdots 19 = 9{,}699{,}690$, fits easily in 64 bits, and `n` itself needs `long long` because it reaches $10^{18}$.
+- **`n = 1`:** every product is at least 2, so every term is 0 and the answer is 0.
+
+## Code
 
 <Tabs syncKey="lang">
 <TabItem label="C++">
@@ -27,33 +68,29 @@ Time complexity: $O(2^8)$
 ```cpp
 #include <iostream>
 using namespace std;
-#define lli long long int
 
-lli prime[8] = {2, 3, 5, 7, 11, 13, 17, 19};
+const long long primes[] = {2, 3, 5, 7, 11, 13, 17, 19};
+const int k = 8;
+
+long long countDivisible(long long n) {
+    long long ans = 0;
+    for (int mask = 1; mask < (1 << k); mask++) {
+        long long product = 1;
+        for (int j = 0; j < k; j++)
+            if (mask & (1 << j)) product *= primes[j];
+        if (__builtin_popcount(mask) & 1) ans += n / product;  // odd-sized subset: add
+        else ans -= n / product;                               // even-sized subset: subtract
+    }
+    return ans;
+}
 
 int main() {
     int t;
     cin >> t;
     while (t--) {
-        lli n;
+        long long n;
         cin >> n;
-        lli ans = 0;
-        for (int i = 1; i < (1 << 8); i++) {
-            int setbit = __builtin_popcount(i);
-            int deno = 1;
-            for (int j = 0; j < 8; j++) {
-                int mask = 1 << j;
-                if (mask & i) {
-                    deno *= prime[j];
-                }
-            }
-            if (setbit & 1) {
-                ans += n / deno;
-            } else {
-                ans -= n / deno;
-            }
-        }
-        cout << ans << '\n';
+        cout << countDivisible(n) << '\n';
     }
 }
 ```
@@ -62,28 +99,28 @@ int main() {
 <TabItem label="Python">
 
 ```py
-prime = [2, 3, 5, 7, 11, 13, 17, 19]
+PRIMES = [2, 3, 5, 7, 11, 13, 17, 19]
 
-for t in range(int(input())):
-    n = int(input())
-    i = 1; ans = 0
-    while i < (1 << 8):
-        setbit = bin(i).count('1')
-        deno = 1
-        for j in range(0, 8):
-            mask = ((1 << j) & i)
-            if mask:
-                deno = deno * prime[j]
 
-        if (setbit & 1):
-            ans += n//deno
+def count_divisible(n):
+    ans = 0
+    for mask in range(1, 1 << len(PRIMES)):
+        product = 1
+        for j, p in enumerate(PRIMES):
+            if mask >> j & 1:
+                product *= p
+        if bin(mask).count("1") % 2:
+            ans += n // product   # odd-sized subset: add
         else:
-            ans -= n//deno
-        i += 1
+            ans -= n // product   # even-sized subset: subtract
+    return ans
 
-    print(ans)
 
+for _ in range(int(input())):
+    print(count_divisible(int(input())))
 ```
 
 </TabItem>
 </Tabs>
+
+**Further reading:** [Inclusion–exclusion principle on cp-algorithms](https://cp-algorithms.com/combinatorics/inclusion-exclusion.html).

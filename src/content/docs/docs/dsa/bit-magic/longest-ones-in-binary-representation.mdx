@@ -1,43 +1,57 @@
 ---
 title: "Longest Consecutive 1s in Binary Representation"
+description: "Find the longest run of 1s in a number's binary form by repeatedly AND-ing it with a shifted copy of itself."
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Given a number `n`, find length of the longest consecutive 1s in its binary representation.
+## Problem
 
-### Examples : 
+Given a number `n`, find the length of the longest run of consecutive 1s in its binary representation. ([GeeksforGeeks: Longest Consecutive 1's](https://www.geeksforgeeks.org/problems/longest-consecutive-1s-1587115620/1))
+
 ```txt
-Input : n = 14
-Output : 3
-The binary representation of 14 is 1110.
+Input:  n = 14
+Output: 3
+Explanation: 14 is 1110 in binary; the longest run of 1s is 111.
 
-Input : n = 222
-Output : 4
-The binary representation of 222 is 11011110.
+Input:  n = 222
+Output: 4
+Explanation: 222 is 11011110 in binary; the longest run of 1s is 1111.
 ```
 
-### Solution:
+**Constraints:** $1 \le n \le 10^9$
 
-<strong>Using Bit Magic: </strong> The idea is based on the concept that if we AND a bit sequence with a shifted version of itself, we’re effectively removing the trailing 1 from every sequence of consecutive 1s.  
+## Idea
 
-<code>
-&nbsp; 11101111   (x)   <br/>
-    &amp; 11011110   (x &lt;&lt; 1)  <br/>
-    ----------  <br/>
-&nbsp; 11001110   (x &amp; (x &lt;&lt; 1))   <br/>
-&nbsp;   ^    ^  <br/>
-&nbsp;   |    |  <br/>
-&nbsp; trailing 1 removed  <br/>
-</code>
+AND a number with a copy of itself shifted one place. A bit survives only if **it and its neighbour** are both 1, so every run of 1s loses exactly one bit, and a run of length 1 disappears:
 
-So the operation `x = (x & (x << 1))` reduces length of every sequence of 1s by one in binary representation of x. If we keep doing this operation in a loop, we end up with x = 0. The number of iterations required to reach 0 is actually length of the longest consecutive sequence of 1s.
+```txt
+  x            = 1 1 0 1 1 1 1 0     (222)
+  x >> 1       = 0 1 1 0 1 1 1 1
+  x & (x >> 1) = 0 1 0 0 1 1 1 0     runs of 2 and 4 became runs of 1 and 3
+```
 
-<strong>Time Complexity:</strong>
+Repeat until nothing is left. A run of length $L$ survives exactly $L - 1$ rounds and vanishes on the $L$-th, so **the number of rounds equals the longest run**.
 
-$log(n)$
+## Algorithm
 
-<hr/>
+1. Set `count = 0`.
+2. While `n` is not 0: replace `n` with `n & (n >> 1)` and add 1 to `count`.
+3. Return `count`.
+
+Trace for `n = 222`: `11011110 → 01001110 → 00000110 → 00000010 → 0`, four rounds, so the answer is 4.
+
+## Complexity
+
+- **Time:** $O(L)$ where $L$ is the answer. Since $L \le \lfloor \log_2 n \rfloor + 1$, this is at most $O(\log n)$: 30 rounds for $n \le 10^9$.
+- **Space:** $O(1)$.
+
+## Edge cases
+
+- **Shifting direction:** `n & (n << 1)` works equally well, but on a signed type it can push 1s into the sign bit. The C++ version takes an `unsigned` value, so the right shift always brings in 0s and the loop always ends; with a signed negative number `n >> 1` would copy the sign bit forever.
+- **`n = 0`:** the loop never runs and the answer is 0.
+
+## Code
 
 <Tabs syncKey="lang">
 <TabItem label="C++">
@@ -46,17 +60,18 @@ $log(n)$
 #include <iostream>
 using namespace std;
 
-int maxConsecutivesOne(int n) {
+int maxConsecutiveOnes(unsigned int n) {
     int count = 0;
     while (n) {
-        n &= (n >> 1);
+        n &= n >> 1;  // every run of 1s loses one bit
         count++;
     }
     return count;
 }
 
 int main() {
-    cout << maxConsecutivesOne(221);
+    cout << maxConsecutiveOnes(14) << '\n';   // 3
+    cout << maxConsecutiveOnes(222) << '\n';  // 4
     return 0;
 }
 ```
@@ -65,20 +80,24 @@ int main() {
 <TabItem label="Python">
 
 ```py
-def maxConsecutiveOnes(n):
+def max_consecutive_ones(n):
     count = 0
-    while n > 0:            # 1101110
-        n &= n << 1         # &11011100
-        count += 1          # -> 10010100 repeat
+    while n:
+        n &= n >> 1  # every run of 1s loses one bit
+        count += 1
     return count
 
-print(maxConsecutiveOnes(221))
+
+print(max_consecutive_ones(14))   # 3
+print(max_consecutive_ones(222))  # 4
 ```
 
 </TabItem>
 </Tabs>
 
-### Output:
+## Output
+
 ```txt
 3
+4
 ```
