@@ -183,3 +183,38 @@ h1#_top {
   background: var(--cp-accent-soft);
   color: var(--cp-accent);
 }
+
+/* ---------- Page layout ----------
+ * Starlight right-aligns the article against the table of contents and lets the TOC column absorb
+ * all extra width, which leaves a large empty gap left of the article on wide screens. Instead, keep
+ * the TOC at a fixed width, centre the article in the space that remains, and let the article grow
+ * in steps with the viewport (capped so prose lines stay readable). */
+@media (min-width: 72rem) {
+  .right-sidebar-container {
+    width: var(--sl-sidebar-width);
+    flex-shrink: 0;
+  }
+
+  [data-has-sidebar][data-has-toc] .main-pane {
+    --sl-content-margin-inline: auto;
+    width: calc(100% - var(--sl-sidebar-width));
+  }
+}
+
+@media (min-width: 90rem) {
+  :root {
+    --sl-content-width: 52rem;
+  }
+}
+
+@media (min-width: 120rem) {
+  :root {
+    --sl-content-width: 58rem;
+  }
+}
+
+@media (min-width: 150rem) {
+  :root {
+    --sl-content-width: 64rem;
+  }
+}

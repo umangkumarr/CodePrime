@@ -4,8 +4,9 @@ import {platformOf} from '../lib/platform.mjs';
  * Gives problem pages (front matter `source:`) their reading layout:
  *
  *   ## Problem  → statement wrapped in a card whose header links to the original problem
- *   ## Code     → solution wrapped in <cp-solution>, a spoiler gate enhanced by
- *                 src/scripts/reader.ts (without JavaScript the code is simply shown)
+ *   ## Solution approach,
+ *   ## Code     → each wrapped in its own <cp-solution>, a spoiler gate enhanced by
+ *                 src/scripts/reader.ts (without JavaScript the content is simply shown)
  *
  * Authors keep writing plain Markdown; nothing here is required in the source.
  */
@@ -72,27 +73,47 @@ export default function rehypeProblemLayout() {
       ]),
     );
 
-    children = wrapSection(children, 'code', (section) =>
+    const tryLink = h('a', {href: source, target: '_blank', rel: 'noopener noreferrer'}, [t(platform)]);
+
+    /** Spoiler gate: the section is blurred until the reader chooses to reveal it. */
+    const gate = ({title, text, show, hide}) => (section) =>
       h('cp-solution', {className: ['cp-solution']}, [
         h('div', {className: ['cp-solution__body'], tabIndex: -1}, section),
         h('div', {className: ['cp-solution__gate', 'not-content']}, [
-          h('p', {className: ['cp-solution__title']}, [t('Give it a try first')]),
-          h('p', {className: ['cp-solution__text']}, [
-            t('Attempt the problem on '),
-            h('a', {href: source, target: '_blank', rel: 'noopener noreferrer'}, [t(platform)]),
-            t(' — the code will still be here.'),
-          ]),
+          h('p', {className: ['cp-solution__title']}, [t(title)]),
+          h('p', {className: ['cp-solution__text']}, text),
           h('div', {className: ['cp-solution__actions']}, [
-            h('button', {type: 'button', className: ['cp-btn', 'cp-btn--solid'], dataAction: 'reveal'}, [t('Show solution')]),
+            h('button', {type: 'button', className: ['cp-btn', 'cp-btn--solid'], dataAction: 'reveal'}, [t(show)]),
             h('button', {type: 'button', className: ['cp-btn', 'cp-btn--link'], dataAction: 'always'}, [
               t('Always show solutions'),
             ]),
           ]),
         ]),
         h('div', {className: ['cp-solution__bar', 'not-content']}, [
-          h('button', {type: 'button', className: ['cp-btn', 'cp-btn--link'], dataAction: 'hide'}, [t('Hide solution')]),
+          h('button', {type: 'button', className: ['cp-btn', 'cp-btn--link'], dataAction: 'hide'}, [t(hide)]),
         ]),
-      ]),
+      ]);
+
+    children = wrapSection(
+      children,
+      'solution approach',
+      gate({
+        title: 'Think before you peek',
+        text: [t('Work out an approach on your own first — the explanation will still be here when you want it.')],
+        show: 'Show approach',
+        hide: 'Hide approach',
+      }),
+    );
+
+    children = wrapSection(
+      children,
+      'code',
+      gate({
+        title: 'Give it a try first',
+        text: [t('Attempt the problem on '), tryLink, t(' — the code will still be here.')],
+        show: 'Show code',
+        hide: 'Hide code',
+      }),
     );
 
     tree.children = children;

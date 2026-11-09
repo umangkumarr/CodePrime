@@ -1,0 +1,328 @@
+---
+/**
+ * Per-problem scratchpad: a notes panel the reader can keep open while working through a problem.
+ * Docked on the right (over the table of contents) on wide screens, a bottom sheet on small ones.
+ * Notes are stored in the reader's browser only (localStorage), keyed by the page's permalink.
+ * Behaviour lives in src/scripts/notepad.ts; without JavaScript nothing is shown.
+ */
+const {entry} = Astro.locals.starlightRoute;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const permalink = `${base}/${entry.id}/`;
+const slug = entry.id.split('/').pop();
+---
+
+<cp-notepad class="cp-notepad not-content" data-key={permalink} data-slug={slug} data-title={entry.data.title}>
+  <button type="button" class="cp-notepad__fab" aria-expanded="false" aria-controls="cp-notepad-panel" title="Notes (Alt+N)">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 20h4L19 9a2.83 2.83 0 0 0-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+      <path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8"></path>
+    </svg>
+    <span class="cp-notepad__fab-label">Notes</span>
+    <span class="cp-notepad__dot" aria-hidden="true"></span>
+  </button>
+
+  <section id="cp-notepad-panel" class="cp-notepad__panel" aria-label="Notes for this problem" hidden>
+    <div class="cp-notepad__resize" aria-hidden="true"></div>
+    <header class="cp-notepad__head">
+      <div>
+        <p class="cp-notepad__title">Scratchpad</p>
+        <p class="cp-notepad__status" aria-live="polite">Saved in this browser</p>
+      </div>
+      <button type="button" class="cp-notepad__icon" data-np="close" aria-label="Close notes" title="Close (Esc)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="cp-notepad__toolbar" role="toolbar" aria-label="Notes tools">
+      <button type="button" data-np="dryrun" title="Insert a dry-run table at the cursor">+ Dry run</button>
+      <button type="button" data-np="approach" title="Insert an approach outline at the cursor">+ Outline</button>
+      <span class="cp-notepad__spacer"></span>
+      <button type="button" data-np="copy" title="Copy notes">Copy</button>
+      <button type="button" data-np="download" title="Download as Markdown">Save .md</button>
+      <button type="button" data-np="clear" class="cp-notepad__danger" title="Delete these notes">Clear</button>
+    </div>
+
+    <textarea
+      class="cp-notepad__text"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      aria-label="Notes"
+      placeholder={'Think it through here — ideas, edge cases, a dry run…\n\nTab indents · Esc leaves the editor · notes are saved per problem'}
+    ></textarea>
+
+    <footer class="cp-notepad__foot">
+      <span class="cp-notepad__count">0 lines</span>
+      <span>Alt+N to toggle</span>
+    </footer>
+  </section>
+</cp-notepad>
+
+<script>
+  import '../scripts/notepad';
+</script>
+
+<style is:global>
+  .cp-notepad {
+    display: none;
+  }
+
+  /* Only appears once the script has defined the element. */
+  .cp-notepad:defined {
+    display: contents;
+  }
+
+  .cp-notepad__fab {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: var(--sl-z-index-toc);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.75rem;
+    padding: 0 1.05rem 0 0.95rem;
+    border-radius: 999px;
+    border: 1px solid var(--cp-border-strong);
+    background: var(--cp-surface);
+    color: var(--cp-text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    transition: border-color 140ms ease, transform 140ms ease;
+  }
+
+  .cp-notepad__fab:hover {
+    border-color: var(--cp-accent);
+    transform: translateY(-1px);
+  }
+
+  .cp-notepad__fab:focus-visible,
+  .cp-notepad__panel button:focus-visible {
+    outline: 2px solid var(--cp-accent);
+    outline-offset: 2px;
+  }
+
+  .cp-notepad__dot {
+    display: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--cp-accent);
+  }
+
+  .cp-notepad[data-has-notes] .cp-notepad__dot {
+    display: inline-block;
+  }
+
+  .cp-notepad[data-open] .cp-notepad__fab {
+    display: none;
+  }
+
+  .cp-notepad__panel {
+    position: fixed;
+    z-index: var(--sl-z-index-toc);
+    display: flex;
+    flex-direction: column;
+    background: var(--cp-surface);
+    color: var(--cp-text);
+    /* Small screens: bottom sheet. */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: min(60vh, 32rem);
+    border-top: 1px solid var(--cp-border-strong);
+    border-radius: var(--cp-radius-lg) var(--cp-radius-lg) 0 0;
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .cp-notepad__panel[hidden] {
+    display: none;
+  }
+
+  .cp-notepad__resize {
+    display: none;
+  }
+
+  .cp-notepad__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1rem 0.5rem;
+  }
+
+  .cp-notepad__title {
+    margin: 0;
+    font-family: var(--cp-font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .cp-notepad__status {
+    margin: 0.1rem 0 0;
+    font-size: 0.75rem;
+    color: var(--cp-muted);
+  }
+
+  .cp-notepad__icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    border: 1px solid var(--cp-border);
+    background: none;
+    color: var(--cp-text-2);
+    cursor: pointer;
+  }
+
+  .cp-notepad__icon:hover {
+    border-color: var(--cp-border-strong);
+    color: var(--cp-text);
+  }
+
+  .cp-notepad__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 1rem 0.6rem;
+    border-bottom: 1px solid var(--cp-border);
+  }
+
+  .cp-notepad__toolbar button {
+    height: 1.85rem;
+    padding: 0 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--cp-border);
+    background: var(--cp-surface-2);
+    color: var(--cp-text-2);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .cp-notepad__toolbar button:hover {
+    border-color: var(--cp-border-strong);
+    color: var(--cp-text);
+  }
+
+  .cp-notepad__toolbar .cp-notepad__danger:hover {
+    border-color: var(--cp-red);
+    color: var(--cp-red);
+  }
+
+  .cp-notepad__spacer {
+    flex: 1;
+  }
+
+  .cp-notepad__text {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    resize: none;
+    border: 0;
+    outline: none;
+    padding: 0.9rem 1rem;
+    background: var(--cp-bg-soft);
+    color: var(--cp-text);
+    font-family: var(--sl-font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    tab-size: 2;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .cp-notepad__text::placeholder {
+    color: var(--cp-muted);
+    white-space: pre-wrap;
+  }
+
+  .cp-notepad__foot {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.45rem 1rem;
+    border-top: 1px solid var(--cp-border);
+    font-size: 0.72rem;
+    color: var(--cp-muted);
+    font-family: var(--sl-font-mono);
+  }
+
+  /* Wide screens: docked to the right, over the table of contents; the reader can drag it wider. */
+  @media (min-width: 72rem) {
+    .cp-notepad__fab,
+    .cp-notepad__panel {
+      z-index: var(--sl-z-index-menu);
+    }
+
+    .cp-notepad__panel {
+      left: auto;
+      top: var(--sl-nav-height);
+      height: auto;
+      width: var(--cp-notepad-width, max(var(--sl-sidebar-width), 22rem));
+      max-width: 60vw;
+      border-top: 0;
+      border-left: 1px solid var(--cp-border-strong);
+      border-radius: 0;
+      box-shadow: -12px 0 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .cp-notepad__resize {
+      display: block;
+      position: absolute;
+      left: -4px;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      cursor: ew-resize;
+    }
+
+    .cp-notepad__resize:hover,
+    .cp-notepad[data-resizing] .cp-notepad__resize {
+      background: color-mix(in srgb, var(--cp-accent) 35%, transparent);
+    }
+  }
+
+  @media (max-width: 50rem) {
+    .cp-notepad__fab {
+      right: 1rem;
+      bottom: 1rem;
+    }
+
+    .cp-notepad__fab-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    .cp-notepad__fab {
+      padding: 0 0.85rem;
+    }
+
+    .cp-notepad__foot span:last-child {
+      display: none;
+    }
+  }
+
+  /* While the bottom sheet is open, leave room so it never hides the end of the page. */
+  @media (max-width: 71.99rem) {
+    html[data-notes-open] body {
+      padding-bottom: min(60vh, 32rem);
+    }
+  }
+
+  @media print {
+    .cp-notepad {
+      display: none !important;
+    }
+  }
+</style>

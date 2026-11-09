@@ -67,6 +67,9 @@
   .sl-markdown-content table {
     display: block;
     overflow-x: auto;
+    /* Hug the columns so the border doesn't run past them; wide tables still scroll. */
+    width: max-content;
+    max-width: 100%;
   }
 }
 
@@ -541,4 +544,25 @@
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.35;
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 50rem) {
+  .sl-markdown-content {
+    font-size: 1rem;
+  }
+
+  .cp-statement__bar {
+    padding: 0.55rem 0.8rem 0.55rem 1rem;
+  }
+
+  .cp-statement__body {
+    padding: 0.9rem 0.9rem 1rem 1rem;
+  }
+
+  .cp-statement__body pre,
+  .sl-markdown-content pre {
+    font-size: 0.8rem;
+  }
 }
