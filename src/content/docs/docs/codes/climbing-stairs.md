@@ -1,35 +1,74 @@
 ---
 title: "Climbing Stairs"
-description: "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to…"
+description: "Count the distinct ways to climb n stairs taking 1 or 2 steps at a time, using the Fibonacci recurrence with two rolling variables."
 source: "https://leetcode.com/problems/climbing-stairs/"
+difficulty: "Easy"
 tags: ["Math", "Dynamic Programming", "Memoization"]
 complexity:
   time: "O(n)"
-  space: "O(n)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>You are climbing a staircase. It takes <code>n</code> steps to reach the top.</p>
+You are climbing a staircase. It takes `n` steps to reach the top.
 
-<p>Each time you can either climb <code>1</code> or <code>2</code> steps. In how many distinct ways can you climb to the top?</p>
+Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?
+
+**Example 1:**
+
+```text
+Input:  n = 2
+Output: 2
+Explanation: There are two ways to climb to the top.
+1. 1 step + 1 step
+2. 2 steps
+```
+
+**Example 2:**
+
+```text
+Input:  n = 3
+Output: 3
+Explanation: There are three ways to climb to the top.
+1. 1 step + 1 step + 1 step
+2. 1 step + 2 steps
+3. 2 steps + 1 step
+```
+
+**Constraints:**
+
+- $1 \le n \le 45$
 
 ## Solution approach
 
 ### Intuition
 
-The last move to reach step `i` is either one step from `i - 1` or two steps from `i - 2`. So the number of ways to reach step `i` is the sum of the ways to reach those two steps, which is the Fibonacci recurrence. Plain recursion would recompute the same steps exponentially many times; storing each result in a table avoids that.
+Look at the **last** move of any way to reach step `i`: it is either a 1-step from `i - 1` or a 2-step from `i - 2`. These two groups do not overlap and together cover every way, so
+
+$$
+\text{ways}(i) = \text{ways}(i - 1) + \text{ways}(i - 2), \qquad \text{ways}(0) = \text{ways}(1) = 1.
+$$
+
+This is the Fibonacci sequence shifted by one. Plain recursion recomputes the same values exponentially often; computing bottom-up fixes that, and since each value needs only the previous two, two variables replace the whole table.
 
 ### Algorithm
 
-1. Create `dp` of size `n + 1` with `dp[0] = 1` and `dp[1] = 1`.
-2. For `i` from `2` to `n`, set `dp[i] = dp[i - 1] + dp[i - 2]`.
-3. Return `dp[n]`.
+1. Keep `prev = ways(i - 2)` and `curr = ways(i - 1)`, starting with `prev = curr = 1` (`ways(0)` and `ways(1)`).
+2. For `i` from `2` to `n`: compute `next = curr + prev`, then shift: `prev = curr`, `curr = next`.
+3. Return `curr`, which now holds `ways(n)`.
+
+For `n = 3`: `ways(2) = 1 + 1 = 2`, `ways(3) = 2 + 1 = 3`.
 
 ### Complexity
 
 - **Time:** $O(n)$ — one loop over the steps.
-- **Space:** $O(n)$ — for the `dp` table.
+- **Space:** $O(1)$ — two integers.
+
+### Edge cases
+
+- **`n == 1`:** the loop does not run and `curr = 1` is returned.
+- **`n == 45`:** the answer is $1\,836\,311\,903$, which still fits in a 32-bit `int` (`n = 46` would overflow).
 
 ## Code
 
@@ -37,11 +76,13 @@ The last move to reach step `i` is either one step from `i - 1` or two steps fro
 class Solution {
    public:
     int climbStairs(int n) {
-        vector<int> dp(n + 1);
-        dp[0] = 1;
-        dp[1] = 1;
-        for (int i = 2; i <= n; i++) dp[i] = dp[i - 1] + dp[i - 2];
-        return dp[n];
+        int prev = 1, curr = 1;
+        for (int i = 2; i <= n; i++) {
+            int next = curr + prev;
+            prev = curr;
+            curr = next;
+        }
+        return curr;
     }
 };
 ```

@@ -1,7 +1,8 @@
 ---
 title: "Merge Two Sorted Lists"
-description: "You are given the heads of two sorted linked lists list1 and list2. Merge the two lists in a one sorted list. The list should be made by splicing together…"
+description: "Merge two sorted linked lists into one sorted list by splicing their nodes together, using a dummy head and a single linear walk."
 source: "https://leetcode.com/problems/merge-two-sorted-lists/"
+difficulty: "Easy"
 tags: ["Linked List", "Recursion"]
 complexity:
   time: "O(n + m)"
@@ -10,34 +11,76 @@ complexity:
 
 ## Problem
 
-<p>You are given the heads of two sorted linked lists <code>list1</code> and <code>list2</code>.</p>
+You are given the heads of two sorted linked lists `list1` and `list2`.
 
-<p>Merge the two lists in a one <strong>sorted</strong> list. The list should be made by splicing together the nodes of the first two lists.</p>
+Merge the two lists into one **sorted** list. The list should be made by splicing together the nodes of the first two lists.
 
-<p>Return <em>the head of the merged linked list</em>.</p>
+Return *the head of the merged linked list*.
+
+**Example 1:**
+
+![list1 = 1→2→4 and list2 = 1→3→4 merged into 1→1→2→3→4→4](https://assets.leetcode.com/uploads/2020/10/03/merge_ex1.jpg)
+
+```text
+Input:  list1 = [1,2,4], list2 = [1,3,4]
+Output: [1,1,2,3,4,4]
+```
+
+**Example 2:**
+
+```text
+Input:  list1 = [], list2 = []
+Output: []
+```
+
+**Example 3:**
+
+```text
+Input:  list1 = [], list2 = [0]
+Output: [0]
+```
+
+**Constraints:**
+
+- The number of nodes in both lists is in the range `[0, 50]`.
+- $-100 \le \text{Node.val} \le 100$
+- Both `list1` and `list2` are sorted in **non-decreasing** order.
 
 ## Solution approach
 
 ### Intuition
 
-The merged list must start with the smaller of the two heads. After that, walk along one list and splice nodes of the other list into it wherever they belong. Because both lists are already sorted, each node of `list2` is spliced in at most once and the walk never moves backwards, so no new nodes are needed.
+The smallest node of the merged list is the smaller of the two heads. Once it is taken, the next smallest is again the smaller of the two *current* heads, and so on — exactly the merge step of merge sort. Because we may splice existing nodes, we never allocate: we only rewrite `next` pointers.
+
+The awkward part is the very first node (which list does the head come from?). A **dummy node** removes that special case: we append every chosen node after a `tail` pointer that starts at the dummy, and the answer is `dummy.next`.
+
+Invariant: after each step, `dummy.next … tail` is a sorted list containing exactly the nodes removed so far, and every one of them is `<=` every node still left in `list1` and `list2`.
 
 ### Algorithm
 
-1. If either list is empty, return the other one.
-2. Swap if needed so that `list1` starts with the smaller value, and remember that node as `head`.
-3. While `list1->next` and `list2` both exist: if `list1->next->val <= list2->val`, the next node is already in order, so advance `list1`.
-4. Otherwise detach the first node of `list2` (`temp`), insert it between `list1` and `list1->next`, and move `list1` onto it.
-5. When `list1` reaches its last node, attach whatever remains of `list2` and return `head`.
+1. Create a stack-allocated `dummy` node and set `tail = &dummy`.
+2. While both `list1` and `list2` are non-empty:
+   - If `list1->val <= list2->val`, link `tail->next = list1` and advance `list1`; otherwise link `list2` and advance `list2`.
+   - Move `tail` to the node just linked.
+3. At most one list still has nodes; they are all `>=` everything already merged, so link the whole remainder at once: `tail->next = list1 ? list1 : list2`.
+4. Return `dummy.next`.
+
+### Walkthrough
+
+Orange cells are the two heads being compared, grey cells have already been spliced out, and in the `out` row (the list hanging off `dummy`) blue marks `tail`:
+
+![Merging [1,2,4] and [1,3,4] with a tail pointer](/img/codes/merge-two-sorted-lists/merge.gif)
 
 ### Complexity
 
-- **Time:** $O(n + m)$ — each node of either list is passed over at most once.
-- **Space:** $O(1)$ — nodes are relinked in place (the `malloc` calls allocate memory that is never used).
+- **Time:** $O(n + m)$ — each loop iteration moves one node into the result, and the remainder is attached in $O(1)$.
+- **Space:** $O(1)$ — only the dummy node and `tail`; the nodes are relinked in place. (The recursive version is also linear time but uses $O(n + m)$ stack.)
 
 ### Edge cases
 
-- **Equal values** keep the node from `list1` first, because the check is `<=`.
+- **One or both lists empty** (Examples 2 and 3): the loop never runs and step 3 returns the other list (or `nullptr`).
+- **Equal values:** `<=` takes the node from `list1` first, so the merge is stable.
+- **One list much longer:** its leftover tail is attached in one assignment instead of being walked.
 
 ## Code
 
@@ -45,32 +88,20 @@ The merged list must start with the smaller of the two heads. After that, walk a
 class Solution {
    public:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
-        if (list1 == NULL) return list2;
-        if (list2 == NULL) return list1;
-
-        if (list1->val > list2->val) swap(list1, list2);
-        ListNode* head;
-        head = (ListNode*)malloc(sizeof(ListNode*));
-        head = list1;
-
-        while (list1->next != NULL && list2 != NULL) {
-            if (list1->next->val <= list2->val) {
+        ListNode dummy;
+        ListNode* tail = &dummy;
+        while (list1 && list2) {
+            if (list1->val <= list2->val) {
+                tail->next = list1;
                 list1 = list1->next;
-                continue;
+            } else {
+                tail->next = list2;
+                list2 = list2->next;
             }
-            ListNode* temp;
-            temp = (ListNode*)malloc(sizeof(ListNode*));
-            temp = list2;
-            list2 = list2->next;
-            temp->next = list1->next;
-            list1->next = temp;
-            list1 = list1->next;
+            tail = tail->next;
         }
-        if (list2 != NULL) {
-            list1->next = list2;
-        }
-        return head;
+        tail->next = list1 ? list1 : list2;
+        return dummy.next;
     }
 };
-
 ```

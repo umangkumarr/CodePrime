@@ -1,44 +1,94 @@
 ---
 title: "3Sum"
-description: "Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] ==…"
+description: "Find all unique triplets in an array that sum to zero by sorting the array and closing in on each fixed element with two pointers."
 source: "https://leetcode.com/problems/3sum/"
+difficulty: "Medium"
 tags: ["Array", "Two Pointers", "Sorting"]
 complexity:
-  time: "O(n^2 \\log n)"
-  space: "O(n + k)"
+  time: "O(n^2)"
+  space: "O(\\log n)"
 ---
 
 ## Problem
 
-<p>Given an integer array nums, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>.</p>
+Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.
 
-<p>Notice that the solution set must not contain duplicate triplets.</p>
+Notice that the solution set must not contain duplicate triplets.
+
+**Example 1:**
+
+```text
+Input:  nums = [-1,0,1,2,-1,-4]
+Output: [[-1,-1,2],[-1,0,1]]
+Explanation:
+nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0.
+nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0.
+nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0.
+The distinct triplets are [-1,0,1] and [-1,-1,2].
+Notice that the order of the output and the order of the triplets does not matter.
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [0,1,1]
+Output: []
+Explanation: The only possible triplet does not sum up to 0.
+```
+
+**Example 3:**
+
+```text
+Input:  nums = [0,0,0]
+Output: [[0,0,0]]
+Explanation: The only possible triplet sums up to 0.
+```
+
+**Constraints:**
+
+- $3 \le$ `nums.length` $\le 3000$
+- $-10^5 \le$ `nums[i]` $\le 10^5$
 
 ## Solution approach
 
 ### Intuition
 
-Duplicate triplets are the main difficulty, so the code works with the **distinct values** of `nums` and a frequency map `mp`. Every valid triplet falls into exactly one of three shapes: three different values, two equal values plus a third, or `{0, 0, 0}`. Each shape can be checked separately using the counts in `mp`.
+Checking every triple is $O(n^3)$, far too slow for $n = 3000$. Sorting the array unlocks two things at once.
 
-For three different values, fixing a pair `arr[i]`, `arr[j]` determines the third value `-(arr[i] + arr[j])`, which a hash lookup checks in $O(1)$. This avoids the $O(n^3)$ brute force over all triples. Each triplet is sorted and stored in a `set` so repeats are dropped.
+1. **Two Sum on a sorted array is linear.** Fix the smallest element `nums[i]`; we now need two elements to its right that sum to `-nums[i]`. Put `lo` just after `i` and `hi` at the end. If `nums[i] + nums[lo] + nums[hi]` is too small, the only way to increase it is to move `lo` right; if it is too big, move `hi` left. Every move discards a value that cannot be part of any answer with the current `i`, so one sweep finds all pairs.
+2. **Duplicates sit next to each other.** A triplet is identified by its values, so we skip an `i` whose value equals the previous one, and after recording a triplet we step `lo` past every copy of its value. This produces each triplet exactly once, in sorted order, without a `set`.
+
+A further shortcut: once `nums[i] > 0`, the three smallest remaining values are all positive, so no more triplets exist.
 
 ### Algorithm
 
-1. Count every value in `mp`, copy the distinct values into `arr`, and sort `arr`.
-2. **All different:** for every pair `i`, `j` of distinct values, let `sm = arr[i] + arr[j]`. If `-sm` differs from both and `mp[-sm] > 0`, sort the triplet and insert it into `ans`.
-3. **Two equal:** for every `arr[i] != 0` with `mp[arr[i]] > 1`, check whether `-2 * arr[i]` exists; if so, insert `{arr[i], arr[i], -2 * arr[i]}`.
-4. **All equal:** if `mp[0] > 2`, insert `{0, 0, 0}`.
-5. Copy the set `ans` into the vector `vv` and return it.
+1. Sort `nums`.
+2. For each `i` from `0` to `n - 3`:
+   - stop if `nums[i] > 0`; skip `i` if `nums[i] == nums[i - 1]`;
+   - set `lo = i + 1`, `hi = n - 1` and, while `lo < hi`, compute `sum = nums[i] + nums[lo] + nums[hi]`:
+     - `sum < 0`: `lo++`;
+     - `sum > 0`: `hi--`;
+     - `sum == 0`: record the triplet, move `lo` right and `hi` left, then keep moving `lo` right while `nums[lo] == nums[lo - 1]`.
+3. Return the recorded triplets.
+
+Skipping duplicates only on `lo` is enough: if `nums[lo]` changes and `nums[i]` is fixed, the matching `nums[hi]` must change too.
+
+### Walkthrough
+
+Example 1 after sorting is `[-4,-1,-1,0,1,2]`. Blue is the fixed element `i`, orange the pair `lo`/`hi`, grey the values already ruled out:
+
+![Two-pointer sweep for 3Sum on [-4,-1,-1,0,1,2]](/img/codes/3sum/two-pointers.gif)
 
 ### Complexity
 
-- **Time:** $O(n^2 \log n)$ — $O(n^2)$ pairs of distinct values, and each insertion into the ordered `set` costs $O(\log n)$ or more.
-- **Space:** $O(n + k)$ — the map and `arr` hold up to $n$ values and the set holds the $k$ unique triplets.
+- **Time:** $O(n^2)$ — sorting costs $O(n \log n)$; for each of the $n$ choices of `i` the pointers `lo` and `hi` together move at most $n$ steps.
+- **Space:** $O(\log n)$ — the stack space of `std::sort`; the output list is not counted.
 
 ### Edge cases
 
-- **Many zeros** such as `[0, 0, 0, 0]`: steps 2 and 3 skip zero, and only step 4 adds `{0, 0, 0}`, once.
-- **A value used twice** such as `[-1, -1, 2]`: handled by step 3, because step 2 never pairs a value with itself.
+- **All zeros** such as `[0,0,0,0]`: `i = 0` records `[0,0,0]` once, the duplicate skip on `lo` ends the inner loop, and every later `i` is skipped because its value repeats.
+- **No answer** such as `[0,1,1]`: every sum is positive, `hi` moves left until it meets `lo`, and the result is empty.
+- **Sum range:** the largest possible magnitude is $3 \times 10^5$, which fits in an `int`.
 
 ## Code
 
@@ -46,49 +96,26 @@ For three different values, fixing a pair `arr[i]`, `arr[j]` determines the thir
 class Solution {
    public:
     vector<vector<int>> threeSum(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
         int n = nums.size();
-        unordered_map<int, int> mp;
-        for (int i = 0; i < n; i++) {
-            mp[nums[i]]++;
-        }
-
-        vector<int> arr;
-        for (auto i : mp) {
-            arr.push_back(i.first);
-        }
-
-        set<vector<int>> ans;
-        n = arr.size();
-        sort(arr.begin(), arr.end());
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int sm = arr[i] + arr[j];
-                if (-sm != arr[i] && -sm != arr[j] && mp[-sm] > 0) {
-                    vector<int> v = {arr[i], arr[j], -sm};
-                    sort(v.begin(), v.end());
-                    ans.insert(v);
+        vector<vector<int>> ans;
+        for (int i = 0; i + 2 < n && nums[i] <= 0; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int lo = i + 1, hi = n - 1;
+            while (lo < hi) {
+                int sum = nums[i] + nums[lo] + nums[hi];
+                if (sum < 0) {
+                    lo++;
+                } else if (sum > 0) {
+                    hi--;
+                } else {
+                    ans.push_back({nums[i], nums[lo], nums[hi]});
+                    lo++, hi--;
+                    while (lo < hi && nums[lo] == nums[lo - 1]) lo++;
                 }
             }
         }
-
-        for (int i = 0; i < n; i++) {
-            int sm = 2 * arr[i];
-            if (sm != arr[i] && mp[arr[i]] > 1 && mp[-2 * arr[i]] > 0) {
-                vector<int> v = {arr[i], arr[i], -sm};
-                sort(v.begin(), v.end());
-                ans.insert(v);
-            }
-        }
-
-        if (mp[0] > 2) {
-            ans.insert({0, 0, 0});
-        }
-        vector<vector<int>> vv;
-        for (auto i : ans) {
-            vv.push_back(i);
-        }
-        return vv;
+        return ans;
     }
 };
-
 ```

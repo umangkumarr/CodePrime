@@ -1,76 +1,106 @@
 ---
 title: "Construct Binary Tree from Inorder and Postorder Traversal"
-description: "Given two integer arrays inorder and postorder where inorder is the inorder traversal of a binary tree and postorder is the postorder traversal of the…"
+description: "Rebuild a binary tree from its inorder and postorder traversals in linear time: the last postorder value is the root, and a hash map finds it in inorder to split the subtrees."
 source: "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/"
+difficulty: "Medium"
 tags: ["Array", "Hash Table", "Divide and Conquer", "Tree", "Binary Tree"]
 complexity:
-  time: "O(n^2)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-<p>Given two integer arrays <code>inorder</code> and <code>postorder</code> where <code>inorder</code> is the inorder traversal of a binary tree and <code>postorder</code> is the postorder traversal of the same tree, construct and return <em>the binary tree</em>.</p>
+Given two integer arrays `inorder` and `postorder` where `inorder` is the inorder traversal of a binary tree and `postorder` is the postorder traversal of the same tree, construct and return *the binary tree*.
+
+**Example 1:**
+
+![Tree with root 3, left child 9, right child 20 whose children are 15 and 7](https://assets.leetcode.com/uploads/2021/02/19/tree.jpg)
+
+```text
+Input:  inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]
+Output: [3,9,20,null,null,15,7]
+```
+
+**Example 2:**
+
+```text
+Input:  inorder = [-1], postorder = [-1]
+Output: [-1]
+```
+
+**Constraints:**
+
+- $1 \le$ `inorder.length` $\le 3000$
+- `postorder.length == inorder.length`
+- $-3000 \le$ `inorder[i]`, `postorder[i]` $\le 3000$
+- `inorder` and `postorder` consist of **unique** values.
+- Each value of `postorder` also appears in `inorder`.
+- `inorder` is **guaranteed** to be the inorder traversal of the tree.
+- `postorder` is **guaranteed** to be the postorder traversal of the tree.
 
 ## Solution approach
 
 ### Intuition
 
-The last element of a post-order range is the root of that subtree. Finding the root in the in-order range splits it: everything to its left forms the left subtree and everything to its right forms the right subtree. The sizes of those two parts tell us which slice of the post-order range belongs to each subtree, since post-order lists the whole left subtree, then the whole right subtree, then the root.
+The two traversals lay out every subtree as a **contiguous block**, in different arrangements:
+
+- **postorder** = `[left subtree][right subtree] root` — the root of any block is its **last** element;
+- **inorder** = `[left subtree] root [right subtree]` — once the root is known, its position `mid` splits the block into the two subtrees, and tells us their sizes.
+
+So: take the root from the end of the postorder block, find it in inorder, and recurse on the two halves. The right subtree has `rightSize = inHi - mid` nodes, so in postorder it occupies the `rightSize` positions just before the root, and the left subtree ends just before that.
+
+Searching inorder linearly for the root costs $O(n)$ per node and $O(n^2)$ overall on a skewed tree. Because all values are unique, a hash map from value to inorder index makes every lookup $O(1)$.
 
 ### Algorithm
 
-1. Copy both arrays into the members and call `createTree(0, n - 1, 0, n - 1)`, where `p1..p2` is the post-order range and `n1..n2` the in-order range.
-2. Return `NULL` for an empty range. Create `root` from `postorder[p2]`, and return it at once if the range has one element.
-3. **Left subtree:** scan from `n1` until `inorder[nn2]` equals the root, then step back one. The left in-order range is `nn1..nn2`, and the left post-order range is `p1` to `p1 + (nn2 - nn1)`.
-4. **Right subtree:** scan from `n2` backwards until the root is found, then step forward one. The right in-order range is `nn1..n2`, and the right post-order range ends at `p2 - 1` and has the same length.
-5. Build both subtrees recursively and return `root`.
+1. Build `pos`, mapping each `inorder[i]` to `i`.
+2. Call `build(postorder, n - 1, 0, n - 1, pos)`, where the arguments are `postEnd` (index of the block's last postorder element) and the inorder range `[inLo, inHi]`.
+3. In `build`:
+   - If `inLo > inHi`, the block is empty: return `nullptr`.
+   - Create `root` from `postorder[postEnd]` and let `mid = pos[root->val]`, `rightSize = inHi - mid`.
+   - `root->right = build(postorder, postEnd - 1, mid + 1, inHi, pos)` — the right block ends just before the root.
+   - `root->left = build(postorder, postEnd - 1 - rightSize, inLo, mid - 1, pos)` — the left block ends just before the right block.
+   - Return `root`.
+
+### Walkthrough
+
+Example 1. Each step shows one call: blue is the root taken from the end of the postorder block and found in inorder; orange is its left block, purple its right block:
+
+![Splitting inorder and postorder around each root for the tree 3, 9, 20, 15, 7](/img/codes/construct-binary-tree-from-inorder-and-postorder-traversal/split.gif)
 
 ### Complexity
 
-- **Time:** $O(n^2)$ — the root is located with a linear scan of the in-order range, which costs $O(n^2)$ in total for a skewed tree ($O(n \log n)$ for a balanced one).
-- **Space:** $O(n)$ — for the member copies of the arrays; the recursion stack adds $O(h)$.
+- **Time:** $O(n)$ — building `pos` is $O(n)$, and each node is created by exactly one call doing $O(1)$ work (plus one empty call per missing child).
+- **Space:** $O(n)$ — the hash map, plus a recursion stack of depth $O(h)$, which is $O(n)$ for a skewed tree.
+
+### Edge cases
+
+- **Single node** (Example 2): `mid = inLo = inHi`, so both child ranges are empty.
+- **Skewed tree:** one side is always empty; depth reaches $3000$, which is fine for the recursion stack.
+- **Negative values:** handled naturally, since `pos` is a hash map rather than an offset array.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    vector<int> postorder;
-    vector<int> inorder;
-
-   public:
-    TreeNode* createTree(int p1, int p2, int n1, int n2) {
-        if (p2 < p1 || n1 > n2) return NULL;
-        TreeNode* root = new TreeNode(postorder[p2]);
-        if (p1 == p2 || n1 == n2) return root;
-        int pp1, pp2, nn1, nn2;
-
-        nn1 = n1, nn2 = n1;
-        while (inorder[nn2] != postorder[p2]) {
-            nn2++;
-        }
-        nn2--;
-        pp1 = p1;
-        pp2 = p1 + (nn2 - nn1);
-
-        root->left = createTree(pp1, pp2, nn1, nn2);
-
-        nn2 = n2;
-        nn1 = n2;
-        while (inorder[nn1] != postorder[p2]) nn1--;
-        nn1++;
-        pp2 = p2 - 1;
-        pp1 = pp2 - (nn2 - nn1);
-        root->right = createTree(pp1, pp2, nn1, nn2);
+    TreeNode* build(const vector<int>& postorder, int postEnd, int inLo, int inHi,
+                    const unordered_map<int, int>& pos) {
+        if (inLo > inHi) return nullptr;
+        TreeNode* root = new TreeNode(postorder[postEnd]);
+        int mid = pos.at(root->val);
+        int rightSize = inHi - mid;
+        root->right = build(postorder, postEnd - 1, mid + 1, inHi, pos);
+        root->left = build(postorder, postEnd - 1 - rightSize, inLo, mid - 1, pos);
         return root;
     }
 
+   public:
     TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
-        this->postorder = postorder;
-        this->inorder = inorder;
         int n = inorder.size();
-        return createTree(0, n - 1, 0, n - 1);
+        unordered_map<int, int> pos;
+        for (int i = 0; i < n; i++) pos[inorder[i]] = i;
+        return build(postorder, n - 1, 0, n - 1, pos);
     }
 };
-
 ```

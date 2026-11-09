@@ -1,83 +1,113 @@
 ---
 title: "Flood Fill"
-description: "An image is represented by an m x n integer grid image where image[i][j] represents the pixel value of the image. You are also given three integers sr,…"
+description: "Recolour the 4-directionally connected region of same-coloured pixels that contains a start pixel, using breadth-first search over the grid."
 source: "https://leetcode.com/problems/flood-fill/"
+difficulty: "Easy"
 tags: ["Array", "Depth-First Search", "Breadth-First Search", "Matrix"]
 complexity:
-  time: "O(n \\cdot m)"
-  space: "O(n \\cdot m)"
+  time: "O(m \\cdot n)"
+  space: "O(m \\cdot n)"
 ---
 
 ## Problem
 
-<p>An image is represented by an <code>m x n</code> integer grid <code>image</code> where <code>image[i][j]</code> represents the pixel value of the image.</p>
+You are given an image represented by an `m x n` grid of integers `image`, where `image[i][j]` represents the pixel value of the image. You are also given three integers `sr`, `sc`, and `color`. Your task is to perform a **flood fill** on the image starting from the pixel `image[sr][sc]`.
 
-<p>You are also given three integers <code>sr</code>, <code>sc</code>, and <code>color</code>. You should perform a <strong>flood fill</strong> on the image starting from the pixel <code>image[sr][sc]</code>.</p>
+To perform a **flood fill**:
 
-<p>To perform a <strong>flood fill</strong>, consider the starting pixel, plus any pixels connected <strong>4-directionally</strong> to the starting pixel of the same color as the starting pixel, plus any pixels connected <strong>4-directionally</strong> to those pixels (also with the same color), and so on. Replace the color of all of the aforementioned pixels with <code>color</code>.</p>
+1. Begin with the starting pixel and change its color to `color`.
+2. Perform the same process for each pixel that is **directly adjacent** (pixels that share a side with the original pixel, either horizontally or vertically) and shares the **same color** as the starting pixel.
+3. Keep **repeating** this process by checking neighboring pixels of the *updated* pixels and modifying their color if it matches the original color of the starting pixel.
+4. The process **stops** when there are **no more** adjacent pixels of the original color to update.
 
-<p>Return <em>the modified image after performing the flood fill</em>.</p>
+Return the **modified** image after performing the flood fill.
+
+**Example 1:**
+
+![The 3 x 3 image before and after the fill; the connected 1s turn into 2s](https://assets.leetcode.com/uploads/2021/06/01/flood1-grid.jpg)
+
+```text
+Input:  image = [[1,1,1],[1,1,0],[1,0,1]], sr = 1, sc = 1, color = 2
+Output: [[2,2,2],[2,2,0],[2,0,1]]
+Explanation: From the center of the image with position (sr, sc) = (1, 1) (i.e., the red pixel),
+all pixels connected by a path of the same color as the starting pixel (i.e., the blue pixels)
+are colored with the new color.
+Note the bottom corner is not colored 2, because it is not horizontally or vertically connected
+to the starting pixel.
+```
+
+**Example 2:**
+
+```text
+Input:  image = [[0,0,0],[0,0,0]], sr = 0, sc = 0, color = 0
+Output: [[0,0,0],[0,0,0]]
+Explanation: The starting pixel is already colored with 0, which is the same as the target color.
+Therefore, no changes are made to the image.
+```
+
+**Constraints:**
+
+- `m == image.length`
+- `n == image[i].length`
+- $1 \le m, n \le 50$
+- $0 \le$ `image[i][j]`, `color` $< 2^{16}$
+- $0 \le$ `sr` $< m$
+- $0 \le$ `sc` $< n$
 
 ## Solution approach
 
 ### Intuition
 
-The pixels to recolour are those connected to `(sr, sc)` that share its original colour `col`. A breadth-first search from the start pixel visits exactly that region. To avoid visiting a pixel twice (and looping forever when `color == col`), each visited pixel is first marked with the temporary value `-1`. All `-1` pixels are given the new colour at the end.
+The pixels to recolour are exactly the connected component of the start pixel in the graph whose vertices are pixels of the original colour `original` and whose edges join side-adjacent pixels. Any graph traversal — BFS or DFS — started at `(sr, sc)` visits precisely that component.
+
+The neat part is that recolouring a pixel **is** marking it as visited: once a pixel has been changed to `color` it no longer equals `original`, so it will never be queued again. That only works when `color != original`. If they are equal, the image would not change at all, so we return it straight away — this also prevents an infinite loop.
 
 ### Algorithm
 
-1. Save `col = image[sr][sc]` and push `(sr, sc)` into the deque `q`.
-2. Pop a pixel `(i, j)`. If it no longer has colour `col`, skip it (it was already processed).
-3. Otherwise set `image[i][j] = -1` and push each of its four neighbours (using `dx` and `dy`) that is inside the grid and still has colour `col`.
-4. When the queue is empty, scan the whole grid and replace every `-1` with `color`.
-5. Return `image`.
+1. Let `original = image[sr][sc]`. If `original == color`, return `image` unchanged.
+2. Recolour the start pixel and push it into the queue `q`.
+3. While `q` is not empty, pop a pixel `(r, c)` and look at its four neighbours `(nr, nc)` (offsets from `dirs`). For each neighbour that is inside the grid and still has colour `original`, recolour it **immediately** and push it.
+4. Return `image`.
+
+Recolouring at push time (rather than at pop time) guarantees that every pixel enters the queue at most once.
 
 ### Complexity
 
-- **Time:** $O(n \cdot m)$ — each pixel is marked at most once, may be pushed at most four times, and the final scan touches every cell.
-- **Space:** $O(n \cdot m)$ — the queue can hold a number of entries proportional to the grid size.
+- **Time:** $O(m \cdot n)$ — each pixel is pushed at most once, and each pop checks four neighbours.
+- **Space:** $O(m \cdot n)$ — in the worst case (the whole image is one colour) the queue can hold a number of pixels proportional to the grid size. A recursive DFS would need the same amount of stack.
 
 ### Edge cases
 
-- **`color == col`:** the `-1` marker stops the BFS from revisiting pixels, and the final pass writes back the same colour.
+- **`color` equals the start colour (Example 2):** the early return leaves the image untouched and avoids re-queuing pixels forever.
+- **Diagonal neighbours** (the bottom-right `1` in Example 1) are never reached, because only the four side offsets in `dirs` are used.
+- **`1 x 1` image:** the start pixel is recoloured and the loop ends immediately.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-   public:
-    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc,
-                                  int color) {
-        deque<pair<int, int>> q;
-        int col = image[sr][sc];
-        int n = image.size();
-        int m = image[0].size();
-        q.push_back({sr, sc});
+  public:
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {
+        int original = image[sr][sc];
+        if (original == color) return image;
 
-        int dx[] = {1, -1, 0, 0};
-        int dy[] = {0, 0, 1, -1};
-
-        while (q.size()) {
-            auto p = q.front();
-            q.pop_front();
-            int i = p.first, j = p.second;
-            if (image[p.first][p.second] != col) continue;
-            image[i][j] = -1;
-            for (int k = 0; k < 4; k++) {
-                int x = dx[k] + i;
-                int y = dy[k] + j;
-                if (x >= 0 && x < n && y >= 0 && y < m && image[x][y] == col)
-                    q.push_back({x, y});
-            }
-        }
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (image[i][j] == -1) image[i][j] = color;
+        int m = image.size(), n = image[0].size();
+        const int dirs[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        queue<pair<int, int>> q;
+        image[sr][sc] = color;
+        q.push({sr, sc});
+        while (!q.empty()) {
+            auto [r, c] = q.front();
+            q.pop();
+            for (auto& d : dirs) {
+                int nr = r + d[0], nc = c + d[1];
+                if (nr >= 0 && nr < m && nc >= 0 && nc < n && image[nr][nc] == original) {
+                    image[nr][nc] = color;
+                    q.push({nr, nc});
+                }
             }
         }
         return image;
     }
 };
-
 ```

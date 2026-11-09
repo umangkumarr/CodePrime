@@ -1,7 +1,8 @@
 ---
 title: "Path to Given Node"
-description: "Given a Binary Tree A containing N nodes. You need to find the path from Root to a given node B. NOTE: No two nodes in the tree have same data values. You…"
+description: "Return the root-to-node path to a given value in a binary tree, using a depth-first search that keeps the current path and backtracks on dead ends."
 source: "https://www.interviewbit.com/problems/path-to-given-node/"
+difficulty: "Easy"
 tags: ["Hash Table", "Tree", "Depth-First Search", "Binary Tree"]
 complexity:
   time: "O(n)"
@@ -10,63 +11,110 @@ complexity:
 
 ## Problem
 
-<div>
+Given a Binary Tree `A` containing `N` nodes.
 
-<p>Given a Binary Tree <strong>A</strong> containing <strong>N</strong> nodes.</p>
-<p>You need to find the path from <strong>Root</strong> to a given node <strong>B</strong>.</p>
-<p><strong>NOTE:</strong></p>
-<ul>
-<li>No two nodes in the tree have same data values.</li>
-<li>You can assume that <strong>B</strong> is present in the tree <strong>A</strong> and a path always exists.</li>
-</ul>
+You need to find the path from **Root** to a given node `B`.
 
-</div>
+**NOTE:**
+
+- No two nodes in the tree have same data values.
+- You can assume that `B` is present in the tree `A` and a path always exists.
+
+The first argument is a pointer to the root of the binary tree `A`; the second is an integer `B` denoting the node number. Return a one-dimensional array denoting the path from the root to the node `B`, in order.
+
+**Example 1:**
+
+```text
+Input:  A =       1
+                /   \
+               2     3
+              / \   / \
+             4   5 6   7
+        B = 5
+Output: [1, 2, 5]
+Explanation: We need to find the path from root node to node with data value 5.
+So the path is 1 -> 2 -> 5 so we will return [1, 2, 5].
+```
+
+**Example 2:**
+
+```text
+Input:  A =       1
+                /   \
+               2     3
+              / \     \
+             4   5     6
+        B = 1
+Output: [1]
+Explanation: We need to find the path from root node to node with data value 1.
+As node with data value 1 is the root so there is only one node in the path. So we will return [1].
+```
+
+**Constraints:**
+
+- $1 \le N \le 10^5$
+- $1 \le$ data value of each node $\le N$
+- $1 \le B \le N$
 
 ## Solution approach
 
 ### Intuition
 
-The path from the root to the node with value `B` is exactly the list of nodes on the recursion stack when a DFS finds `B`. So we search the tree, and once `B` is found each ancestor appends itself while the recursion unwinds. This produces the path from the node back up to the root, and reversing it gives the root-to-node order.
+During a depth-first search, the nodes on the recursion stack are exactly the path from the root to the node currently being visited. So if we keep that stack as an explicit array `path` — push a node when we enter it, pop it when we leave it — then at the moment we reach the node with value `B`, `path` **is** the answer, already in root-to-node order.
+
+When a subtree does not contain `B`, the search returns `false` and the node is popped again, so dead ends leave no trace. As soon as `B` is found, every caller returns `true` immediately without popping, which freezes `path`.
 
 ### Algorithm
 
-1. Clear the global `ans` and reset the flag `check` to `0`, then call `traversal(A, B)`.
-2. In `traversal`, return on a null node. If `root->val == B`, set `check = 1`, push the value and return.
-3. Search the left subtree. If `check` became `1`, this node is an ancestor, so push its value and return without searching further.
-4. Otherwise search the right subtree, and push this node's value if `check` is now `1`.
-5. Reverse `ans` so it runs from the root to `B`, then return it.
+1. `findPath(node, B, path)` returns whether `B` lies in the subtree of `node`:
+   - If `node` is null, return `false`.
+   - Push `node->val` onto `path`.
+   - If `node->val == B`, or `findPath` succeeds in the left subtree, or in the right subtree, return `true` (leave `node` on the path).
+   - Otherwise pop `node->val` and return `false`.
+2. `solve(A, B)` calls `findPath(A, B, path)` on an empty `path` and returns it.
+
+### Walkthrough
+
+Example 1: the search enters `1`, `2`, `4` (dead end, popped), then `5` = `B`. Green nodes are the returned path, red the dead end that was backtracked; `3` and its subtree are never visited:
+
+```mermaid
+flowchart TD
+    n1((1)) --> n2((2))
+    n1 --> n3((3))
+    n2 --> n4((4))
+    n2 --> n5((5))
+    n3 --> n6((6))
+    n3 --> n7((7))
+    classDef path fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    classDef dead fill:#fde0e0,stroke:#d64545,color:#7d1a1a
+    class n1,n2,n5 path
+    class n4 dead
+```
 
 ### Complexity
 
-- **Time:** $O(n)$ — each node is visited at most once, and the reverse is $O(h)$.
-- **Space:** $O(h)$ — the recursion stack and the path both have at most `h` entries, where `h` is the tree height ($O(n)$ for a skewed tree).
+- **Time:** $O(n)$ — each node is entered at most once, and the search stops as soon as `B` is found.
+- **Space:** $O(h)$ — the recursion stack and `path` both hold at most `h` nodes, where `h` is the height ($O(n)$ for a skewed tree).
+
+### Edge cases
+
+- **`B` is the root** (Example 2): the first call matches and returns `[A->val]`.
+- **`B` is a deep leaf in a skewed tree:** `path` grows to `N` entries; it is still exactly the root-to-node path.
 
 ## Code
 
 ```cpp title="C++"
-vector<int> ans;
-int check = 0;
-void traversal(TreeNode* root, int B) {
-    if (!root) return;
-    if (root->val == B) {
-        check = 1;
-        ans.push_back(root->val);
-        return;
-    }
-    traversal(root->left, B);
-    if (check == 1) {
-        ans.push_back(root->val);
-        return;
-    }
-    traversal(root->right, B);
-    if (check == 1) ans.push_back(root->val);
+bool findPath(TreeNode* node, int B, vector<int>& path) {
+    if (!node) return false;
+    path.push_back(node->val);
+    if (node->val == B || findPath(node->left, B, path) || findPath(node->right, B, path)) return true;
+    path.pop_back();
+    return false;
 }
 
 vector<int> Solution::solve(TreeNode* A, int B) {
-    ans.clear();
-    check = 0;
-    traversal(A, B);
-    reverse(ans.begin(), ans.end());
-    return ans;
+    vector<int> path;
+    findPath(A, B, path);
+    return path;
 }
 ```

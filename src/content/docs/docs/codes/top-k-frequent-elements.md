@@ -1,34 +1,85 @@
 ---
 title: "Top K Frequent Elements"
-description: "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order."
+description: "Return the k most frequent values of an array in O(n) time by counting with a hash map and then bucket-sorting the values by frequency."
 source: "https://leetcode.com/problems/top-k-frequent-elements/"
+difficulty: "Medium"
 tags: ["Array", "Hash Table", "Divide and Conquer", "Sorting", "Heap (Priority Queue)", "Bucket Sort", "Counting", "Quickselect"]
 complexity:
-  time: "O(n \\log n)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-<p>Given an integer array <code>nums</code> and an integer <code>k</code>, return <em>the</em> <code>k</code> <em>most frequent elements</em>. You may return the answer in <strong>any order</strong>.</p>
+Given an integer array `nums` and an integer `k`, return *the* `k` *most frequent elements*. You may return the answer in **any order**.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,1,1,2,2,3], k = 2
+Output: [1,2]
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [1], k = 1
+Output: [1]
+```
+
+**Example 3:**
+
+```text
+Input:  nums = [1,2,1,2,1,2,3,1,3,2], k = 2
+Output: [1,2]
+```
+
+**Constraints:**
+
+- $1 \le nums.length \le 10^5$
+- $-10^4 \le nums[i] \le 10^4$
+- `k` is in the range `[1, the number of unique elements in the array]`.
+- It is **guaranteed** that the answer is **unique**.
+
+**Follow-up:** Your algorithm's time complexity must be better than $O(n \log n)$, where `n` is the array's size.
 
 ## Solution approach
 
 ### Intuition
 
-Count how often each value appears, then sort the distinct values by frequency and take the first `k`. Storing each entry as a `(frequency, value)` pair makes the default pair ordering sort by frequency first.
+First count how often each value occurs with a hash map `freq`. Sorting the distinct values by count would give the answer in $O(n \log n)$, which the follow-up rules out. A heap of size `k` gives $O(n \log k)$; we can do even better.
+
+The trick is that a frequency is an integer between `1` and `n`. So instead of comparison-sorting by frequency we can **bucket** the values by it: `buckets[f]` holds every value that occurs exactly `f` times. Scanning the buckets from `f = n` down to `1` visits the values in decreasing order of frequency, and the first `k` values we meet are the answer. Because the answer is guaranteed to be unique, we never have to break a tie at the boundary.
 
 ### Algorithm
 
-1. Count frequencies of `nums` into the ordered map `mp`.
-2. Push each entry into `distinct` as `make_pair(count, value)`.
-3. Sort `distinct` and reverse it, so the highest frequencies come first.
-4. Return the `.second` (value) of the first `k` pairs as `ans`.
+1. Build `freq[x]` = number of occurrences of `x` in `nums`.
+2. Create `n + 1` empty buckets; for each `(x, f)` in `freq`, append `x` to `buckets[f]`.
+3. For `f` from `n` down to `1`, append the values of `buckets[f]` to `ans`, stopping as soon as `ans` holds `k` values.
+4. Return `ans`.
+
+### Walkthrough
+
+Example 3, `nums = [1,2,1,2,1,2,3,1,3,2]`, `k = 2`:
+
+| step | state |
+| --- | --- |
+| count | `freq = {1: 4, 2: 4, 3: 2}` |
+| bucket | `buckets[4] = [1, 2]`, `buckets[2] = [3]`, all others empty |
+| scan from `f = 10` down | buckets 10 to 5 are empty; `buckets[4]` gives `1` and `2`; `ans` has `k = 2` values, stop |
+
+Result: `[1, 2]`.
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — building the ordered map costs $O(n \log n)$, and sorting the distinct pairs costs at most the same.
-- **Space:** $O(n)$ — the map and `distinct` hold up to $n$ entries.
+- **Time:** $O(n)$ — counting is one pass with average $O(1)$ hash operations, filling the buckets touches each distinct value once, and the scan visits at most `n + 1` buckets.
+- **Space:** $O(n)$ — the hash map and the buckets each hold at most `n` entries.
+
+### Edge cases
+
+- **All values distinct:** every value lands in `buckets[1]`. Since the answer must be unique, `k` then equals the number of values, and all of them are returned.
+- **Single element** (Example 2): `buckets[1] = [1]`, returned immediately.
+- **Negative values:** they are only used as map keys and bucket contents, never as indices.
 
 ## Code
 
@@ -36,25 +87,21 @@ Count how often each value appears, then sort the distinct values by frequency a
 class Solution {
    public:
     vector<int> topKFrequent(vector<int>& nums, int k) {
-        int n = nums.size();
-        map<int, int> mp;
-        vector<pair<int, int>> distinct;
-        for (int i = 0; i < n; i++) {
-            mp[nums[i]]++;
-        }
+        unordered_map<int, int> freq;
+        for (int x : nums) freq[x]++;
 
-        for (auto i : mp) {
-            distinct.push_back(make_pair(i.second, i.first));
-        }
+        // buckets[f] = values that occur exactly f times
+        vector<vector<int>> buckets(nums.size() + 1);
+        for (auto& [x, f] : freq) buckets[f].push_back(x);
 
-        sort(distinct.begin(), distinct.end());
-        reverse(distinct.begin(), distinct.end());
         vector<int> ans;
-        for (int i = 0; i < k; i++) {
-            ans.push_back(distinct[i].second);
+        for (int f = nums.size(); f >= 1 && (int)ans.size() < k; f--) {
+            for (int x : buckets[f]) {
+                ans.push_back(x);
+                if ((int)ans.size() == k) break;
+            }
         }
         return ans;
     }
 };
-
 ```

@@ -1,8 +1,9 @@
 ---
 title: "Largest Rectangle in Histogram"
-description: "Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in…"
+description: "Find the largest rectangle in a histogram in one pass with an increasing monotonic stack that settles each bar's widest span when it is popped."
 source: "https://leetcode.com/problems/largest-rectangle-in-histogram/"
-tags: ["Array", "Stack", "Monotonic Stack"]
+difficulty: "Hard"
+tags: ["Array", "Stack", "Monotonic Stack", "Range Minimum/Maximum Query"]
 complexity:
   time: "O(n)"
   space: "O(n)"
@@ -10,31 +11,74 @@ complexity:
 
 ## Problem
 
-<p>Given an array of integers <code>heights</code> representing the histogram&#39;s bar height where the width of each bar is <code>1</code>, return <em>the area of the largest rectangle in the histogram</em>.</p>
+Given an array of integers `heights` representing the histogram's bar height where the width of each bar is `1`, return _the area of the largest rectangle in the histogram_.
+
+**Example 1:**
+
+![Histogram of bars 2,1,5,6,2,3 with the rectangle over bars 5 and 6 highlighted](https://assets.leetcode.com/uploads/2021/01/04/histogram.jpg)
+
+```text
+Input:  heights = [2,1,5,6,2,3]
+Output: 10
+Explanation: The above is a histogram where width of each bar is 1.
+The largest rectangle is shown in the red area, which has an area = 10 units.
+```
+
+**Example 2:**
+
+![Histogram of bars 2 and 4](https://assets.leetcode.com/uploads/2021/01/04/histogram-1.jpg)
+
+```text
+Input:  heights = [2,4]
+Output: 4
+```
+
+**Constraints:**
+
+- $1 \le$ `heights.length` $\le 10^5$
+- $0 \le$ `heights[i]` $\le 10^4$
 
 ## Solution approach
 
 ### Intuition
 
-In the best rectangle, some bar `i` is the shortest bar, and the rectangle stretches left and right until it hits a bar strictly shorter than `heights[i]`. So for every bar we need the index of the **nearest smaller bar on each side**; its rectangle then has width `right - left - 1`.
+Look at the best rectangle and its **shortest** bar `j`. The rectangle has height `heights[j]` and extends left and right until it would hit a bar that is strictly shorter than `heights[j]` — otherwise it could be widened. So it is enough to compute, for every bar `j`:
 
-A monotonic stack finds all nearest smaller bars in one pass per direction: bars that are taller than or equal to the current one can never be the "nearest smaller" for anything further along, so they are popped. Checking every pair of boundaries directly would be $O(n^2)$.
+- `left` = index of the nearest bar to the left that is shorter than `heights[j]` (or `-1`),
+- `right` = index of the nearest bar to the right that is shorter than `heights[j]` (or `n`),
+
+and take the maximum of `heights[j] * (right - left - 1)`. Trying all pairs of boundaries would be $O(n^2)$.
+
+A **monotonic stack** finds both boundaries in a single left-to-right pass. Keep the indices of bars whose heights are **increasing** from bottom to top. When the current bar `i` is lower than (or equal to) the bar on top, that top bar `j` has just found its right boundary `i`. Its left boundary is the bar directly beneath it in the stack, because everything that was between them was popped earlier by a bar no taller than `heights[j]`. So the rectangle for `j` is fully known at the moment it is popped.
+
+A virtual bar of height `0` at index `n` pops everything left at the end, so every bar is settled.
 
 ### Algorithm
 
-1. Right-to-left pass: the stack `st` holds `{height, index}` pairs, starting with the sentinel `{-1, n}`. For each `i`, pop while the top height is at least `heights[i]`; the top index is then the next smaller bar on the right, `indexes[i]`. Store `ans[i] = (indexes[i] - i) * heights[i]` and push `{heights[i], i}`.
-2. Clear the stack and push the sentinel `{-1, -1}`.
-3. Left-to-right pass: in the same way, `indexes[i]` becomes the previous smaller bar on the left. Add `heights[i] * (i - indexes[i])` to `ans[i]` and subtract `heights[i]`, because bar `i` was counted in both halves. Now `ans[i]` equals `heights[i] * (right - left - 1)`.
-4. Return the maximum `ans[i]` as `area`.
+1. Let `st` be an empty stack of indices and `best = 0`.
+2. For `i` from `0` to `n` (where the height at `i == n` is taken as `0`):
+   - while `st` is not empty and `heights[st.back()] >= h`: pop `j`; let `left` be the new top (or `-1` if the stack is empty); update `best` with `heights[j] * (i - left - 1)`;
+   - push `i`.
+3. Return `best`.
+
+Popping equal heights too is safe: the earlier of two equal bars gets a too-narrow width, but the later one is popped with the correct, strictly shorter left boundary and records the full rectangle.
+
+### Walkthrough
+
+Example 1. Purple cells are on the stack, the orange cell is the bar being settled, and its rectangle spans the orange and green cells; the grey cell is the virtual height-0 bar:
+
+![Monotonic stack on [2,1,5,6,2,3]](/img/codes/largest-rectangle-in-histogram/monotonic-stack.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — each bar is pushed and popped at most once in each pass.
-- **Space:** $O(n)$ — the stack plus the `indexes` and `ans` arrays.
+- **Time:** $O(n)$ — every index is pushed once and popped at most once.
+- **Space:** $O(n)$ — the stack, for example on a strictly increasing histogram.
 
 ### Edge cases
 
-- **Equal heights:** bars of equal height are popped as well, so both boundaries are strictly shorter bars and a run of equal bars is included in the width.
+- **Increasing heights:** nothing is popped until the virtual `0` bar at `i == n`, which settles every bar with right boundary `n`.
+- **Zero-height bars:** they pop everything before them, and their own rectangle has area `0`.
+- **Overflow:** the area is at most $10^5 \times 10^4 = 10^9$, which fits in an `int`.
 
 ## Code
 
@@ -42,34 +86,19 @@ A monotonic stack finds all nearest smaller bars in one pass per direction: bars
 class Solution {
    public:
     int largestRectangleArea(vector<int>& heights) {
-        int n = heights.size();
-        vector<int> indexes(n);
-        vector<int> ans(n);
-
-        stack<pair<int, int>> st;
-        st.push({-1, n});
-
-        for (int i = n - 1; i >= 0; i--) {
-            while (st.top().first >= heights[i]) st.pop();
-            indexes[i] = st.top().second;
-            st.push({heights[i], i});
-            ans[i] = (indexes[i] - i) * heights[i];
+        int n = heights.size(), best = 0;
+        vector<int> st;  // indices of bars with increasing heights
+        for (int i = 0; i <= n; i++) {
+            int h = (i == n) ? 0 : heights[i];
+            while (!st.empty() && heights[st.back()] >= h) {
+                int height = heights[st.back()];
+                st.pop_back();
+                int left = st.empty() ? -1 : st.back();
+                best = max(best, height * (i - left - 1));
+            }
+            st.push_back(i);
         }
-
-        while (!st.empty()) st.pop();
-        st.push({-1, -1});
-        int area = 0;
-
-        for (int i = 0; i < n; i++) {
-            while (st.top().first >= heights[i]) st.pop();
-            indexes[i] = st.top().second;
-            st.push({heights[i], i});
-            ans[i] = ans[i] + heights[i] * (i - indexes[i]) - heights[i];
-            area = max(ans[i], area);
-        }
-
-        return area;
+        return best;
     }
 };
-
 ```

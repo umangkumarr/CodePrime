@@ -1,41 +1,88 @@
 ---
 title: "Sliding Window Maximum"
-description: "You are given an array of integers nums, there is a sliding window of size k which is moving from the very left of the array to the very right. You can…"
+description: "Return the maximum of every window of size k as it slides over an array, in O(n) time using a monotonic deque of indices."
 source: "https://leetcode.com/problems/sliding-window-maximum/"
+difficulty: "Hard"
 tags: ["Array", "Queue", "Sliding Window", "Heap (Priority Queue)", "Monotonic Queue"]
 complexity:
-  time: "O(n \\log k)"
+  time: "O(n)"
   space: "O(k)"
 ---
 
 ## Problem
 
-<p>You are given an array of integers&nbsp;<code>nums</code>, there is a sliding window of size <code>k</code> which is moving from the very left of the array to the very right. You can only see the <code>k</code> numbers in the window. Each time the sliding window moves right by one position.</p>
+You are given an array of integers `nums`, there is a sliding window of size `k` which is moving from the very left of the array to the very right. You can only see the `k` numbers in the window. Each time the sliding window moves right by one position.
 
-<p>Return <em>the max sliding window</em>.</p>
+Return *the max sliding window*.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,3,-1,-3,5,3,6,7], k = 3
+Output: [3,3,5,5,6,7]
+Explanation:
+Window position                Max
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [1], k = 1
+Output: [1]
+```
+
+**Constraints:**
+
+- $1 \le nums.length \le 10^5$
+- $-10^4 \le nums[i] \le 10^4$
+- $1 \le k \le nums.length$
 
 ## Solution approach
 
 ### Intuition
 
-A `std::map` keeps its keys sorted, so its last key is always the largest. If the map holds exactly the values in the current window (with counts, to handle duplicates), the window maximum is just the last key. Recomputing the maximum of each window from scratch would cost $O(k)$ per window, $O(n \cdot k)$ overall.
+Recomputing each window's maximum costs $O(k)$ per window, $O(n \cdot k)$ overall; a balanced tree or heap brings that down to $O(n \log k)$. We can do better by noticing which elements can **never** be a maximum again.
+
+If `j < i` and `nums[j] <= nums[i]`, then `nums[j]` is useless from the moment `i` enters the window: every future window that contains `j` also contains `i` (`i` leaves later), and `nums[i]` is at least as large. So we may throw `j` away.
+
+After discarding all such useless elements, the indices that remain have **strictly decreasing values** from front to back. Keep them in a deque `dq`:
+
+- the front `dq.front()` is the index of the current window's maximum;
+- new indices are pushed at the back after popping every smaller-or-equal value they dominate;
+- the front is popped once it slides out of the window.
 
 ### Algorithm
 
-1. Insert the first `k` values into `mp`, counting how often each occurs.
-2. Push the last key of `mp` (found with `itr = mp.end(); itr--`) into `ans`.
-3. For each `i` from `k` to `n - 1`: increment `mp[nums[i]]`, decrement `mp[nums[i - k]]`, and erase that key if its count drops to `0`.
-4. Push the current last key of `mp` into `ans`.
-5. Return `ans`.
+1. For each index `i` from `0` to `n - 1`:
+   - If `dq.front() == i - k`, that index has just left the window: pop it from the front.
+   - While `dq` is non-empty and `nums[dq.back()] <= nums[i]`, pop from the back.
+   - Push `i` at the back.
+   - Once the first window is complete (`i >= k - 1`), append `nums[dq.front()]` to `ans`.
+2. Return `ans`.
+
+### Walkthrough
+
+Example 1. The blue cell is the new element `i`, orange cells are the indices still in `dq` (front first), grey cells are outside the window:
+
+![Monotonic deque on [1,3,-1,-3,5,3,6,7] with k = 3](/img/codes/sliding-window-maximum/deque.gif)
 
 ### Complexity
 
-- **Time:** $O(n \log k)$ — each step does a constant number of map operations on a map of at most `k` keys.
-- **Space:** $O(k)$ — the map holds at most `k` distinct values (plus the output).
+- **Time:** $O(n)$ — every index is pushed onto `dq` once and popped at most once, so all the `while` loops together do at most `n` pops.
+- **Space:** $O(k)$ — `dq` only holds indices inside the current window (the output itself takes $n - k + 1$ slots).
 
 ### Edge cases
 
-- **Duplicate values in the window**: the counts make sure a value is only removed when its last copy leaves the window.
+- **`k == 1`:** each element is popped by the next one or by the window check, and every element is its own maximum.
+- **Equal values:** the `<=` pops the older copy, so the front is always the most recent index of the maximum and leaves the window as late as possible.
+- **`k == n`:** only one window, `ans` has a single value.
 
 ## Code
 
@@ -43,26 +90,15 @@ A `std::map` keeps its keys sorted, so its last key is always the largest. If th
 class Solution {
    public:
     vector<int> maxSlidingWindow(vector<int>& nums, int k) {
-        map<int, int> mp;
-        for (int i = 0; i < k; i++) mp[nums[i]]++;
-        int n = nums.size();
+        deque<int> dq;  // indices; their values are strictly decreasing
         vector<int> ans;
-        auto itr = mp.end();
-        itr--;
-        ans.push_back((*itr).first);
-        for (int i = k; i < n; i++) {
-            mp[nums[i]]++;
-            mp[nums[i - k]]--;
-            if (mp[nums[i - k]] == 0) {
-                mp.erase(nums[i - k]);
-            }
-            itr = mp.end();
-            itr--;
-            ans.push_back((*itr).first);
+        for (int i = 0; i < (int)nums.size(); i++) {
+            if (!dq.empty() && dq.front() == i - k) dq.pop_front();
+            while (!dq.empty() && nums[dq.back()] <= nums[i]) dq.pop_back();
+            dq.push_back(i);
+            if (i >= k - 1) ans.push_back(nums[dq.front()]);
         }
-
         return ans;
     }
 };
-
 ```

@@ -94,6 +94,11 @@ class CpSolution extends HTMLElement {
     if (body) body.inert = !(this.revealed || always);
   }
 
+  reveal() {
+    this.revealed = true;
+    this.sync();
+  }
+
   private onClick = (event: Event) => {
     const action = (event.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset.action;
     if (!action) return;
@@ -103,12 +108,26 @@ class CpSolution extends HTMLElement {
       this.revealed = false;
       write(ALWAYS_SHOW_KEY, 'false');
     }
-    this.sync();
+    // The "always show" preference is shared, so every gate on the page follows it.
+    document.querySelectorAll<CpSolution>('cp-solution').forEach((s) => s.sync());
     if (action !== 'hide') this.querySelector<HTMLElement>('.cp-solution__body')?.focus({preventScroll: true});
   };
 }
 
 if (!customElements.get('cp-solution')) customElements.define('cp-solution', CpSolution);
+
+/** A table-of-contents link (or shared URL) pointing inside a hidden section opens that section. */
+function revealHashTarget() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  const target = id ? document.getElementById(id) : null;
+  const gate = target?.closest<CpSolution>('cp-solution');
+  if (!gate || gate.hasAttribute('data-open')) return;
+  gate.reveal();
+  requestAnimationFrame(() => target?.scrollIntoView());
+}
+
+window.addEventListener('hashchange', revealHashTarget);
+revealHashTarget();
 
 // ---------- Keyboard navigation ----------------------------------------------------
 

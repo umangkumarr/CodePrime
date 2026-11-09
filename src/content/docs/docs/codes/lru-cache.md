@@ -1,7 +1,8 @@
 ---
 title: "LRU Cache"
-description: "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache. Implement the LRUCache class: LRUCache(int capacity) Initialize…"
+description: "Design a least-recently-used cache with O(1) get and put, using a hash map of iterators into a doubly linked list kept in recency order."
 source: "https://leetcode.com/problems/lru-cache/"
+difficulty: "Medium"
 tags: ["Hash Table", "Linked List", "Design", "Doubly-Linked List"]
 complexity:
   time: "O(1)"
@@ -10,75 +11,130 @@ complexity:
 
 ## Problem
 
-<p>Design a data structure that follows the constraints of a <strong><a href="https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU" target="_blank">Least Recently Used (LRU) cache</a></strong>.</p>
+Design a data structure that follows the constraints of a **[Least Recently Used (LRU) cache](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU)**.
 
-<p>Implement the <code>LRUCache</code> class:</p>
+Implement the `LRUCache` class:
 
-<ul>
-	<li><code>LRUCache(int capacity)</code> Initialize the LRU cache with <strong>positive</strong> size <code>capacity</code>.</li>
-	<li><code>int get(int key)</code> Return the value of the <code>key</code> if the key exists, otherwise return <code>-1</code>.</li>
-	<li><code>void put(int key, int value)</code>&nbsp;Update the value of the <code>key</code> if the <code>key</code> exists. Otherwise, add the <code>key-value</code> pair to the cache. If the number of keys exceeds the <code>capacity</code> from this operation, <strong>evict</strong> the least recently used key.</li>
-</ul>
+- `LRUCache(int capacity)` Initialize the LRU cache with **positive** size `capacity`.
+- `int get(int key)` Return the value of the `key` if the key exists, otherwise return `-1`.
+- `void put(int key, int value)` Update the value of the `key` if the `key` exists. Otherwise, add the `key-value` pair to the cache. If the number of keys exceeds the `capacity` from this operation, **evict** the least recently used key.
 
-<p>The functions&nbsp;<code data-stringify-type="code">get</code>&nbsp;and&nbsp;<code data-stringify-type="code">put</code>&nbsp;must each run in <code>O(1)</code> average time complexity.</p>
+The functions `get` and `put` must each run in `O(1)` average time complexity.
+
+**Example 1:**
+
+```text
+Input
+["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
+[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+Output
+[null, null, null, 1, null, -1, null, -1, 3, 4]
+
+Explanation
+LRUCache lRUCache = new LRUCache(2);
+lRUCache.put(1, 1); // cache is {1=1}
+lRUCache.put(2, 2); // cache is {1=1, 2=2}
+lRUCache.get(1);    // return 1
+lRUCache.put(3, 3); // LRU key was 2, evicts key 2, cache is {1=1, 3=3}
+lRUCache.get(2);    // returns -1 (not found)
+lRUCache.put(4, 4); // LRU key was 1, evicts key 1, cache is {4=4, 3=3}
+lRUCache.get(1);    // return -1 (not found)
+lRUCache.get(3);    // return 3
+lRUCache.get(4);    // return 4
+```
+
+**Constraints:**
+
+- $1 \le$ `capacity` $\le 3000$
+- $0 \le$ `key` $\le 10^4$
+- $0 \le$ `value` $\le 10^5$
+- At most $2 \times 10^5$ calls will be made to `get` and `put`.
 
 ## Solution approach
 
 ### Intuition
 
-An LRU cache must find a key's value quickly and also know which key was used least recently. A linked list `lst` keeps keys in recency order (most recent at the front, least recent at the back), and hash maps give $O(1)$ access: `mp` from key to value and `itr` from key to its position in `lst`. With the stored iterator we can unlink a key from the middle of the list in $O(1)$ when it is used again.
+We need two things in $O(1)$:
+
+1. **Find a key** — a hash map does that.
+2. **Know which key was used least recently, and mark a key as just used** — keep all entries in a list ordered by recency: most recent at the front, least recent at the back. Marking a key as used means moving its node to the front; evicting means removing the back.
+
+A plain list cannot find a node in $O(1)$, and a hash map has no order, so combine them: the doubly linked list stores `(key, value)` pairs in recency order, and the hash map stores, for each key, an **iterator to its node**. With the iterator, a node can be unlinked and moved to the front in $O(1)$ (`std::list::splice` relinks the node without copying it, and keeps the iterator valid). The back node stores its key, so on eviction we know which map entry to erase.
 
 ### Algorithm
 
-1. `get(key)`: return `-1` if the key is not in `mp`; otherwise call `update(key)` to move it to the front, and return `mp[key]`.
-2. `put(key, value)`: if the cache is full (`mp.size() == size`) and the key is new, call `evict()`. Then call `update(key)` and set `mp[key] = value`.
-3. `update(key)`: if the key already exists, erase it from `lst` using `itr[key]`; push it to the front and store the new iterator.
-4. `evict()`: remove the key at `lst.back()` from `itr`, `mp` and the list.
+- `order`: `list<pair<int, int>>` of `(key, value)`, most recently used first. `pos`: `unordered_map<int, list<...>::iterator>`.
+- `get(key)`: if `key` is not in `pos`, return `-1`. Otherwise splice its node to the front of `order` and return its value.
+- `put(key, value)`:
+  1. If `key` exists, update the value in its node, splice the node to the front and return.
+  2. If the cache is full (`order.size() == cap`), erase `order.back()`'s key from `pos` and pop the back node.
+  3. Push `(key, value)` to the front and store `pos[key] = order.begin()`.
+
+### Walkthrough
+
+State of Example 1 right after `put(3, 3)`: the map points into the list, the front is the most recent key and the back (`1`) is the next one to be evicted. Key `2` was evicted from the back by this `put`.
+
+```mermaid
+flowchart LR
+    subgraph pos ["pos: hash map"]
+        k3["key 3"]
+        k1["key 1"]
+    end
+    subgraph order ["order: most recent → least recent"]
+        a["(3, 3)"] <--> b["(1, 1)"]
+    end
+    k3 --> a
+    k1 --> b
+    classDef front fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    classDef back fill:#ffeccc,stroke:#d9822b,color:#7a4106
+    class a front
+    class b back
+```
+
+The next call, `get(2)`, misses. Then `put(4, 4)` finds the cache full and evicts the back node `(1, 1)`.
 
 ### Complexity
 
-- **Time:** $O(1)$ on average per `get` and `put` — hash-map lookups plus constant-time list operations.
-- **Space:** $O(\text{capacity})$ — each stored key appears once in `lst`, `mp` and `itr`.
+- **Time:** $O(1)$ average per `get` and `put` — one or two hash-map operations plus constant-time list splicing, insertion and deletion.
+- **Space:** $O(\text{capacity})$ — at most `capacity` list nodes and map entries.
 
 ### Edge cases
 
-- **Updating an existing key when the cache is full:** no eviction happens, because the key is not new; it just moves to the front with its new value.
+- **`put` on an existing key** updates the value and refreshes its recency without evicting anything, even when the cache is full.
+- **Capacity 1:** every `put` of a new key evicts the only entry, which is also the back of the list.
+- **`get` refreshes recency:** in Example 1, `get(1)` moves `1` to the front, which is why `put(3, 3)` evicts `2` and not `1`.
 
 ## Code
 
 ```cpp title="C++"
 class LRUCache {
-    list<int> lst;
-    unordered_map<int, int> mp;
-    unordered_map<int, list<int>::iterator> itr;
-    int size;
+    int cap;
+    list<pair<int, int>> order;  // (key, value), most recently used at the front
+    unordered_map<int, list<pair<int, int>>::iterator> pos;
 
    public:
-    LRUCache(int capacity) { this->size = capacity; }
+    LRUCache(int capacity) : cap(capacity) {}
 
     int get(int key) {
-        if (mp.find(key) == mp.end()) return -1;
-        update(key);
-        return mp[key];
+        auto it = pos.find(key);
+        if (it == pos.end()) return -1;
+        order.splice(order.begin(), order, it->second);  // mark as most recent
+        return it->second->second;
     }
 
     void put(int key, int value) {
-        if (mp.size() == size && mp.find(key) == mp.end()) evict();
-        update(key);
-        mp[key] = value;
-    }
-
-    void update(int key) {
-        if (mp.find(key) != mp.end()) lst.erase(itr[key]);
-        lst.push_front(key);
-        itr[key] = lst.begin();
-    }
-
-    void evict() {
-        itr.erase(lst.back());
-        mp.erase(lst.back());
-        lst.pop_back();
+        auto it = pos.find(key);
+        if (it != pos.end()) {
+            it->second->second = value;
+            order.splice(order.begin(), order, it->second);
+            return;
+        }
+        if ((int)order.size() == cap) {
+            pos.erase(order.back().first);  // evict the least recently used key
+            order.pop_back();
+        }
+        order.emplace_front(key, value);
+        pos[key] = order.begin();
     }
 };
-
 ```

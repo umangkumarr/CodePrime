@@ -1,63 +1,83 @@
 ---
 title: "Pascal's Triangle"
-description: "Given an integer numRows, return the first numRows of Pascal's triangle. In Pascal's triangle, each number is the sum of the two numbers directly above it…"
+description: "Generate the first numRows rows of Pascal's triangle, building each row from the previous one since every inner entry is the sum of the two above it."
 source: "https://leetcode.com/problems/pascals-triangle/"
+difficulty: "Easy"
 tags: ["Array", "Dynamic Programming"]
 complexity:
   time: "O(n^2)"
-  space: "O(n)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given an integer <code>numRows</code>, return the first numRows of <strong>Pascal&#39;s triangle</strong>.</p>
+You are given an integer `numRows`.
 
-<p>In <strong>Pascal&#39;s triangle</strong>, each number is the sum of the two numbers directly above it as shown:</p>
-<img alt="" src="https://upload.wikimedia.org/wikipedia/commons/0/0d/PascalTriangleAnimated2.gif" />
+Return the first `numRows` of **Pascal's triangle**.
+
+In **Pascal's triangle**, each number is the sum of the two numbers directly above it and the first and last number on each row must be equal to `1`, as shown below:
+
+![Pascal's triangle being built row by row](https://upload.wikimedia.org/wikipedia/commons/0/0d/PascalTriangleAnimated2.gif)
+
+**Example 1:**
+
+```text
+Input:  numRows = 5
+Output: [[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]
+```
+
+**Example 2:**
+
+```text
+Input:  numRows = 1
+Output: [[1]]
+```
+
+**Constraints:**
+
+- $1 \le$ `numRows` $\le 30$
 
 ## Solution approach
 
 ### Intuition
 
-Each row of Pascal's triangle starts and ends with `1`, and every inner entry is the sum of the two entries just above it. So each row can be built directly from the previous one.
+The definition is already a recurrence. Row `i` (0-indexed) has `i + 1` entries; its first and last entries are `1`, and every inner entry `j` is the sum of the two entries above it in row `i - 1`:
+
+$$row_i[j] = row_{i-1}[j-1] + row_{i-1}[j], \qquad 0 \lt j \lt i$$
+
+Row `i - 1` is complete before row `i` starts, so building the rows top to bottom always has the needed values ready. (Entry `j` of row `i` is the binomial coefficient $\binom{i}{j}$; for `numRows` up to `30` the largest is $\binom{29}{14} = 77\,558\,760$, which fits in an `int`.)
 
 ### Algorithm
 
-1. Start with the first row `a = {1}` and add it to `ans`. If `n == 1`, return right away.
-2. For each row `i` from `2` to `n`:
-   - Push `1` into a fresh vector `b`.
-   - For every adjacent pair in the previous row, push `a[k] + a[k + 1]`.
-   - Push a closing `1`, append `b` to `ans`, then set `a = b` and clear `b`.
-3. Return `ans`.
+1. Create `triangle` with `numRows` rows.
+2. For each `i` from `0` to `numRows - 1`, make row `i` of size `i + 1` filled with `1` (this sets both ends).
+3. For each inner `j` from `1` to `i - 1`, set `triangle[i][j] = triangle[i - 1][j - 1] + triangle[i - 1][j]`.
+4. Return `triangle`.
 
 ### Complexity
 
-- **Time:** $O(n^2)$ — row `i` has `i` entries, and the rows add up to about $n^2 / 2$ entries.
-- **Space:** $O(n)$ extra for the working rows `a` and `b`; the output itself holds $O(n^2)$ numbers.
+- **Time:** $O(n^2)$ for `n = numRows` — the triangle has $n(n+1)/2$ entries and each is computed in $O(1)$.
+- **Space:** $O(1)$ extra — only the output, which itself has $O(n^2)$ entries.
+
+### Edge cases
+
+- **`numRows = 1`** (Example 2): row `0` is `[1]` and the inner loop never runs.
+- **Rows 0 and 1** have no inner entries, so they stay all `1`s.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
    public:
-    vector<vector<int>> generate(int n) {
-        vector<vector<int>> ans;
-        vector<int> a, b;
-        a = {1};
-        ans.push_back(a);
-        if (n == 1) return ans;
-        for (int i = 2; i <= n; i++) {
-            b.push_back(1);
-            for (int k = 0; k < a.size() - 1; k++) {
-                b.push_back(a[k] + a[k + 1]);
+    vector<vector<int>> generate(int numRows) {
+        vector<vector<int>> triangle(numRows);
+        for (int i = 0; i < numRows; i++) {
+            triangle[i].assign(i + 1, 1);
+            for (int j = 1; j < i; j++) {
+                triangle[i][j] = triangle[i - 1][j - 1] + triangle[i - 1][j];
             }
-            b.push_back(1);
-            ans.push_back(b);
-            a = b;
-            b.clear();
         }
-        return ans;
+        return triangle;
     }
 };
-
 ```

@@ -1,63 +1,94 @@
 ---
 title: "House Robber"
-description: "You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you…"
+description: "Find the largest sum of non-adjacent house values with a rob-or-skip dynamic programme that keeps only the last two best totals."
 source: "https://leetcode.com/problems/house-robber/"
+difficulty: "Medium"
 tags: ["Array", "Dynamic Programming"]
 complexity:
   time: "O(n)"
-  space: "O(n)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and <b>it will automatically contact the police if two adjacent houses were broken into on the same night</b>.</p>
+You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and **it will automatically contact the police if two adjacent houses were broken into on the same night**.
 
-<p>Given an integer array <code>nums</code> representing the amount of money of each house, return <em>the maximum amount of money you can rob tonight <b>without alerting the police</b></em>.</p>
+Given an integer array `nums` representing the amount of money of each house, return *the maximum amount of money you can rob tonight **without alerting the police***.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,2,3,1]
+Output: 4
+Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+Total amount you can rob = 1 + 3 = 4.
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [2,7,9,3,1]
+Output: 12
+Explanation: Rob house 1 (money = 2), rob house 3 (money = 9) and rob house 5 (money = 1).
+Total amount you can rob = 2 + 9 + 1 = 12.
+```
+
+**Constraints:**
+
+- $1 \le$ `nums.length` $\le 100$
+- $0 \le$ `nums[i]` $\le 400$
 
 ## Solution approach
 
 ### Intuition
 
-At each house there are only two states that matter: we rob it, or we don't. If we rob house `i`, house `i - 1` must have been skipped. If we skip it, the best total is simply the best total up to house `i - 1`, whatever we did there. Keeping both states for every house lets us build the answer from left to right without trying every subset.
+Let `best(i)` be the most money obtainable from the first `i + 1` houses (`0..i`). For house `i` there are only two choices:
+
+- **Skip it.** Then the best we can do is whatever was best for houses `0..i-1`: `best(i - 1)`.
+- **Rob it.** Then house `i - 1` must stay untouched, so we add `nums[i]` to the best for houses `0..i-2`: `best(i - 2) + nums[i]`.
+
+So `best(i) = max(best(i - 1), best(i - 2) + nums[i])`, with `best(-1) = best(-2) = 0` (no houses, no money). An optimal plan for the first `i + 1` houses must end in one of these two ways, and in each case the rest of the plan must itself be optimal — that is why the recurrence is correct.
+
+Each value depends only on the two before it, so instead of a whole table we keep two numbers: `prev1 = best(i - 1)` and `prev2 = best(i - 2)`.
 
 ### Algorithm
 
-1. If `n == 1`, return `nums[0]`.
-2. `v[i].f` is the best total when house `i` is robbed; `v[i].s` is the best total when it is not.
-3. Initialise `v[0].f = nums[0]`, `v[1].f = nums[1]` and `v[1].s = nums[0]`.
-4. For `i >= 2`: `v[i].f = nums[i] + v[i - 1].s` and `v[i].s = max(v[i - 1].f, v[i - 1].s)`.
-5. Return `max(v[n - 1].f, v[n - 1].s)`.
+1. Set `prev2 = 0` and `prev1 = 0`.
+2. For each amount `x` in `nums`:
+   - `cur = max(prev1, prev2 + x)` — skip this house, or rob it on top of the best total two houses back.
+   - Shift the window: `prev2 = prev1`, `prev1 = cur`.
+3. Return `prev1`, the best total for all the houses.
+
+### Walkthrough
+
+Example 2, `nums = [2,7,9,3,1]`. The second row is `best(i)`; blue is the house being decided, orange the two earlier totals it is computed from, and green the new total:
+
+![House Robber DP on [2,7,9,3,1]](/img/codes/house-robber/house-robber-dp.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — one pass over the houses.
-- **Space:** $O(n)$ — the array `v` of pairs.
+- **Time:** $O(n)$ — one pass with constant work per house.
+- **Space:** $O(1)$ — two running totals instead of a DP array.
 
 ### Edge cases
 
-- **One house:** returned directly.
-- **Two houses:** the loop does not run and the larger of the two is returned.
+- **A single house:** the loop runs once with `prev2 = prev1 = 0` and returns `nums[0]`.
+- **Houses with `0` money:** `max` simply prefers skipping them when that is at least as good; no special case is needed.
+- **Two houses:** the result is `max(nums[0], nums[1])`, as it must be.
 
 ## Code
 
 ```cpp title="C++"
-#define f first
-#define s second
-
 class Solution {
-   public:
+  public:
     int rob(vector<int>& nums) {
-        int n = nums.size();
-        if (n == 1) return nums[0];
-        vector<pair<int, int>> v(n);
-        v[0].f = nums[0];
-        v[1].f = nums[1];
-        v[1].s = nums[0];
-        for (int i = 2; i < n; i++) {
-            v[i].f = nums[i] + v[i - 1].s;
-            v[i].s = max(v[i - 1].f, v[i - 1].s);
+        int prev2 = 0, prev1 = 0;  // best totals up to house i - 2 and up to house i - 1
+        for (int x : nums) {
+            int cur = max(prev1, prev2 + x);
+            prev2 = prev1;
+            prev1 = cur;
         }
-        return max(v[n - 1].f, v[n - 1].s);
+        return prev1;
     }
 };
 ```

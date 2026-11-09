@@ -1,7 +1,8 @@
 ---
 title: "Nearest Smaller Element"
-description: "Given an array, find the nearest smaller element G[i] for every element A[i] in the array such that the element has an index smaller than i. More…"
+description: "For every element, find the nearest strictly smaller element to its left (or -1) in linear time using a monotonic increasing stack."
 source: "https://www.interviewbit.com/problems/nearest-smaller-element/"
+difficulty: "Easy"
 tags: ["Stack", "Array"]
 complexity:
   time: "O(n)"
@@ -10,55 +11,102 @@ complexity:
 
 ## Problem
 
-Given an array, find the nearest smaller element G[i] for every element A[i] in the array such that the element has an index smaller than i.
+Given an array, find the nearest smaller element `G[i]` for every element `A[i]` in the array such that the element has an index smaller than `i`.
 
 More formally,
-```txt
-    G[i] for an element A[i] = an element A[j] such that 
-    j is maximum possible AND 
+
+```text
+G[i] for an element A[i] = an element A[j] such that
+    j is maximum possible AND
     j < i AND
     A[j] < A[i]
 ```
-Elements for which no smaller element exist, consider next smaller element as -1.
+
+Elements for which no smaller element exist, consider next smaller element as `-1`.
+
+Complete the function `vector<int> Solution::prevSmaller(vector<int> &A)`, which returns the array `G` such that `G[i]` contains the nearest smaller number than `A[i]`. If no such element occurs, `G[i]` should be `-1`.
+
+**Example 1:**
+
+```text
+Input:  A = [4, 5, 2, 10, 8]
+Output: G = [-1, 4, -1, 2, 2]
+Explanation:
+index 1: No element less than 4 in left of 4, G[1] = -1
+index 2: A[1] is only element less than A[2], G[2] = A[1]
+index 3: No element less than 2 in left of 2, G[3] = -1
+index 4: A[3] is nearest element which is less than A[4], G[4] = A[3]
+index 5: A[3] is nearest element which is less than A[5], G[5] = A[3]
+```
+
+(The explanation uses 1-based indices.)
+
+**Example 2:**
+
+```text
+Input:  A = [3, 2, 1]
+Output: [-1, -1, -1]
+Explanation:
+index 1: No element less than 3 in left of 3, G[1] = -1
+index 2: No element less than 2 in left of 2, G[2] = -1
+index 3: No element less than 1 in left of 1, G[3] = -1
+```
+
+**Constraints (assumed):** the source does not list any. The solution below is linear and is designed for
+
+- $1 \le |A| \le 10^5$
+- every `A[i]` fits in a 32-bit signed integer.
 
 ## Solution approach
 
 ### Intuition
 
-Use a stack to find the previous smaller element. If a value `A[j]` is greater than or equal to a later value `A[i]`, then `A[j]` can never be the nearest smaller element for anything after `i`, because `A[i]` is closer and at least as small. So the stack only needs to keep an increasing sequence of candidates, and each value is pushed and popped at most once.
+Scanning left from every index takes $O(n^2)$ in the worst case (think of an increasing array followed by a tiny value). The key observation is that many elements can never be an answer again:
 
-Scanning left from every index would take $O(n^2)$ time in the worst case.
+> if `j < k` and `A[j] >= A[k]`, then `A[j]` is never the nearest smaller element for any index after `k` — `A[k]` is closer and at least as small, so it would always be preferred (or, if `A[k]` is not smaller, neither is `A[j]`).
+
+So, at any moment, the only useful candidates are the elements to the left that are **strictly smaller than everything to their right**. Read from left to right they form a **strictly increasing** sequence, which we keep in a stack `st`.
+
+For a new value `A[i]`: pop every candidate `>= A[i]` (they are not smaller than `A[i]`, and by the observation above `A[i]` now makes them useless for the future too). Whatever remains on top is the nearest element to the left that is smaller than `A[i]`, or the stack is empty and the answer is `-1`. Then push `A[i]`, which keeps the stack increasing.
 
 ### Algorithm
 
-1. Push the sentinel `-1` onto `st`. It is returned when no smaller element exists.
-2. For each `A[i]`, pop while `st.top() >= A[i]`.
-3. The remaining top is the nearest smaller value, so store it in `ans[i]`, then push `A[i]`.
-4. Return `ans`.
+1. Start with an empty stack `st` and an answer array `G` of size `n`.
+2. For each `i` from `0` to `n - 1`:
+   - while `st` is non-empty and `st.top() >= A[i]`, pop;
+   - `G[i] = st.empty() ? -1 : st.top()`;
+   - push `A[i]`.
+3. Return `G`.
+
+### Walkthrough
+
+Example 1. The blue cell is `A[i]`; the `stack` line lists the candidates from bottom to top, and `G` the answers so far:
+
+![Monotonic stack on [4, 5, 2, 10, 8]](/img/codes/nearest-smaller-element/stack.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — each element is pushed once and popped at most once.
-- **Space:** $O(n)$ — the stack and the answer array.
+- **Time:** $O(n)$ — every element is pushed once and popped at most once, so the inner `while` runs at most `n` times over the whole scan.
+- **Space:** $O(n)$ — the stack (an increasing array keeps every element) plus the output.
 
 ### Edge cases
 
-- **Equal values** are popped, because the answer must be strictly smaller.
-- **The sentinel** assumes every `A[i]` is at least `0`. A value of `-1` or less would pop the sentinel and empty the stack.
+- **Equal values** (`[2, 2]`): the earlier `2` is popped because `>=` is used, so the second `2` gets `-1` — the answer must be **strictly** smaller.
+- **Decreasing array** (Example 2): every element pops the previous one and gets `-1`.
+- **Negative values** such as `-1`: emptiness of the stack, not a `-1` sentinel value, decides the "no smaller element" case.
 
 ## Code
 
 ```cpp title="C++"
 vector<int> Solution::prevSmaller(vector<int> &A) {
     int n = A.size();
-    stack<int> st;
-    st.push(-1);
-    vector<int> ans(n);
+    vector<int> G(n);
+    stack<int> st;  // strictly increasing from bottom to top
     for (int i = 0; i < n; i++) {
-        while (st.top() >= A[i]) st.pop();
-        ans[i] = st.top();
+        while (!st.empty() && st.top() >= A[i]) st.pop();
+        G[i] = st.empty() ? -1 : st.top();
         st.push(A[i]);
     }
-    return ans;
+    return G;
 }
 ```

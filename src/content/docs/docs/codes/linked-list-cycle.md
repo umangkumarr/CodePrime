@@ -1,63 +1,116 @@
 ---
 title: "Linked List Cycle"
-description: "Given head, the head of a linked list, determine if the linked list has a cycle in it. There is a cycle in a linked list if there is some node in the list…"
+description: "Detect whether a linked list contains a cycle in O(1) memory with Floyd's tortoise and hare: a fast pointer catches a slow one only inside a loop."
 source: "https://leetcode.com/problems/linked-list-cycle/"
-tags: ["Hash Table", "Linked List", "Two Pointers"]
+difficulty: "Easy"
+tags: ["Hash Table", "Linked List", "Two Pointers", "Floyd's Cycle Finding Algorithm"]
 complexity:
-  time: "O(n \\log n)"
-  space: "O(n)"
+  time: "O(n)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given <code>head</code>, the head of a linked list, determine if the linked list has a cycle in it.</p>
+Given `head`, the head of a linked list, determine if the linked list has a cycle in it.
 
-<p>There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the&nbsp;<code>next</code>&nbsp;pointer. Internally, <code>pos</code>&nbsp;is used to denote the index of the node that&nbsp;tail&#39;s&nbsp;<code>next</code>&nbsp;pointer is connected to.&nbsp;<strong>Note that&nbsp;<code>pos</code>&nbsp;is not passed as a parameter</strong>.</p>
+There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the `next` pointer. Internally, `pos` is used to denote the index of the node that tail's `next` pointer is connected to. **Note that `pos` is not passed as a parameter**.
 
-<p>Return&nbsp;<code>true</code><em> if there is a cycle in the linked list</em>. Otherwise, return <code>false</code>.</p>
+Return `true` _if there is a cycle in the linked list_. Otherwise, return `false`.
+
+**Example 1:**
+
+![List 3 → 2 → 0 → -4 with -4 pointing back to 2](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)
+
+```text
+Input:  head = [3,2,0,-4], pos = 1
+Output: true
+Explanation: There is a cycle in the linked list, where the tail connects to the 1st node (0-indexed).
+```
+
+**Example 2:**
+
+![List 1 → 2 with 2 pointing back to 1](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test2.png)
+
+```text
+Input:  head = [1,2], pos = 0
+Output: true
+Explanation: There is a cycle in the linked list, where the tail connects to the 0th node.
+```
+
+**Example 3:**
+
+![A single node 1 with no cycle](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test3.png)
+
+```text
+Input:  head = [1], pos = -1
+Output: false
+Explanation: There is no cycle in the linked list.
+```
+
+**Constraints:**
+
+- The number of the nodes in the list is in the range $[0, 10^4]$.
+- $-10^5 \le$ `Node.val` $\le 10^5$
+- `pos` is `-1` or a **valid index** in the linked-list.
+
+**Follow-up:** Can you solve it using $O(1)$ (i.e. constant) memory?
 
 ## Solution approach
 
 ### Intuition
 
-In a list without a cycle, the walk ends at `NULL`. In a list with a cycle, the walk eventually reaches a node it has already seen. Recording every visited node and checking each `next` pointer against that record detects the cycle.
+Remembering every visited node in a hash set detects a revisit, but uses $O(n)$ memory. Floyd's **tortoise and hare** uses two pointers instead: `slow` moves one node per step, `fast` moves two.
+
+- **No cycle:** `fast` runs ahead and reaches the end of the list (`nullptr`), so we answer `false`.
+- **Cycle:** `fast` can never leave the loop, and `slow` eventually enters it too. From then on, every step `fast` closes the gap to `slow` by exactly one node (it moves 2, `slow` moves 1). A gap that shrinks by one each step cannot jump over zero, so `fast` lands **exactly** on `slow` within one lap of the cycle.
+
+So the two pointers meet if and only if the list has a cycle.
 
 ### Algorithm
 
-1. Walk the list with `temp`, marking each node in the map `mp`.
-2. If `temp->next` is already in `mp`, a cycle exists: the code sets `temp->next = NULL` and returns `true`.
-3. Otherwise advance `temp`.
-4. If the walk reaches `NULL`, return `false`.
+1. Set `slow = fast = head`.
+2. While `fast` and `fast->next` are not `nullptr`:
+   - `slow = slow->next`, `fast = fast->next->next`;
+   - if `slow == fast`, return `true`.
+3. Return `false`.
+
+### Walkthrough
+
+Example 1 (`3 → 2 → 0 → -4 → back to 2`):
+
+| Step | `slow` | `fast` |
+| --- | --- | --- |
+| start | `3` | `3` |
+| 1 | `2` | `0` |
+| 2 | `0` | `2` |
+| 3 | `-4` | `-4` — they meet, return `true` |
+
+To find **where** the cycle starts as well, see [Linked List Cycle II](/docs/codes/linked-list-cycle-ii/).
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — each node is inserted into and looked up in an ordered `map`.
-- **Space:** $O(n)$ — the map stores every node.
+- **Time:** $O(n)$ — without a cycle `fast` reaches the end in `n / 2` steps; with one, `slow` enters the cycle within `n` steps and is caught within one more lap.
+- **Space:** $O(1)$ — two pointers; the list is only read.
 
 ### Edge cases
 
-- **Side effect:** setting `temp->next = NULL` breaks the cycle, so the input list is modified when the answer is `true`.
+- **Empty list:** `fast` is `nullptr`, the loop never runs, and `false` is returned.
+- **Single node** (Example 3): `fast->next` is `nullptr`, so `false`.
+- **Self-loop** on one node: `fast->next->next` is that node, so the pointers meet after one step.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
    public:
-    bool hasCycle(ListNode* head) {
-        map<ListNode*, int> mp;
-        ListNode* temp;
-        temp = head;
-        while (temp != NULL) {
-            mp[temp] = 1;
-            if (mp.find(temp->next) != mp.end()) {
-                temp->next = NULL;
-                return true;
-                break;
-            }
-            temp = temp->next;
+    bool hasCycle(ListNode *head) {
+        ListNode *slow = head, *fast = head;
+        while (fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+            if (slow == fast) return true;
         }
         return false;
     }
 };
-
 ```

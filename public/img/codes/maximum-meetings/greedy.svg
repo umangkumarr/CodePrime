@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="314" viewBox="0 0 620 314" font-family="Arial, sans-serif">
+<rect x="1" y="1" width="618" height="312" rx="14" fill="#ffffff" stroke="#dfe2e8" stroke-width="2"/>
+<text x="24" y="30" font-size="16" fill="#1f2430">Meetings sorted by end time (green = selected, red = skipped)</text>
+<line x1="70" y1="44" x2="70" y2="254" stroke="#eceef2"/>
+<text x="70" y="274" font-size="13" fill="#5b6270" text-anchor="middle">0</text>
+<line x1="122" y1="44" x2="122" y2="254" stroke="#eceef2"/>
+<text x="122" y="274" font-size="13" fill="#5b6270" text-anchor="middle">1</text>
+<line x1="174" y1="44" x2="174" y2="254" stroke="#eceef2"/>
+<text x="174" y="274" font-size="13" fill="#5b6270" text-anchor="middle">2</text>
+<line x1="226" y1="44" x2="226" y2="254" stroke="#eceef2"/>
+<text x="226" y="274" font-size="13" fill="#5b6270" text-anchor="middle">3</text>
+<line x1="278" y1="44" x2="278" y2="254" stroke="#eceef2"/>
+<text x="278" y="274" font-size="13" fill="#5b6270" text-anchor="middle">4</text>
+<line x1="330" y1="44" x2="330" y2="254" stroke="#eceef2"/>
+<text x="330" y="274" font-size="13" fill="#5b6270" text-anchor="middle">5</text>
+<line x1="382" y1="44" x2="382" y2="254" stroke="#eceef2"/>
+<text x="382" y="274" font-size="13" fill="#5b6270" text-anchor="middle">6</text>
+<line x1="434" y1="44" x2="434" y2="254" stroke="#eceef2"/>
+<text x="434" y="274" font-size="13" fill="#5b6270" text-anchor="middle">7</text>
+<line x1="486" y1="44" x2="486" y2="254" stroke="#eceef2"/>
+<text x="486" y="274" font-size="13" fill="#5b6270" text-anchor="middle">8</text>
+<line x1="538" y1="44" x2="538" y2="254" stroke="#eceef2"/>
+<text x="538" y="274" font-size="13" fill="#5b6270" text-anchor="middle">9</text>
+<rect x="122" y="54" width="52" height="24" rx="6" fill="#dcf5e3" stroke="#2e9e57" stroke-width="2"/>
+<text x="148.0" y="71.0" font-size="13" fill="#145c2e" text-anchor="middle">(1, 2)</text>
+<text x="18" y="71.0" font-size="12" fill="#145c2e">take</text>
+<rect x="226" y="88" width="52" height="24" rx="6" fill="#dcf5e3" stroke="#2e9e57" stroke-width="2"/>
+<text x="252.0" y="105.0" font-size="13" fill="#145c2e" text-anchor="middle">(3, 4)</text>
+<text x="18" y="105.0" font-size="12" fill="#145c2e">take</text>
+<rect x="70" y="122" width="312" height="24" rx="6" fill="#fde0e0" stroke="#d64545" stroke-width="2"/>
+<text x="226.0" y="139.0" font-size="13" fill="#7d1a1a" text-anchor="middle">(0, 6)</text>
+<text x="18" y="139.0" font-size="12" fill="#7d1a1a">skip</text>
+<rect x="330" y="156" width="104" height="24" rx="6" fill="#dcf5e3" stroke="#2e9e57" stroke-width="2"/>
+<text x="382.0" y="173.0" font-size="13" fill="#145c2e" text-anchor="middle">(5, 7)</text>
+<text x="18" y="173.0" font-size="12" fill="#145c2e">take</text>
+<rect x="330" y="190" width="208" height="24" rx="6" fill="#fde0e0" stroke="#d64545" stroke-width="2"/>
+<text x="434.0" y="207.0" font-size="13" fill="#7d1a1a" text-anchor="middle">(5, 9)</text>
+<text x="18" y="207.0" font-size="12" fill="#7d1a1a">skip</text>
+<rect x="486" y="224" width="52" height="24" rx="6" fill="#dcf5e3" stroke="#2e9e57" stroke-width="2"/>
+<text x="512.0" y="241.0" font-size="13" fill="#145c2e" text-anchor="middle">(8, 9)</text>
+<text x="18" y="241.0" font-size="12" fill="#145c2e">take</text>
+<text x="24" y="300" font-size="14" fill="#1f2430">Selected 4 meetings: (1,2), (3,4), (5,7), (8,9)</text>
+</svg>

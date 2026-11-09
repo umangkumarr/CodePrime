@@ -1,83 +1,130 @@
 ---
 title: "Combination Sum"
-description: "Given an array of distinct integers candidates and a target integer target, return a list of all unique combinations of candidates where the chosen…"
+description: "List every combination of distinct candidates (each usable any number of times) that sums to target, by backtracking over the sorted array in non-decreasing order."
 source: "https://leetcode.com/problems/combination-sum/"
+difficulty: "Medium"
 tags: ["Array", "Backtracking"]
 complexity:
-  time: "O\\left(\\prod_i (T / c_i + 1)\\right)"
-  space: "O(n + T / c_m)"
+  time: "O(n^{T/m + 1})"
+  space: "O(T/m)"
 ---
 
 ## Problem
 
-<p>Given an array of <strong>distinct</strong> integers <code>candidates</code> and a target integer <code>target</code>, return <em>a list of all <strong>unique combinations</strong> of </em><code>candidates</code><em> where the chosen numbers sum to </em><code>target</code><em>.</em> You may return the combinations in <strong>any order</strong>.</p>
+Given an array of **distinct** integers `candidates` and a target integer `target`, return a list of all **unique combinations** of `candidates` where the chosen numbers sum to `target`. You may return the combinations in **any order**.
 
-<p>The <strong>same</strong> number may be chosen from <code>candidates</code> an <strong>unlimited number of times</strong>. Two combinations are unique if the frequency of at least one of the chosen numbers is different.</p>
+The **same** number may be chosen from `candidates` an **unlimited number of times**. Two combinations are unique if the frequency of at least one of the chosen numbers is different.
 
-<p>It is <strong>guaranteed</strong> that the number of unique combinations that sum up to <code>target</code> is less than <code>150</code> combinations for the given input.</p>
+The test cases are generated such that the number of unique combinations that sum up to `target` is less than `150` combinations for the given input.
+
+**Example 1:**
+
+```text
+Input:  candidates = [2,3,6,7], target = 7
+Output: [[2,2,3],[7]]
+Explanation:
+2 and 3 are candidates, and 2 + 2 + 3 = 7. Note that 2 can be used multiple times.
+7 is a candidate, and 7 = 7.
+These are the only two combinations.
+```
+
+**Example 2:**
+
+```text
+Input:  candidates = [2,3,5], target = 8
+Output: [[2,2,2,2],[2,3,3],[3,5]]
+```
+
+**Example 3:**
+
+```text
+Input:  candidates = [2], target = 1
+Output: []
+```
+
+**Constraints:**
+
+- $1 \le$ `candidates.length` $\le 30$
+- $2 \le$ `candidates[i]` $\le 40$
+- All elements of `candidates` are **distinct**.
+- $1 \le$ `target` $\le 40$
 
 ## Solution approach
 
 ### Intuition
 
-Each candidate can be used any number of times, so for every candidate we decide **how many copies** to take: zero, one, two, and so on. The recursion handles one candidate per level (`indx`), which also means combinations are built in a fixed order and no duplicates appear.
+A combination is a multiset, so `[2,2,3]`, `[2,3,2]` and `[3,2,2]` are the same answer. To generate each multiset exactly once, build every combination in **non-decreasing order of index**: after choosing `candidates[i]`, the next element may be `candidates[i]` again (unlimited reuse) or anything after it, but never anything before it. Every multiset has exactly one such ordering, so no duplicates are produced and no de-duplication is needed.
 
-A branch stops as soon as the running sum `sm` reaches `target` (record it) or goes past it (abandon it).
+Sorting the candidates first gives a cheap prune: once `candidates[i] > remaining`, every later candidate is larger too, so the whole rest of the loop can be abandoned.
 
 ### Algorithm
 
-1. Store `candidates` in `comb`, set `sm = 0`, and call `find(0)`.
-2. In `find(indx)`:
-   - if `sm == target`, push the current list `arr` into `ans` and return;
-   - if `sm > target` or `indx >= n`, return.
-3. Call `find(indx + 1)` to take **zero** copies of `comb[indx]`.
-4. Then repeatedly push one more copy of `comb[indx]` into `arr`, add it to `sm`, and call `find(indx + 1)`. This is done `target / comb[indx]` times, the most copies that could ever fit.
-5. Pop the same number of copies and subtract them from `sm` to restore the state before returning.
+1. Sort `candidates` and call `backtrack(candidates, 0, target, path, res)`.
+2. In `backtrack(nums, start, remaining, path, res)`:
+   - If `remaining == 0`, copy `path` into `res` and return.
+   - For `i` from `start` while `nums[i] <= remaining`: push `nums[i]`, recurse with the **same** `start = i` (so `nums[i]` can be taken again) and `remaining - nums[i]`, then pop it.
+3. Return `res`.
+
+### Walkthrough
+
+Example 1 (`[2, 3, 6, 7]`, `target = 7`). Each box is a call with its `path` and remaining sum; a call only tries candidates from its own index onwards. Green calls record an answer, red ones are dead ends where even the smallest allowed candidate is too big:
+
+```mermaid
+flowchart TD
+    r["[] rem 7"] --> a["[2] rem 5"]
+    r --> b["[3] rem 4"]
+    r --> c["[6] rem 1"]
+    r --> d["[7] rem 0"]
+    a --> a1["[2,2] rem 3"]
+    a --> a2["[2,3] rem 2"]
+    a1 --> a11["[2,2,2] rem 1"]
+    a1 --> a12["[2,2,3] rem 0"]
+    b --> b1["[3,3] rem 1"]
+    classDef ok fill:#dcf5e3,stroke:#2e9e57,color:#1f2430
+    classDef dead fill:#fde0e0,stroke:#d64545,color:#1f2430
+    class a12,d ok
+    class a11,a2,b1,c dead
+```
+
+Note that `[3]` never tries `2` again — that would rebuild `[2,2,3]` in a different order.
 
 ### Complexity
 
-- **Time:** $O\left(\prod_i (T / c_i + 1)\right)$ in the worst case — each candidate $c_i$ branches into up to $T / c_i + 1$ choices of count, where $T$ is `target`. Branches that overshoot return immediately, so the real cost is far smaller, but it is exponential in $n$.
-- **Space:** $O(n + T / c_m)$ — the recursion depth is at most $n$ and `arr` holds at most $T / c_m$ values, where $c_m$ is the smallest candidate, not counting the output.
+Let `n` be the number of candidates, `T` the target and `m` the smallest candidate.
+
+- **Time:** $O(n^{T/m + 1})$ — a combination has at most `T / m` elements, so the recursion tree has depth at most `T / m` and each node branches into at most `n` children; copying each answer adds at most `T / m` per result. The sorted prune makes the real tree far smaller.
+- **Space:** $O(T/m)$ — the recursion depth and the length of `path`, not counting the output.
+
+### Edge cases
+
+- **No combination (Example 3):** `2 > 1`, so the root loop does not run and `res` stays empty.
+- **A candidate equal to `target`:** recorded at depth 1, like `[7]`.
+- **Input order:** sorting makes the prune valid regardless of how `candidates` is given.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    int target;
-    vector<int> comb;
-    vector<int> arr;
-    vector<vector<int>> ans;
-    int sm, n;
-
-   public:
-    void find(int indx) {
-        if (sm == target) {
-            ans.push_back(arr);
+    void backtrack(const vector<int>& nums, int start, int remaining, vector<int>& path,
+                   vector<vector<int>>& res) {
+        if (remaining == 0) {
+            res.push_back(path);
             return;
         }
-        if (sm > target || indx >= n) return;
-        find(indx + 1);
-
-        for (int i = 1; i <= target / comb[indx]; i++) {
-            arr.push_back(comb[indx]);
-            sm += comb[indx];
-            find(indx + 1);
-        }
-
-        for (int i = 1; i <= target / comb[indx]; i++) {
-            arr.pop_back();
-            sm -= comb[indx];
+        for (int i = start; i < (int)nums.size() && nums[i] <= remaining; i++) {
+            path.push_back(nums[i]);
+            backtrack(nums, i, remaining - nums[i], path, res);  // i, not i + 1: reuse allowed
+            path.pop_back();
         }
     }
 
+   public:
     vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
-        this->comb = candidates;
-        this->target = target;
-        this->n = candidates.size();
-        this->sm = 0;
-        find(0);
-        return ans;
+        sort(candidates.begin(), candidates.end());
+        vector<vector<int>> res;
+        vector<int> path;
+        backtrack(candidates, 0, target, path, res);
+        return res;
     }
 };
-
 ```

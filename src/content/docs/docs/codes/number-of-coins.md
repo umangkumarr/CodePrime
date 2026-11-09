@@ -1,63 +1,110 @@
 ---
 title: "Number of Coins"
-description: "Given a value V and array coins[] of size M, the task is to make the change for V cents, given that you have an infinite supply of each of coins - coins1,…"
-source: "https://practice.geeksforgeeks.org/problems/number-of-coins1824/1/"
-tags: ["Array", "Dynamic Programming", "Sorting"]
+description: "Find the minimum number of coins (unlimited supply of each) that add up to a target sum, using a one-dimensional unbounded-knapsack DP."
+source: "https://www.geeksforgeeks.org/problems/number-of-coins1824/1"
+difficulty: "Medium"
+tags: ["Dynamic Programming"]
 complexity:
-  time: "O(M \\cdot V)"
-  space: "O(M \\cdot V)"
+  time: "O(n \\cdot sum)"
+  space: "O(sum)"
 ---
 
 ## Problem
 
-<p><span>Given a value <strong>V</strong> and array <strong>coins[]</strong> of size <strong>M</strong>, the task is to make the change for <strong>V</strong> cents, given that you have an infinite supply of each of coins - coins<sub>1</sub>, coins<sub>2</sub>, ..., coins<sub>m</sub> valued coins. Find the minimum number of coins to make the change. If not possible to make change then return -1.</span></p>
+Given an array `coins[]`, where each element represents a coin of a different denomination, and a target value `sum`. You have an unlimited supply of each coin type.
+
+Find the minimum number of coins needed to obtain the target `sum`. If it is not possible to form the sum using the given coins, return `-1`.
+
+Complete the function `minCoins()` which takes the array `coins[]` and the integer `sum` and returns the minimum number of coins, or `-1`.
+
+**Example 1:**
+
+```text
+Input:  coins[] = [25, 10, 5], sum = 30
+Output: 2
+Explanation: Minimum 2 coins needed, 25 and 5.
+```
+
+**Example 2:**
+
+```text
+Input:  coins[] = [9, 6, 5, 1], sum = 19
+Output: 3
+Explanation: 19 = 9 + 9 + 1
+```
+
+**Example 3:**
+
+```text
+Input:  coins[] = [5, 1], sum = 0
+Output: 0
+Explanation: For 0 sum, we do not need a coin.
+```
+
+**Example 4:**
+
+```text
+Input:  coins[] = [4, 6, 2], sum = 5
+Output: -1
+Explanation: Not possible to make the given sum.
+```
+
+**Constraints:**
+
+- $0 \le sum \le 10^4$
+- $1 \le$ `coins.size()` $\le 10^3$
+- $1 \le$ `coins[i]` $\le 10^4$
 
 ## Solution approach
 
 ### Intuition
 
-This is an unbounded knapsack: every coin can be used any number of times, and we want the fewest coins whose values add up to `V`. Let `dp[i][j]` be the minimum number of coins, using only the first `i` coin types, that sum to exactly `j`. Trying every combination of coins directly is exponential, but each state depends only on two smaller states.
+Greedy (always take the largest coin that fits) fails: with `coins = [9, 6, 5, 1]` and `sum = 11`, greedy gives `9 + 1 + 1` (3 coins) but `6 + 5` uses 2.
 
-For the `i`-th coin there are two choices:
+Instead, think about the **last** coin used. If the best way to make amount `x` ends with coin `c`, then the rest is the best way to make `x - c`. So
 
-- **Take it** (it stays available, since coins are unlimited): $dp[i][j] = \min(dp[i][j],\ dp[i][j - coins[i-1]] + 1)$
-- **Skip it**: $dp[i][j] = \min(dp[i][j],\ dp[i-1][j])$
+$$dp[x] = 1 + \min_{c \,\in\, coins,\ c \le x} dp[x - c], \qquad dp[0] = 0$$
+
+where `dp[x]` is the fewest coins summing to exactly `x`. Because every `dp[x - c]` is for a smaller amount, filling `dp` from `0` up to `sum` always has the needed values ready. Coins are unlimited, so the same coin may be the "last coin" again in `dp[x - c]` — that is exactly what an unbounded knapsack needs, and why a single 1D array suffices.
 
 ### Algorithm
 
-1. Sort `coins` (not needed for correctness) and create a `(M + 1) x (V + 1)` table `dp` filled with `INT_MAX`, meaning "not reachable". It uses `long long` so that `INT_MAX + 1` does not overflow.
-2. For each coin index `i` from `1` to `M`, set `dp[i][0] = 0`, since zero coins make sum `0`.
-3. For each sum `j` from `1` to `V`, apply the "take" transition when `coins[i - 1] <= j`, then the "skip" transition.
-4. If `dp[M][V]` is still at least `INT_MAX`, the sum cannot be formed, so return `-1`; otherwise return `dp[M][V]`.
+1. Create `dp` of size `sum + 1`, set `dp[0] = 0` and every other entry to `INF = sum + 1`. No answer can use more than `sum` coins (every coin is at least `1`), so `INF` safely means "not reachable" and `INF + 1` cannot overflow.
+2. For each coin `c` in `coins`, for every amount `x` from `c` to `sum`, set `dp[x] = min(dp[x], dp[x - c] + 1)`. Going **upwards** lets `dp[x - c]` already include copies of `c`.
+3. Return `-1` if `dp[sum]` is still `INF`, otherwise `dp[sum]`.
+
+### Walkthrough
+
+The table for Example 2 after each coin is processed (green cells changed in that round):
+
+![dp table for coins [9,6,5,1] and sum 19, filled coin by coin](/img/codes/number-of-coins/dp.gif)
 
 ### Complexity
 
-- **Time:** $O(M \cdot V)$ — every cell of the `dp` table is filled once in $O(1)$; sorting adds only $O(M \log M)$.
-- **Space:** $O(M \cdot V)$ — the full 2D `dp` table.
+- **Time:** $O(n \cdot sum)$ — for each of the `n` coins we sweep the amounts once.
+- **Space:** $O(sum)$ — a single array of `sum + 1` entries.
 
 ### Edge cases
 
-- **Unreachable value**, e.g. `coins = [2]`, `V = 3`: the cell stays at `INT_MAX` and the function returns `-1`.
+- **`sum = 0`:** `dp[0] = 0` is returned immediately (Example 3).
+- **Unreachable sum:** e.g. only even coins and an odd `sum` — `dp[sum]` stays `INF` and the function returns `-1` (Example 4).
+- **Coins larger than `sum`:** the inner loop for that coin does not run.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
    public:
-    int minCoins(int coins[], int M, int V) {
-        sort(coins, coins + M);
-        vector<vector<long long>> dp(M + 1, vector<long long>(V + 1, INT_MAX));
-        for (int i = 1; i <= M; i++) {
-            dp[i][0] = 0;
-            for (int j = 1; j <= V; j++) {
-                if (coins[i - 1] <= j) {
-                    dp[i][j] = min(dp[i][j], dp[i][j - coins[i - 1]] + 1);
-                }
-                dp[i][j] = min(dp[i][j], dp[i - 1][j]);
+    int minCoins(vector<int>& coins, int sum) {
+        const int INF = sum + 1;
+        vector<int> dp(sum + 1, INF);
+        dp[0] = 0;
+        for (int c : coins) {
+            for (int x = c; x <= sum; x++) {
+                dp[x] = min(dp[x], dp[x - c] + 1);
             }
         }
-        if (dp[M][V] >= INT_MAX) return -1;
-        return (int)dp[M][V];
+        return dp[sum] == INF ? -1 : dp[sum];
     }
 };
 ```

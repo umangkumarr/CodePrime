@@ -1,55 +1,103 @@
 ---
 title: "Subsets"
-description: "Given an integer array nums of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets. Return…"
+description: "Generate the power set of an array of distinct integers with backtracking, where every node of the recursion tree is one subset."
 source: "https://leetcode.com/problems/subsets/"
+difficulty: "Medium"
 tags: ["Array", "Backtracking", "Bit Manipulation"]
 complexity:
-  time: "O(n^2 \\cdot 2^n)"
-  space: "O(n \\cdot 2^n)"
+  time: "O(n \\cdot 2^n)"
+  space: "O(n)"
 ---
 
 ## Problem
 
-<p>Given an integer array <code>nums</code> of <strong>unique</strong> elements, return <em>all possible subsets (the power set)</em>.</p>
+Given an integer array `nums` of **unique** elements, return *all possible subsets (the power set)*.
 
-<p>The solution set <strong>must not</strong> contain duplicate subsets. Return the solution in <strong>any order</strong>.</p>
+The solution set **must not** contain duplicate subsets. Return the solution in **any order**.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,2,3]
+Output: [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [0]
+Output: [[],[0]]
+```
+
+**Constraints:**
+
+- $1 \le nums.length \le 10$
+- $-10 \le nums[i] \le 10$
+- All the numbers of `nums` are **unique**.
 
 ## Solution approach
 
 ### Intuition
 
-Every integer `i` from `0` to $2^n - 1$ is a bitmask describing one subset: bit `j` set means `nums[j]` is included. Enumerating all masks therefore enumerates all subsets. The code also sorts each subset and stores it in a `set`, which removes any duplicate subsets; with distinct elements this step does not change the result, it just keeps the output in sorted order.
+Build subsets by deciding, in index order, which element to add **next**. Starting from the empty subset `cur`, we may append any `nums[i]` with `i >= start`, then continue from `i + 1`. Because indices only increase, each subset is produced in exactly one way — as the sequence of its elements in index order — so no duplicates appear and no `set` is needed.
+
+Every node of this recursion tree (not just the leaves) is a distinct subset, so we record `cur` as soon as we enter a call. With distinct elements the tree has exactly $2^n$ nodes.
 
 ### Algorithm
 
-1. For each mask `i` from `0` to `(1ll << nums.size()) - 1`, build `subset` from every `nums[j]` whose bit `j` is set.
-2. Sort `subset` and insert it into the set `st`.
-3. Construct `ans` from the contents of `st` and return it.
+1. `backtrack(start)`: append a copy of `cur` to `ans`.
+2. For each `i` from `start` to `n - 1`: push `nums[i]` onto `cur`, call `backtrack(i + 1)`, then pop it (undo the choice).
+3. Call `backtrack(0)` and return `ans`.
+
+### Walkthrough
+
+Recursion tree for `nums = [1,2,3]`; each node is the subset `cur` recorded when the call starts, and each edge appends one element:
+
+```mermaid
+flowchart TD
+    E["[ ]"] -->|+1| A["[1]"]
+    E -->|+2| B["[2]"]
+    E -->|+3| C["[3]"]
+    A -->|+2| AB["[1,2]"]
+    A -->|+3| AC["[1,3]"]
+    B -->|+3| BC["[2,3]"]
+    AB -->|+3| ABC["[1,2,3]"]
+    classDef sub fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
+    class E,A,B,C,AB,AC,BC,ABC sub
+```
+
+Pre-order (the order `ans` is filled): `[]`, `[1]`, `[1,2]`, `[1,2,3]`, `[1,3]`, `[2]`, `[2,3]`, `[3]`.
 
 ### Complexity
 
-- **Time:** $O(n^2 \cdot 2^n)$ — for each of the $2^n$ masks, building and sorting the subset costs $O(n \log n)$ and inserting it into the set costs $O(n)$ comparisons of $O(n)$ each.
-- **Space:** $O(n \cdot 2^n)$ — the set and the output hold $2^n$ subsets of size up to $n$.
+- **Time:** $O(n \cdot 2^n)$ — there are $2^n$ calls, and each copies `cur` (up to `n` elements) into `ans`. Since the output itself has $n \cdot 2^{n-1}$ numbers in total, this is optimal.
+- **Space:** $O(n)$ auxiliary — the recursion depth and `cur`; the output takes $O(n \cdot 2^n)$.
+
+### Edge cases
+
+- **Single element** (`[0]`): the root records `[]`, its only child records `[0]`.
+- **Negative numbers:** values are never compared, only positions, so signs do not matter.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
+    vector<vector<int>> ans;
+    vector<int> cur;
+
+    void backtrack(const vector<int>& nums, int start) {
+        ans.push_back(cur);
+        for (int i = start; i < (int)nums.size(); i++) {
+            cur.push_back(nums[i]);
+            backtrack(nums, i + 1);
+            cur.pop_back();
+        }
+    }
+
    public:
     vector<vector<int>> subsets(vector<int>& nums) {
-        set<vector<int>> st;
-        for (int i = 0; i < (1ll << nums.size()); i++) {
-            vector<int> subset;
-            for (int j = 0; j < nums.size(); j++) {
-                int bit = (1ll << j) & i;
-                if (bit) subset.push_back(nums[j]);
-            }
-            sort(subset.begin(), subset.end());
-            st.insert(subset);
-        }
-        vector<vector<int>> ans(st.begin(), st.end());
+        backtrack(nums, 0);
         return ans;
     }
 };
-
 ```

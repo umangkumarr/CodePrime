@@ -1,58 +1,115 @@
 ---
 title: "Group Anagrams"
-description: "Given an array of strings strs, group the anagrams together. You can return the answer in any order. An Anagram is a word or phrase formed by rearranging…"
+description: "Group strings that are anagrams of each other by hashing each word under a canonical key, its letters sorted with a counting sort."
 source: "https://leetcode.com/problems/group-anagrams/"
+difficulty: "Medium"
 tags: ["Array", "Hash Table", "String", "Sorting"]
 complexity:
-  time: "O(n \\cdot L \\log L + n \\cdot L \\log n)"
+  time: "O(n \\cdot L)"
   space: "O(n \\cdot L)"
 ---
 
 ## Problem
 
-<p>Given an array of strings <code>strs</code>, group <strong>the anagrams</strong> together. You can return the answer in <strong>any order</strong>.</p>
+Given an array of strings `strs`, group the **anagrams** together. You can return the answer in **any order**.
 
-<p>An <strong>Anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>
+An **anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, using all the original letters exactly once.
+
+**Example 1:**
+
+```text
+Input:  strs = ["eat","tea","tan","ate","nat","bat"]
+Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
+Explanation:
+- There is no string in strs that can be rearranged to form "bat".
+- The strings "nat" and "tan" are anagrams as they can be rearranged to form each other.
+- The strings "ate", "eat", and "tea" are anagrams as they can be rearranged to form each other.
+```
+
+**Example 2:**
+
+```text
+Input:  strs = [""]
+Output: [[""]]
+```
+
+**Example 3:**
+
+```text
+Input:  strs = ["a"]
+Output: [["a"]]
+```
+
+**Constraints:**
+
+- $1 \le$ `strs.length` $\le 10^4$
+- $0 \le$ `strs[i].length` $\le 100$
+- `strs[i]` consists of lowercase English letters.
 
 ## Solution approach
 
 ### Intuition
 
-Two strings are anagrams exactly when they contain the same letters with the same counts, which is the same as saying their sorted forms are equal. So the sorted string works as a key: every word is put in the group of its sorted form.
+Two words are anagrams exactly when they contain the same letters with the same multiplicities. Sorting a word's letters erases their order and keeps only those multiplicities, so **anagrams have the same sorted form, and non-anagrams have different ones**. The sorted form is therefore a perfect key: put every word into a hash map bucket under its key, and each bucket is one group.
+
+Sorting each word with `std::sort` costs $O(L \log L)$. Because the alphabet has only 26 letters, a **counting sort** produces the same sorted key in $O(L + 26)$: count each letter, then write `'a'` `cnt[0]` times, `'b'` `cnt[1]` times, and so on.
 
 ### Algorithm
 
-1. For each `strs[i]`, copy it into `s` and sort `s`.
-2. Append the original word to `mp[s]`, where `mp` is a `map` from sorted key to its list of words.
-3. Push every group `i.second` from `mp` into `ans` and return it.
+1. For each word `s` in `strs`, build `sortedKey(s)`: count the letters into `cnt[26]`, then append each letter as many times as it occurs, in alphabetical order.
+2. Append `s` to `groups[key]`, where `groups` is an `unordered_map` from key to the list of words.
+3. Move every bucket of `groups` into `ans` and return it.
+
+### Walkthrough
+
+For Example 1 the keys are:
+
+| Word | Key | Bucket |
+| --- | --- | --- |
+| `eat` | `aet` | `aet → [eat]` |
+| `tea` | `aet` | `aet → [eat, tea]` |
+| `tan` | `ant` | `ant → [tan]` |
+| `ate` | `aet` | `aet → [eat, tea, ate]` |
+| `nat` | `ant` | `ant → [tan, nat]` |
+| `bat` | `abt` | `abt → [bat]` |
+
+The three buckets are the three groups (in whatever order the hash map iterates them, which the problem allows).
 
 ### Complexity
 
-- **Time:** $O(n \cdot L \log L + n \cdot L \log n)$, where $n$ is the number of words and $L$ their maximum length — sorting each word, plus $n$ insertions into a `std::map` whose key comparisons cost up to $O(L)$ each.
+- **Time:** $O(n \cdot L)$ on average, where $n$ is the number of words and $L$ the maximum length — building a key is $O(L + 26)$, and hashing and comparing it is $O(L)$.
 - **Space:** $O(n \cdot L)$ — the map stores every key and every word.
 
 ### Edge cases
 
-- **Empty strings:** all of them share the key `""` and form one group.
-- **Single word:** it becomes a group of its own.
+- **Empty strings** (Example 2): all of them get the key `""` and form one group.
+- **Repeated identical words** are anagrams of each other, so they land in the same bucket.
+- **A word with no anagram partner** (like `"bat"`) forms a group of size one.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-public:
+  public:
     vector<vector<string>> groupAnagrams(vector<string>& strs) {
-        map<string, vector<string>> mp;
+        unordered_map<string, vector<string>> groups;
+        for (const string& s : strs) groups[sortedKey(s)].push_back(s);
+
         vector<vector<string>> ans;
-        for (int i = 0; i < strs.size(); i++) {
-            string s = strs[i];
-            sort(s.begin(), s.end());
-            mp[s].push_back(strs[i]);
-        }
-        for (auto i : mp) {
-            ans.push_back(i.second);
-        }
+        ans.reserve(groups.size());
+        for (auto& [key, words] : groups) ans.push_back(move(words));
         return ans;
+    }
+
+  private:
+    // Counting sort over 'a'..'z': the letters of s in sorted order, in O(L + 26).
+    static string sortedKey(const string& s) {
+        int cnt[26] = {};
+        for (char c : s) cnt[c - 'a']++;
+        string key;
+        key.reserve(s.size());
+        for (int i = 0; i < 26; i++) key.append(cnt[i], char('a' + i));
+        return key;
     }
 };
 ```

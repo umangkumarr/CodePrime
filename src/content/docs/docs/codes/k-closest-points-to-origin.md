@@ -1,55 +1,77 @@
 ---
 title: "K Closest Points to Origin"
-description: "Given an array of points where points[i] = [xi, yi] represents a point on the X-Y plane and an integer k, return the k closest points to the origin (0,…"
+description: "Return the k points nearest to the origin by partitioning on squared distance with quickselect (nth_element) in average linear time."
 source: "https://leetcode.com/problems/k-closest-points-to-origin/"
-tags: ["Array", "Math", "Divide and Conquer", "Geometry", "Sorting", "Heap (Priority Queue)", "Quickselect"]
+difficulty: "Medium"
+tags: ["Array", "Math", "Divide and Conquer", "Geometry", "Sorting", "Heap (Priority Queue)", "Quickselect", "K-D Tree"]
 complexity:
-  time: "O(n \\log n)"
-  space: "O(n)"
+  time: "O(n) \\text{ average}"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given an array of <code>points</code> where <code>points[i] = [xi, yi]</code> represents a point on the <strong>X-Y</strong> plane and an integer <code>k</code>, return the <code>k</code> closest points to the origin <code>(0, 0)</code>.</p>
+Given an array of `points` where `points[i] = [xi, yi]` represents a point on the **X-Y** plane and an integer `k`, return the `k` closest points to the origin `(0, 0)`.
 
-<p>The distance between two points on the <strong>X-Y</strong> plane is the Euclidean distance (i.e., <code>&radic;(x<sub>1</sub> - x<sub>2</sub>)<sup>2</sup> + (y<sub>1</sub> - y<sub>2</sub>)<sup>2</sup></code></p>
+The distance between two points on the **X-Y** plane is the Euclidean distance (i.e., $\sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}$).
 
-<p>You may return the answer in <strong>any order</strong>. The answer is <strong>guaranteed</strong> to be <strong>unique</strong> (except for the order that it is in).</p>
+You may return the answer in **any order**. The answer is **guaranteed** to be **unique** (except for the order that it is in).
 
-<p>&nbsp;</p>
-<p><strong>Example:</strong></p>
-<img alt="" src="https://assets.leetcode.com/uploads/2021/03/03/closestplane1.jpg" style={ {width: "400px", height: "400px" } }/>
-<code>
-<strong>Input:</strong> points = [[1,3],[-2,2]], k = 1 <br/>
-<strong>Output:</strong> [[-2,2]] <br/>
-<strong>Explanation:</strong> <br/>
-The distance between (1, 3) and the origin is sqrt(10). <br/>
-The distance between (-2, 2) and the origin is sqrt(8).<br/> 
-Since sqrt(8) &lt; sqrt(10), (-2, 2) is closer to the origin.<br/> 
-We only want the closest k = 1 points from the origin, so the answer is just [[-2,2]]. <br/>
-</code>
+**Example 1:**
+
+![Points (1,3) and (-2,2) plotted on the plane](https://assets.leetcode.com/uploads/2021/03/03/closestplane1.jpg)
+
+```text
+Input:  points = [[1,3],[-2,2]], k = 1
+Output: [[-2,2]]
+Explanation:
+The distance between (1, 3) and the origin is sqrt(10).
+The distance between (-2, 2) and the origin is sqrt(8).
+Since sqrt(8) < sqrt(10), (-2, 2) is closer to the origin.
+We only want the closest k = 1 points from the origin, so the answer is just [[-2,2]].
+```
+
+**Example 2:**
+
+```text
+Input:  points = [[3,3],[5,-1],[-2,4]], k = 2
+Output: [[3,3],[-2,4]]
+Explanation: The answer [[-2,4],[3,3]] would also be accepted.
+```
+
+**Constraints:**
+
+- $1 \le k \le$ `points.length` $\le 10^4$
+- $-10^4 \le x_i, y_i \le 10^4$
 
 ## Solution approach
 
 ### Intuition
 
-The $k$ closest points are simply the first $k$ points once all points are ordered by their distance from the origin. Computing every distance and sorting gives that order directly.
+Two observations make this simple and fast.
+
+1. **No square roots needed.** $\sqrt{\cdot}$ is increasing, so comparing $x^2 + y^2$ gives the same order as comparing true distances — and stays exact in integers. With $|x|, |y| \le 10^4$ the squared distance is at most $2 \times 10^8$, which fits in an `int`.
+2. **We do not need the points in sorted order**, only *which* `k` points are the smallest. Fully sorting costs $O(n \log n)$; a **selection** algorithm does less work. Quickselect partitions the array around a pivot like quicksort but recurses into only one side, which is $O(n)$ on average. C++ provides it as `std::nth_element`: after the call, the element at position `k` is the one that would be there in sorted order, everything before it is no larger and everything after it is no smaller.
+
+So after `nth_element(points.begin(), points.begin() + k, points.end(), cmp)`, the first `k` entries are exactly the `k` closest points (in some order, which the problem allows). The answer is guaranteed unique, so ties at the boundary cannot matter.
+
+An alternative that also works for streaming input is a max-heap of size `k` keyed by squared distance — $O(n \log k)$ time and $O(k)$ space.
 
 ### Algorithm
 
-1. For each point `j`, compute its Euclidean distance `a` $= \sqrt{x^2 + y^2}$ and store the pair `dis[j] = {a, j}`.
-2. Sort `dis`; pairs compare by distance first.
-3. For the first `k` entries, copy the point at index `dis[i][1]` into `ans[i]`.
-4. Return `ans`.
+1. Define `dist(p) = p[0] * p[0] + p[1] * p[1]`.
+2. Call `nth_element` on `points` with position `points.begin() + k`, comparing points by `dist`.
+3. Return a copy of the first `k` points.
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — dominated by sorting the `n` distances.
-- **Space:** $O(n)$ — the `dis` array of distance and index pairs.
+- **Time:** $O(n)$ on average — each partition step discards one side; `nth_element` in libstdc++ falls back to a heap-based selection, so even the worst case is $O(n \log n)$.
+- **Space:** $O(1)$ extra — the partitioning is done in place on `points` (the returned `k` points are the output).
 
 ### Edge cases
 
-- **Ties in distance:** the pair with the smaller original index comes first, which is fine because any order is accepted.
+- **`k == points.length`:** `points.begin() + k` is `end()`, `nth_element` does nothing and all points are returned.
+- **Negative coordinates:** squaring removes the sign, so `(-2, 2)` and `(2, -2)` have the same key `8`.
 
 ## Code
 
@@ -57,24 +79,12 @@ The $k$ closest points are simply the first $k$ points once all points are order
 class Solution {
    public:
     vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
-        int n = points.size();
-        vector<vector<double>> dis(n, vector<double>(2));
-        vector<vector<int>> ans(k, vector<int>(2));
-
-        for (int j = 0; j < n; j++) {
-            double a =
-                (points[j][0] * points[j][0] + points[j][1] * points[j][1]);
-            a = sqrt(a);
-            dis[j][0] = a;
-            dis[j][1] = j;
-        }
-        sort(dis.begin(), dis.end());
-        for (int i = 0; i < k; i++) {
-            ans[i][0] = points[dis[i][1]][0];
-            ans[i][1] = points[dis[i][1]][1];
-        }
-
-        return ans;
+        auto dist = [](const vector<int>& p) { return p[0] * p[0] + p[1] * p[1]; };
+        nth_element(points.begin(), points.begin() + k, points.end(),
+                    [&](const vector<int>& a, const vector<int>& b) {
+                        return dist(a) < dist(b);
+                    });
+        return vector<vector<int>>(points.begin(), points.begin() + k);
     }
 };
 ```

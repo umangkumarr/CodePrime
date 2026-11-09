@@ -1,43 +1,90 @@
 ---
 title: "Median of Two Sorted Arrays"
-description: "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays. The overall run time complexity should…"
+description: "Find the median of two sorted arrays in logarithmic time by binary searching a partition of the shorter array that splits the union into two equal halves."
 source: "https://leetcode.com/problems/median-of-two-sorted-arrays/"
+difficulty: "Hard"
 tags: ["Array", "Binary Search", "Divide and Conquer"]
 complexity:
-  time: "O(\\log(\\min(N1, N2)))"
+  time: "O(\\log(\\min(m, n)))"
   space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given two sorted arrays <code>nums1</code> and <code>nums2</code> of size <code>m</code> and <code>n</code> respectively, return <strong>the median</strong> of the two sorted arrays.</p>
+Given two sorted arrays `nums1` and `nums2` of size `m` and `n` respectively, return **the median** of the two sorted arrays.
 
-<p>The overall run time complexity should be <code>O(log (m+n))</code>.</p>
+The overall run time complexity should be $O(\log (m+n))$.
+
+**Example 1:**
+
+```text
+Input:  nums1 = [1,3], nums2 = [2]
+Output: 2.00000
+Explanation: merged array = [1,2,3] and median is 2.
+```
+
+**Example 2:**
+
+```text
+Input:  nums1 = [1,2], nums2 = [3,4]
+Output: 2.50000
+Explanation: merged array = [1,2,3,4] and median is (2 + 3) / 2 = 2.5.
+```
+
+**Constraints:**
+
+- `nums1.length == m`
+- `nums2.length == n`
+- $0 \le m \le 1000$
+- $0 \le n \le 1000$
+- $1 \le m + n \le 2000$
+- $-10^6 \le$ `nums1[i]`, `nums2[i]` $\le 10^6$
 
 ## Solution approach
 
 ### Intuition
 
-The median splits the merged array into two halves of equal size. We do not need to merge: it is enough to find a cut in each array such that the left parts together hold half of all elements and every value on the left is at most every value on the right. Then the median comes from the largest left value and the smallest right value.
+Merging the arrays would find the median in $O(m + n)$, but the required bound is logarithmic, so we must avoid touching most elements.
 
-To handle odd and even lengths in the same way, the code imagines a separator between every pair of elements, which doubles the cut positions. A cut at position `c` has `L = nums[(c - 1) / 2]` on its left and `R = nums[c / 2]` on its right. Choosing the cut `mid2` in the shorter array fixes `mid1 = N1 + N2 - mid2` in the longer one, so only one value needs to be binary searched. The comments in the code mark each of these steps.
+The median is defined by a **split** of the merged array into a left half and a right half of (almost) equal size, with everything on the left `<=` everything on the right. We can describe such a split without merging: take the first `i` elements of `nums1` and the first `j` elements of `nums2` as the left half, where
+
+`i + j = half = (m + n + 1) / 2`
+
+(the left half gets the extra element when the total is odd). Choosing `i` fixes `j`. Write `L1 = nums1[i - 1]`, `R1 = nums1[i]`, `L2 = nums2[j - 1]`, `R2 = nums2[j]` (using `-inf` / `+inf` past the ends). Each array is sorted, so `L1 <= R1` and `L2 <= R2` hold automatically, and the split is valid exactly when
+
+`L1 <= R2` and `L2 <= R1`.
+
+This condition is **monotonic** in `i`: if `L1 > R2`, then `i` is too large (every larger `i` makes `L1` bigger and `R2` smaller), and if `L2 > R1`, `i` is too small. So we can binary search `i`. Searching over the **shorter** array keeps `j` in range and gives $O(\log \min(m, n))$.
+
+Once the split is found, the largest left value is `max(L1, L2)` and the smallest right value is `min(R1, R2)`. For an odd total the median is the former; for an even total it is their average.
 
 ### Algorithm
 
-1. If `nums1` is shorter, swap the arguments so that `nums2` (length `N2`) is the shorter array.
-2. Binary search `mid2` over `[0, 2 * N2]` and set `mid1 = N1 + N2 - mid2`.
-3. Compute `L1`, `R1`, `L2`, `R2`, using `INT_MIN` or `INT_MAX` when a cut is at an array's edge.
-4. If `L1 > R2`, the left part of `nums1` is too large, so move `mid2` right (`lo = mid2 + 1`). If `L2 > R1`, move it left (`hi = mid2 - 1`).
-5. Otherwise the cut is correct: return `(max(L1, L2) + min(R1, R2)) / 2`. For an odd total length one cut lands on an element, so its `L` and `R` are equal and the formula still gives that element.
+1. If `nums1` is longer, swap the roles so that `nums1` (length `m`) is the shorter array.
+2. `half = (m + n + 1) / 2`, `lo = 0`, `hi = m`.
+3. Loop: `i = lo + (hi - lo) / 2`, `j = half - i`; compute `L1`, `R1`, `L2`, `R2` with `INT_MIN` / `INT_MAX` at the borders.
+   - If `L1 > R2`: too many from `nums1`, set `hi = i - 1`.
+   - Else if `L2 > R1`: too few from `nums1`, set `lo = i + 1`.
+   - Else return `max(L1, L2)` for an odd total, or `(max(L1, L2) + min(R1, R2)) / 2.0` for an even one.
+
+A valid split always exists (the true merged order defines one), and the search interval always contains it, so the loop terminates with a return.
+
+### Walkthrough
+
+On `nums1 = [2,3,5,6,17,36,39]`, `nums2 = [1,8,12,16,18,29,37]` (14 elements, `half = 7`, median `(12 + 16) / 2 = 14`). Green cells form the left half, orange cells are `L1`, `R1`, `L2`, `R2`:
+
+![Binary search for the partition](/img/codes/median-of-two-sorted-arrays/partition.gif)
 
 ### Complexity
 
-- **Time:** $O(\log(\min(N1, N2)))$ — binary search over the cut positions of the shorter array.
-- **Space:** $O(1)$ — only a few variables.
+- **Time:** $O(\log \min(m, n))$ — the search interval `[lo, hi]` over the shorter array halves each iteration.
+- **Space:** $O(1)$ — a few integers (the recursive call only swaps the arguments once).
 
 ### Edge cases
 
-- **One empty array**: `N2 = 0`, so the only cut is `mid2 = 0` and the median comes entirely from `nums1`.
+- **One empty array:** after the swap `m = 0`, so `i = 0` and `j = half`; the median comes entirely from `nums2`.
+- **All of one array on one side** (Example 2): `i = m` makes `R1 = INT_MAX`, and `i = 0` makes `L1 = INT_MIN`, so the comparisons still work.
+- **Duplicates across arrays:** the search only moves on a strict `L1 > R2` or `L2 > R1`, so equal values may end up on either side of the split, which does not change the median.
 
 ## Code
 
@@ -45,31 +92,26 @@ To handle odd and even lengths in the same way, the code imagines a separator be
 class Solution {
    public:
     double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
-        int N1 = nums1.size();
-        int N2 = nums2.size();
-        if (N1 < N2)
-            return findMedianSortedArrays(nums2, nums1);  // Make sure A2 is the shorter one.
-
-        int lo = 0, hi = N2 * 2;
-        while (lo <= hi) {
-            int mid2 = (lo + hi) / 2;   // Try Cut 2
-            int mid1 = N1 + N2 - mid2;  // Calculate Cut 1 accordingly
-
-            double L1 = (mid1 == 0) ? INT_MIN : nums1[(mid1 - 1) / 2];  // Get L1, R1, L2, R2 respectively
-            double L2 = (mid2 == 0) ? INT_MIN : nums2[(mid2 - 1) / 2];
-            double R1 = (mid1 == N1 * 2) ? INT_MAX : nums1[(mid1) / 2];
-            double R2 = (mid2 == N2 * 2) ? INT_MAX : nums2[(mid2) / 2];
-
-            if (L1 > R2)
-                lo = mid2 + 1;  // A1's lower half is too big; need to move C1
-                                // left (C2 right)
-            else if (L2 > R1)
-                hi = mid2 - 1;  // A2's lower half too big; need to move C2 left.
-            else
-                return (max(L1, L2) + min(R1, R2)) / 2;  // Otherwise, that's the right cut.
+        if (nums1.size() > nums2.size()) return findMedianSortedArrays(nums2, nums1);
+        int m = nums1.size(), n = nums2.size();
+        int half = (m + n + 1) / 2;  // size of the left half
+        int lo = 0, hi = m;
+        while (true) {
+            int i = lo + (hi - lo) / 2;  // elements taken from nums1
+            int j = half - i;            // elements taken from nums2
+            int L1 = (i == 0) ? INT_MIN : nums1[i - 1];
+            int R1 = (i == m) ? INT_MAX : nums1[i];
+            int L2 = (j == 0) ? INT_MIN : nums2[j - 1];
+            int R2 = (j == n) ? INT_MAX : nums2[j];
+            if (L1 > R2) {
+                hi = i - 1;
+            } else if (L2 > R1) {
+                lo = i + 1;
+            } else {
+                if ((m + n) % 2 == 1) return max(L1, L2);
+                return (max(L1, L2) + min(R1, R2)) / 2.0;
+            }
         }
-        return -1;
     }
 };
-
 ```

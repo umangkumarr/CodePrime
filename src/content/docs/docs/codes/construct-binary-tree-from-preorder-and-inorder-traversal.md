@@ -1,76 +1,106 @@
 ---
 title: "Construct Binary Tree from Preorder and Inorder Traversal"
-description: "Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and inorder is the inorder traversal of the same…"
+description: "Rebuild a binary tree from its preorder and inorder traversals in linear time: the first preorder value is the root, and a hash map finds it in inorder to split the subtrees."
 source: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/"
+difficulty: "Medium"
 tags: ["Array", "Hash Table", "Divide and Conquer", "Tree", "Binary Tree"]
 complexity:
-  time: "O(n^2)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-<p>Given two integer arrays <code>preorder</code> and <code>inorder</code> where <code>preorder</code> is the preorder traversal of a binary tree and <code>inorder</code> is the inorder traversal of the same tree, construct and return <em>the binary tree</em>.</p>
+Given two integer arrays `preorder` and `inorder` where `preorder` is the preorder traversal of a binary tree and `inorder` is the inorder traversal of the same tree, construct and return *the binary tree*.
+
+**Example 1:**
+
+![Tree with root 3, left child 9, right child 20 whose children are 15 and 7](https://assets.leetcode.com/uploads/2021/02/19/tree.jpg)
+
+```text
+Input:  preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+```
+
+**Example 2:**
+
+```text
+Input:  preorder = [-1], inorder = [-1]
+Output: [-1]
+```
+
+**Constraints:**
+
+- $1 \le$ `preorder.length` $\le 3000$
+- `inorder.length == preorder.length`
+- $-3000 \le$ `preorder[i]`, `inorder[i]` $\le 3000$
+- `preorder` and `inorder` consist of **unique** values.
+- Each value of `inorder` also appears in `preorder`.
+- `preorder` is **guaranteed** to be the preorder traversal of the tree.
+- `inorder` is **guaranteed** to be the inorder traversal of the tree.
 
 ## Solution approach
 
 ### Intuition
 
-The first element of a pre-order range is the root of that subtree. Finding the root in the in-order range splits it: everything to its left forms the left subtree and everything to its right forms the right subtree. The sizes of those two parts tell us which slice of the pre-order range belongs to each subtree, since pre-order lists the root, then the whole left subtree, then the whole right subtree.
+Both traversals lay out every subtree as a **contiguous block**, in different arrangements:
+
+- **preorder** = `root [left subtree][right subtree]` — the root of any block is its **first** element;
+- **inorder** = `[left subtree] root [right subtree]` — once the root is known, its position `mid` splits the block into the two subtrees and gives their sizes.
+
+So: take the root from the front of the preorder block, find it in inorder, and recurse on both halves. The left subtree has `leftSize = mid - inLo` nodes, so in preorder it starts right after the root, and the right subtree starts `leftSize` positions later.
+
+Searching inorder linearly for the root costs $O(n)$ per node, $O(n^2)$ overall on a skewed tree. Because all values are unique, a hash map from value to inorder index makes every lookup $O(1)$.
 
 ### Algorithm
 
-1. Copy both arrays into the members and call `createTree(0, n - 1, 0, n - 1)`, where `p1..p2` is the pre-order range and `n1..n2` the in-order range.
-2. Return `NULL` for an empty range. Create `root` from `preorder[p1]`, and return it at once if the range has one element.
-3. **Left subtree:** scan from `n1` until `inorder[nn2]` equals the root, then step back one. The left in-order range is `nn1..nn2`, and the left pre-order range is `p1 + 1` to `p1 + (nn2 - nn1) + 1`.
-4. **Right subtree:** scan from `n2` backwards until the root is found, then step forward one. The right in-order range is `nn1..n2`, and the right pre-order range ends at `p2` and has the same length.
-5. Build both subtrees recursively and return `root`.
+1. Build `pos`, mapping each `inorder[i]` to `i`.
+2. Call `build(preorder, 0, 0, n - 1, pos)`, where the arguments are `preStart` (index of the block's first preorder element) and the inorder range `[inLo, inHi]`.
+3. In `build`:
+   - If `inLo > inHi`, the block is empty: return `nullptr`.
+   - Create `root` from `preorder[preStart]` and let `mid = pos[root->val]`, `leftSize = mid - inLo`.
+   - `root->left = build(preorder, preStart + 1, inLo, mid - 1, pos)` — the left block starts right after the root.
+   - `root->right = build(preorder, preStart + 1 + leftSize, mid + 1, inHi, pos)` — the right block starts after the left block.
+   - Return `root`.
+
+### Walkthrough
+
+Example 1. Each step shows one call: blue is the root taken from the front of the preorder block and found in inorder; orange is its left block, purple its right block:
+
+![Splitting preorder and inorder around each root for the tree 3, 9, 20, 15, 7](/img/codes/construct-binary-tree-from-preorder-and-inorder-traversal/split.gif)
 
 ### Complexity
 
-- **Time:** $O(n^2)$ — the root is located with a linear scan of the in-order range, which costs $O(n^2)$ in total for a skewed tree ($O(n \log n)$ for a balanced one).
-- **Space:** $O(n)$ — for the member copies of the arrays; the recursion stack adds $O(h)$.
+- **Time:** $O(n)$ — building `pos` is $O(n)$, and each node is created by exactly one call doing $O(1)$ work (plus one empty call per missing child).
+- **Space:** $O(n)$ — the hash map, plus a recursion stack of depth $O(h)$, which is $O(n)$ for a skewed tree.
+
+### Edge cases
+
+- **Single node** (Example 2): `mid = inLo = inHi`, so both child ranges are empty.
+- **Skewed tree:** one side is always empty; depth reaches $3000$, which is fine for the recursion stack.
+- **Negative values:** handled naturally, since `pos` is a hash map rather than an offset array.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    vector<int> preorder;
-    vector<int> inorder;
-
-   public:
-    TreeNode* createTree(int p1, int p2, int n1, int n2) {
-        if (p2 < p1 || n1 > n2) return NULL;
-        TreeNode* root = new TreeNode(preorder[p1]);
-        if (p1 == p2 || n1 == n2) return root;
-        int pp1, pp2, nn1, nn2;
-
-        nn1 = n1, nn2 = n1;
-        while (inorder[nn2] != preorder[p1]) {
-            nn2++;
-        }
-        nn2--;
-        pp1 = p1 + 1;
-        pp2 = p1 + (nn2 - nn1) + 1;
-
-        root->left = createTree(pp1, pp2, nn1, nn2);
-
-        nn2 = n2;
-        nn1 = n2;
-        while (inorder[nn1] != preorder[p1]) nn1--;
-        nn1++;
-        pp2 = p2;
-        pp1 = pp2 - (nn2 - nn1);
-        root->right = createTree(pp1, pp2, nn1, nn2);
+    TreeNode* build(const vector<int>& preorder, int preStart, int inLo, int inHi,
+                    const unordered_map<int, int>& pos) {
+        if (inLo > inHi) return nullptr;
+        TreeNode* root = new TreeNode(preorder[preStart]);
+        int mid = pos.at(root->val);
+        int leftSize = mid - inLo;
+        root->left = build(preorder, preStart + 1, inLo, mid - 1, pos);
+        root->right = build(preorder, preStart + 1 + leftSize, mid + 1, inHi, pos);
         return root;
     }
 
+   public:
     TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
-        this->preorder = preorder;
-        this->inorder = inorder;
-        int n = preorder.size();
-        return createTree(0, n - 1, 0, n - 1);
+        int n = inorder.size();
+        unordered_map<int, int> pos;
+        for (int i = 0; i < n; i++) pos[inorder[i]] = i;
+        return build(preorder, 0, 0, n - 1, pos);
     }
 };
-
 ```

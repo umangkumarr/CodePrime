@@ -1,7 +1,8 @@
 ---
 title: "Trapping Rain Water"
-description: "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining."
+description: "Compute how much rain water an elevation map of unit-width bars traps, in one pass and O(1) space using two pointers with running maxima."
 source: "https://leetcode.com/problems/trapping-rain-water/"
+difficulty: "Hard"
 tags: ["Array", "Two Pointers", "Dynamic Programming", "Stack", "Monotonic Stack"]
 complexity:
   time: "O(n)"
@@ -10,69 +11,93 @@ complexity:
 
 ## Problem
 
-<p>Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is <code>1</code>, compute how much water it can trap after raining.</p>
+Given `n` non-negative integers representing an elevation map where the width of each bar is `1`, compute how much water it can trap after raining.
+
+**Example 1:**
+
+![Elevation map [0,1,0,2,1,0,1,3,2,1,2,1] with 6 units of trapped water](https://assets.leetcode.com/uploads/2018/10/22/rainwatertrap.png)
+
+```text
+Input:  height = [0,1,0,2,1,0,1,3,2,1,2,1]
+Output: 6
+Explanation: The above elevation map (black section) is represented by array
+[0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped.
+```
+
+**Example 2:**
+
+```text
+Input:  height = [4,2,0,3,2,5]
+Output: 9
+```
+
+**Constraints:**
+
+- `n == height.length`
+- $1 \le n \le 2 \times 10^4$
+- $0 \le$ `height[i]` $\le 10^5$
 
 ## Solution approach
 
 ### Intuition
 
-Imagine pouring water until it fills everything it can, then measure the total area covered by bars **plus** water. The water alone is that total minus the sum of the bar heights.
+Look at a single column `i`. Water above it rises until it spills over the lower of the two walls around it, so
 
-The filled shape rises in steps towards the tallest bar $h_m$ and falls in steps after it. Walk from the left edge towards the tallest bar: each time a bar higher than everything before it appears, it adds a new horizontal layer that extends from that bar all the way to the tallest bar. Taking the bars in increasing order of height this way means each layer is counted once and no area overlaps. The same is done from the right edge.
+$$
+\text{water}[i] = \min(\text{maxLeft}[i],\ \text{maxRight}[i]) - \text{height}[i],
+$$
 
-![tapping_rain_water](../../../../assets/img/trapping_rain_water.png "trappig_rain_water")
+where `maxLeft[i]` is the tallest bar in `height[0..i]` and `maxRight[i]` the tallest in `height[i..n-1]`. Precomputing both arrays gives an $O(n)$-space solution. We can drop the arrays with **two pointers** `left` and `right` moving towards each other, keeping `leftMax` (tallest bar seen from the left so far) and `rightMax` (tallest seen from the right).
+
+The key observation: suppose `height[left] < height[right]`. Every bar that `left` has passed was lower than some bar still on the right (that is why `left` moved), so `leftMax` is **at most** `maxRight[left]`; and `height[right]` itself shows the right side is taller than the current bar. Hence `min(maxLeft, maxRight)` at `left` is exactly `leftMax`, and the water above `left` is `leftMax - height[left]` — no need to know the full right side. The mirror argument holds for `right` when `height[left] >= height[right]`.
+
+So at each step we settle the column on the **lower** side, whose water level is already determined, and move that pointer inward.
 
 ### Algorithm
 
-1. In one pass, compute the sum of heights `sm` and the index `indx` of the tallest bar.
-2. Start `ans` at `height[indx]`, the area of the tallest column.
-3. Sweep `i` from `0` to `indx - 1` with a running maximum `mx`. When `height[i] > mx`, add the layer `(indx - i) * (height[i] - mx)` and update `mx`.
-4. Sweep `i` from `n - 1` down to `indx + 1` the same way, adding `(i - indx) * (height[i] - mx)`.
-5. Return `ans - sm`, the filled area minus the bars.
+1. Set `left = 0`, `right = n - 1`, and `leftMax = rightMax = water = 0`.
+2. While `left < right`:
+   - If `height[left] < height[right]`: update `leftMax = max(leftMax, height[left])`, add `leftMax - height[left]` to `water`, and increment `left`.
+   - Otherwise: update `rightMax = max(rightMax, height[right])`, add `rightMax - height[right]` to `water`, and decrement `right`.
+3. Return `water`. The column where the pointers meet is the tallest bar and holds no water.
+
+### Walkthrough
+
+Purple cells are bars, blue cells are water already counted, and green heights are settled columns:
+
+![Two pointers settling columns of [0,1,0,2,1,0,1,3,2,1,2,1] from the lower side](/img/codes/trapping-rain-water/two-pointers.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — three linear passes.
-- **Space:** $O(1)$ — only a few variables.
+- **Time:** $O(n)$ — each iteration moves one pointer one step inward, so there are `n - 1` iterations.
+- **Space:** $O(1)$ — four integers.
 
 ### Edge cases
 
-- **Several bars of maximum height**: `indx` is the first of them; the right sweep still raises the level up to that height, so the water between them is counted.
+- **Fewer than three bars** (`n = 1` or `n = 2`): no column has walls on both sides; the loop runs at most once and adds `0` because the running maximum equals the current bar.
+- **Monotonic heights** such as `[1,2,3]`: each settled column is the new maximum on its side, so it adds `0`.
+- **Overflow:** the total is at most $(n - 2) \cdot 10^5 \lt 2^{31}$, so `int` is enough.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-public:
+   public:
     int trap(vector<int>& height) {
-        int n = height.size();
-        int ans = 0, sm = height[0];
-        int mx = height[0], indx = 0;
-        for (int i = 1; i < n; i++) {
-            sm += height[i];
-            if (mx < height[i]) {
-                mx = height[i];
-                indx = i;
+        int left = 0, right = (int)height.size() - 1;
+        int leftMax = 0, rightMax = 0, water = 0;
+        while (left < right) {
+            if (height[left] < height[right]) {
+                leftMax = max(leftMax, height[left]);
+                water += leftMax - height[left];
+                left++;
+            } else {
+                rightMax = max(rightMax, height[right]);
+                water += rightMax - height[right];
+                right--;
             }
         }
-        mx = 0;
-        ans = height[indx];
-        for (int i = 0; i < indx; i++) {
-            if (mx < height[i]) {
-                ans += (indx - i) * (height[i] - mx);
-                mx = height[i];
-            }
-        }
-        mx = 0;
-        for (int i = n - 1; i > indx; i--) {
-            if (mx < height[i]) {
-                ans += (i - indx) * (height[i] - mx);
-                mx = height[i];
-            }
-        }
-        return ans - sm;
-
+        return water;
     }
-};   
-
+};
 ```

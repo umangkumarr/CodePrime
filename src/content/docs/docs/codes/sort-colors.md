@@ -1,7 +1,8 @@
 ---
 title: "Sort Colors"
-description: "Given an array nums with n objects colored red, white, or blue, sort them in-place so that objects of the same color are adjacent, with the colors in the…"
+description: "Sort an array of 0s, 1s and 2s in place in a single pass with constant extra space, using the Dutch national flag partitioning algorithm."
 source: "https://leetcode.com/problems/sort-colors/"
+difficulty: "Medium"
 tags: ["Array", "Two Pointers", "Sorting"]
 complexity:
   time: "O(n)"
@@ -10,43 +11,92 @@ complexity:
 
 ## Problem
 
-<p>Given an array <code>nums</code> with <code>n</code> objects colored red, white, or blue, sort them <strong><a href="https://en.wikipedia.org/wiki/In-place_algorithm" target="_blank">in-place</a> </strong>so that objects of the same color are adjacent, with the colors in the order red, white, and blue.</p>
+You are given an array `nums` with `n` objects coloured red, white, or blue. Sort them **[in-place](https://en.wikipedia.org/wiki/In-place_algorithm)** so that objects of the same colour are adjacent, with the colours in the order red, white, and blue.
 
-<p>We will use the integers <code>0</code>, <code>1</code>, and <code>2</code> to represent the color red, white, and blue, respectively.</p>
+We use the integers `0`, `1`, and `2` to represent the colours red, white, and blue respectively.
 
-<p>You must solve this problem without using the library&#39;s sort function.</p>
+You must solve this problem without using the library's sort function.
+
+**Example 1:**
+
+```text
+Input:  nums = [2,0,2,1,1,0]
+Output: [0,0,1,1,2,2]
+Explanation: The array has two 0s, two 1s and two 2s; sorted in place the 0s come first, then the 1s, then the 2s.
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [2,0,1]
+Output: [0,1,2]
+```
+
+**Constraints:**
+
+- `n == nums.length`
+- $1 \le n \le 300$
+- `nums[i]` is either `0`, `1`, or `2`.
+
+**Follow-up:** Could you come up with a one-pass algorithm using only constant extra space?
 
 ## Solution approach
 
 ### Intuition
 
-There are only three possible values: `0`, `1` and `2`. So instead of a general sort we can count how many times each value appears (counting sort) and then overwrite the array with that many `0`s, then `1`s, then `2`s.
+A counting sort (count the `0`s, `1`s and `2`s, then overwrite the array) already runs in $O(n)$, but it needs **two** passes. The follow-up asks for one.
+
+Because there are only three values, we can instead grow three bands at the same time while scanning once — the **Dutch national flag** partition. Keep three pointers so that at every moment:
+
+| Range | Contents |
+| --- | --- |
+| `[0, lo)` | all `0` |
+| `[lo, mid)` | all `1` |
+| `[mid, hi]` | not yet examined |
+| `(hi, n)` | all `2` |
+
+Look at `nums[mid]` and move it into the band it belongs to. The unknown region shrinks by one element at each step, so the scan ends after at most `n` steps.
 
 ### Algorithm
 
-1. Count the occurrences of each colour in the array `a` of size 3, using `a[arr[i]]++`.
-2. Keep a write position `j` starting at `0`.
-3. For each colour `i` from `0` to `2`, write `i` into `arr[j++]` exactly `a[i]` times.
+1. Set `lo = 0`, `mid = 0`, `hi = n - 1`.
+2. While `mid <= hi`:
+   - If `nums[mid] == 0`: swap `nums[lo]` and `nums[mid]`, then increment both `lo` and `mid`. The value swapped in from `lo` is a `1` (or it is the same cell), so it is safe to step past it.
+   - If `nums[mid] == 1`: it is already in the middle band; increment `mid`.
+   - If `nums[mid] == 2`: swap `nums[mid]` and `nums[hi]`, then decrement `hi`. Do **not** advance `mid`: the value that came from `hi` has not been examined yet.
+
+### Walkthrough
+
+Green cells are final, blue is the element being examined:
+
+![Dutch national flag partition on [2,0,2,1,1,0]](/img/codes/sort-colors/dutch-flag.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — one pass to count and one pass to rewrite the array.
-- **Space:** $O(1)$ — the count array has a fixed size of 3.
+- **Time:** $O(n)$ — each iteration either advances `mid` or decrements `hi`, so there are at most `n` iterations, all in a single pass.
+- **Space:** $O(1)$ — three indices.
+
+### Edge cases
+
+- **Single element** or **all the same colour:** the loop only moves `mid` (or only `hi`) and the array is left unchanged.
+- **Already sorted / reverse sorted:** handled identically; no special casing is needed.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
    public:
-    void sortColors(vector<int>& arr) {
-        int a[] = {0, 0, 0};
-        int n = arr.size();
-        for (int i = 0; i < n; i++) a[arr[i]]++;
-        int j = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int k = 0; k < a[i]; k++) arr[j++] = i;
+    void sortColors(vector<int>& nums) {
+        int lo = 0, mid = 0, hi = (int)nums.size() - 1;
+        while (mid <= hi) {
+            if (nums[mid] == 0) {
+                swap(nums[lo++], nums[mid++]);
+            } else if (nums[mid] == 1) {
+                mid++;
+            } else {
+                swap(nums[mid], nums[hi--]);
+            }
         }
     }
 };
-
 ```

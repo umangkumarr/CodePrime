@@ -1,7 +1,8 @@
 ---
 title: "Find Median from Data Stream"
-description: "The median is the middle value in an ordered integer list. If the size of the list is even, there is no middle value and the median is the mean of the two…"
+description: "Support adding numbers from a stream and querying the running median, in O(log n) per insertion using a max-heap and a min-heap for the two halves."
 source: "https://leetcode.com/problems/find-median-from-data-stream/"
+difficulty: "Hard"
 tags: ["Two Pointers", "Design", "Sorting", "Heap (Priority Queue)", "Data Stream"]
 complexity:
   time: "O(\\log n)"
@@ -10,64 +11,110 @@ complexity:
 
 ## Problem
 
-<p>The <strong>median</strong> is the middle value in an ordered integer list. If the size of the list is even, there is no middle value and the median is the mean of the two middle values.</p>
+The **median** is the middle value in an ordered integer list. If the size of the list is even, there is no middle value, and the median is the mean of the two middle values.
 
-<ul>
-	<li>For example, for <code>arr = [2,3,4]</code>, the median is <code>3</code>.</li>
-	<li>For example, for <code>arr = [2,3]</code>, the median is <code>(2 + 3) / 2 = 2.5</code>.</li>
-</ul>
+- For example, for `arr = [2,3,4]`, the median is `3`.
+- For example, for `arr = [2,3]`, the median is `(2 + 3) / 2 = 2.5`.
 
-<p>Implement the MedianFinder class:</p>
+Implement the MedianFinder class:
 
-<ul>
-	<li><code>MedianFinder()</code> initializes the <code>MedianFinder</code> object.</li>
-	<li><code>void addNum(int num)</code> adds the integer <code>num</code> from the data stream to the data structure.</li>
-	<li><code>double findMedian()</code> returns the median of all elements so far. Answers within <code>10-5</code> of the actual answer will be accepted.</li>
-</ul>
+- `MedianFinder()` initializes the `MedianFinder` object.
+- `void addNum(int num)` adds the integer `num` from the data stream to the data structure.
+- `double findMedian()` returns the median of all elements so far. Answers within $10^{-5}$ of the actual answer will be accepted.
+
+**Example 1:**
+
+```text
+Input
+["MedianFinder", "addNum", "addNum", "findMedian", "addNum", "findMedian"]
+[[], [1], [2], [], [3], []]
+Output
+[null, null, null, 1.5, null, 2.0]
+
+Explanation
+MedianFinder medianFinder = new MedianFinder();
+medianFinder.addNum(1);    // arr = [1]
+medianFinder.addNum(2);    // arr = [1, 2]
+medianFinder.findMedian(); // return 1.5 (i.e., (1 + 2) / 2)
+medianFinder.addNum(3);    // arr[1, 2, 3]
+medianFinder.findMedian(); // return 2.0
+```
+
+**Constraints:**
+
+- $-10^5 \le$ `num` $\le 10^5$
+- There will be at least one element in the data structure before calling `findMedian`.
+- At most $5 \times 10^4$ calls will be made to `addNum` and `findMedian`.
+
+**Follow-up:**
+
+- If all integer numbers from the stream are in the range `[0, 100]`, how would you optimize your solution?
+- If `99%` of all integer numbers from the stream are in the range `[0, 100]`, how would you optimize your solution?
 
 ## Solution approach
 
 ### Intuition
 
-The median only depends on the middle of the sorted data. Split the numbers into a lower half and an upper half: then the median is the largest number of the lower half, or the average of that and the smallest number of the upper half. A max-heap gives the largest of the lower half and a min-heap gives the smallest of the upper half, each in $O(1)$.
+The median depends only on the one or two values in the **middle** of the sorted data. Keeping everything sorted costs $O(n)$ per insertion, but we never need full order — only the boundary between the lower and the upper half.
 
-`small` is a max-heap for the lower half. `large` stores the **negatives** of the upper half, so its max-heap top is minus the smallest upper value.
+So split the numbers into two halves:
+
+- `lo`, a **max-heap** holding the smaller half, so `lo.top()` is the largest of the small numbers;
+- `hi`, a **min-heap** holding the larger half, so `hi.top()` is the smallest of the large numbers.
+
+Maintain two invariants: every value in `lo` is `<=` every value in `hi`, and `lo` has either the same number of elements as `hi` or exactly one more. Then the median is `lo.top()` when the total is odd, and the mean of `lo.top()` and `hi.top()` when it is even.
 
 ### Algorithm
 
-1. `addNum` pushes `num` into `small`, then moves the largest of `small` to `large` (as `-small.top()`). This keeps every value in `small` no larger than every value in `large`.
-2. If `large` now has more elements than `small`, move its smallest value back with `small.push(-large.top())`. So `small` always has the same size as `large` or one more.
-3. `findMedian` returns `small.top()` when `small` is bigger, otherwise `(small.top() - large.top()) / 2.0`, which is the average of the two middle values because `large.top()` is negated.
+1. `addNum(num)`:
+   - Push `num` into `lo`, then move `lo`'s largest element to `hi`. Whatever `num` was, the element that ends up in `hi` is at least as large as everything left in `lo`, so the ordering invariant holds.
+   - If `hi` now has more elements than `lo`, move `hi`'s smallest element back to `lo`, which restores the size invariant.
+2. `findMedian()`: if `lo` is larger, return `lo.top()`; otherwise return `(lo.top() + hi.top()) / 2.0`.
+
+### Walkthrough
+
+The stream `5, 15, 1, 3, 8, 7`, drawn as the sorted list of numbers seen so far. Blue cells are in `lo`, orange cells in `hi`; the heap tops are the two cells at the boundary:
+
+![Two heaps splitting the stream 5, 15, 1, 3, 8, 7](/img/codes/find-median-from-data-stream/two-heaps.gif)
 
 ### Complexity
 
-- **Time:** $O(\log n)$ per `addNum` (a constant number of heap operations) and $O(1)$ per `findMedian`.
-- **Space:** $O(n)$ — every number is stored in one of the two heaps.
+- **Time:** $O(\log n)$ per `addNum` (at most three heap pushes/pops) and $O(1)$ per `findMedian`.
+- **Space:** $O(n)$ — every number is stored in exactly one heap.
 
 ### Edge cases
 
-- The heaps use `long`, so negating a value like `-2^31` cannot overflow.
+- **One element:** it ends up in `lo` (pushed to `lo`, moved to `hi`, moved back), so `findMedian` returns it.
+- **Duplicates and negative numbers:** the comparisons are plain `<=`/`>=` on `int`, so they need no special care; `lo.top() + hi.top()` is at most $2 \cdot 10^5$ in absolute value, so the sum cannot overflow.
+
+### Follow-up
+
+- **All numbers in `[0, 100]`:** keep a count array `cnt[101]` and the total `n`. `addNum` is $O(1)$; `findMedian` walks the 101 buckets to find the element(s) at rank `(n - 1) / 2` and `n / 2` — constant time.
+- **99% in `[0, 100]`:** keep the 101 buckets plus two counters (or small sorted containers) for values below `0` and above `100`. The median is almost certainly inside the bucket range; when its rank falls among the outliers, look it up in the corresponding container, which holds only about 1% of the data.
 
 ## Code
 
 ```cpp title="C++"
 class MedianFinder {
-    priority_queue<long> small, large;
+    priority_queue<int> lo;                             // smaller half, max at top
+    priority_queue<int, vector<int>, greater<int>> hi;  // larger half, min at top
 
    public:
+    MedianFinder() {}
+
     void addNum(int num) {
-        small.push(num);
-        large.push(-small.top());
-        small.pop();
-        if (small.size() < large.size()) {
-            small.push(-large.top());
-            large.pop();
+        lo.push(num);
+        hi.push(lo.top());
+        lo.pop();
+        if (hi.size() > lo.size()) {
+            lo.push(hi.top());
+            hi.pop();
         }
     }
 
     double findMedian() {
-        return small.size() > large.size() ? small.top() : (small.top() - large.top()) / 2.0;
+        if (lo.size() > hi.size()) return lo.top();
+        return (lo.top() + hi.top()) / 2.0;
     }
 };
-
 ```

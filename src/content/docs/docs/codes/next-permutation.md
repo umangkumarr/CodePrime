@@ -1,7 +1,8 @@
 ---
 title: "Next Permutation"
-description: "A permutation of an array of integers is an arrangement of its members into a sequence or linear order. For example, for arr = [1,2,3], the following are…"
+description: "Rearrange an array into the next lexicographically greater permutation in place, by finding the pivot, swapping it with its successor and reversing the suffix."
 source: "https://leetcode.com/problems/next-permutation/"
+difficulty: "Medium"
 tags: ["Array", "Two Pointers"]
 complexity:
   time: "O(n)"
@@ -10,46 +11,82 @@ complexity:
 
 ## Problem
 
-<p>A <strong>permutation</strong> of an array of integers is an arrangement of its members into a sequence or linear order.</p>
+A **permutation** of an array of integers is an arrangement of its members into a sequence or linear order.
 
-<ul>
-	<li>For example, for <code>arr = [1,2,3]</code>, the following are considered permutations of <code>arr</code>: <code>[1,2,3]</code>, <code>[1,3,2]</code>, <code>[3,1,2]</code>, <code>[2,3,1]</code>.</li>
-</ul>
+- For example, for `arr = [1, 2, 3]`, the following are all the permutations of `arr`: `[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]`.
 
-<p>The <strong>next permutation</strong> of an array of integers is the next lexicographically greater permutation of its integer. More formally, if all the permutations of the array are sorted in one container according to their lexicographical order, then the <strong>next permutation</strong> of that array is the permutation that follows it in the sorted container. If such arrangement is not possible, the array must be rearranged as the lowest possible order (i.e., sorted in ascending order).</p>
+The **next permutation** of an array of integers is the next lexicographically greater permutation of its integer. More formally, if all the permutations of the array are sorted in one container according to their lexicographical order, then the **next permutation** of that array is the permutation that follows it in the sorted container. If such arrangement is not possible, the array must be rearranged as the lowest possible order (i.e., sorted in ascending order).
 
-<ul>
-	<li>For example, the next permutation of <code>arr = [1,2,3]</code> is <code>[1,3,2]</code>.</li>
-	<li>Similarly, the next permutation of <code>arr = [2,3,1]</code> is <code>[3,1,2]</code>.</li>
-	<li>While the next permutation of <code>arr = [3,2,1]</code> is <code>[1,2,3]</code> because <code>[3,2,1]</code> does not have a lexicographical larger rearrangement.</li>
-</ul>
+Examples:
 
-<p>Given an array of integers <code>nums</code>, <em>find the next permutation of</em> <code>nums</code>.</p>
+- The next permutation of `arr = [1, 2, 3]` is `[1, 3, 2]`.
+- The next permutation of `arr = [2, 3, 1]` is `[3, 1, 2]`.
+- The next permutation of `arr = [3, 2, 1]` is `[1, 2, 3]` because `[3, 2, 1]` does not have a lexicographical larger rearrangement.
 
-<p>The replacement must be <strong><a href="http://en.wikipedia.org/wiki/In-place_algorithm" target="_blank">in place</a></strong> and use only constant extra memory.</p>
+Given an array of integers `nums`, *find the next permutation of* `nums`.
+
+The replacement must be **[in place](http://en.wikipedia.org/wiki/In-place_algorithm)** and use only constant extra memory.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,2,3]
+Output: [1,3,2]
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [3,2,1]
+Output: [1,2,3]
+```
+
+**Example 3:**
+
+```text
+Input:  nums = [1,1,5]
+Output: [1,5,1]
+```
+
+**Constraints:**
+
+- $1 \le \text{nums.length} \le 100$
+- $0 \le \text{nums[i]} \le 100$
 
 ## Solution approach
 
 ### Intuition
 
-To get the next larger arrangement, change as far to the right as possible. Find the longest suffix that is non-increasing: it is already the largest arrangement of its elements, so it cannot be increased by itself. The element just before it, `nums[i]`, must grow by the smallest possible amount, so swap it with the smallest suffix element that is larger than it. Then reverse the suffix, which makes it as small as possible.
+Generating all permutations and sorting them is $O(n! \cdot n)$. Instead, think about how a number "counts up": the next larger arrangement changes the array **as far to the right as possible**.
+
+1. **Find the pivot.** Look at the longest suffix that is **non-increasing** (read left to right). Such a suffix is already the largest possible arrangement of its own elements, so no change confined to it can make the array larger. The element just before it, `nums[i]`, is the pivot: it is the rightmost position that *can* grow, because something larger than it sits in the suffix.
+2. **Grow the pivot by as little as possible.** Swap `nums[i]` with the **smallest suffix element that is greater than it**. Since the suffix is non-increasing, that is the **rightmost** element greater than `nums[i]`, found by scanning from the end.
+3. **Make the rest as small as possible.** After the swap, the suffix is still non-increasing (the value placed into it fits exactly where the old one was in the order). Its smallest arrangement is ascending, so **reverse** it.
+
+If no pivot exists, the whole array is non-increasing — it is the last permutation — and reversing it gives the first (ascending) one, exactly as required.
 
 ### Algorithm
 
-1. If `n == 1`, return.
-2. Starting at `i = n - 2`, move left while `nums[i + 1] <= nums[i]`.
-3. If `i >= 0`, scan `j` from the end while `nums[j] <= nums[i]`. This finds the rightmost, and therefore smallest, element greater than `nums[i]`. Swap `nums[i]` and `nums[j]`, then reverse `nums[i + 1 ...]`.
-4. If `i < 0`, the whole array is non-increasing, which is the last permutation, so reverse it to get the first one.
+1. Set `i = n - 2` and move left while `nums[i] >= nums[i + 1]`. Afterwards `nums[i + 1 .. n - 1]` is the longest non-increasing suffix, and `i` is the pivot (or `-1`).
+2. If `i >= 0`: set `j = n - 1`, move left while `nums[j] <= nums[i]`, then `swap(nums[i], nums[j])`.
+3. Reverse `nums[i + 1 .. n - 1]` (when `i = -1` this reverses the whole array).
+
+### Walkthrough
+
+On `[1,3,5,4,2]` (not an official example, but it shows every step). Orange is the non-increasing suffix, blue the pivot, purple its swap partner:
+
+![Next permutation of [1,3,5,4,2]](/img/codes/next-permutation/steps.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — at most a few linear scans plus one reverse.
-- **Space:** $O(1)$ — the array is rearranged in place.
+- **Time:** $O(n)$ — at most one scan to find `i`, one to find `j`, and one reverse.
+- **Space:** $O(1)$ — everything happens in place.
 
 ### Edge cases
 
-- **Last permutation** such as `[3, 2, 1]` becomes `[1, 2, 3]`.
-- **Duplicates** such as `[1, 5, 1]`: the `<=` comparisons skip equal values, giving `[5, 1, 1]`.
+- **Last permutation** (`[3,2,1]`, Example 2): `i` ends at `-1`, no swap happens, and reversing the whole array gives `[1,2,3]`.
+- **Duplicates** (`[1,1,5]`, `[1,5,1]`): using `>=` and `<=` treats equal values as "not larger", so `[1,5,1]` correctly becomes `[5,1,1]`, and `[1,1,5]` becomes `[1,5,1]`.
+- **Single element:** `i` starts at `-1`, and reversing a one-element range does nothing.
 
 ## Code
 
@@ -57,25 +94,15 @@ To get the next larger arrangement, change as far to the right as possible. Find
 class Solution {
    public:
     void nextPermutation(vector<int>& nums) {
-        int n, i, j;
-        n = nums.size();
-        if (n == 1) return;
-        i = n - 2;
-        while (i >= 0 && nums[i + 1] <= nums[i]) {
-            i--;
-        }
+        int n = nums.size();
+        int i = n - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) i--;  // pivot: rightmost i with nums[i] < nums[i+1]
         if (i >= 0) {
-            j = n - 1;
-            while (nums[j] <= nums[i]) j--;
-            int temp = nums[i];
-            nums[i] = nums[j];
-            nums[j] = temp;
-            reverse(nums.begin() + i + 1, nums.end());
-            return;
+            int j = n - 1;
+            while (nums[j] <= nums[i]) j--;  // rightmost element larger than the pivot
+            swap(nums[i], nums[j]);
         }
-        reverse(nums.begin(), nums.end());
-        return;
+        reverse(nums.begin() + i + 1, nums.end());
     }
 };
-
 ```

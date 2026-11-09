@@ -1,7 +1,8 @@
 ---
 title: "Valid Number"
-description: "A valid number can be split up into these components (in order): A decimal number or an integer. (Optional) An 'e' or 'E', followed by an integer. A…"
+description: "Decide whether a string is a valid decimal or integer number with an optional exponent, in one left-to-right scan that tracks digit, dot and exponent flags."
 source: "https://leetcode.com/problems/valid-number/"
+difficulty: "Hard"
 tags: ["String"]
 complexity:
   time: "O(n)"
@@ -10,127 +11,148 @@ complexity:
 
 ## Problem
 
-<p>A <strong>valid number</strong> can be split up into these components (in order):</p>
+Given a string `s`, return whether `s` is a **valid number**.
 
-<ol>
-	<li>A <strong>decimal number</strong> or an <strong>integer</strong>.</li>
-	<li>(Optional) An <code>&#39;e&#39;</code> or <code>&#39;E&#39;</code>, followed by an <strong>integer</strong>.</li>
-</ol>
+For example, all the following are valid numbers: `"2", "0089", "-0.1", "+3.14", "4.", "-.9", "2e10", "-90E3", "3e+7", "+6e-1", "53.5e93", "-123.456e789"`, while the following are not valid numbers: `"abc", "1a", "1e", "e3", "99e2.5", "--6", "-+3", "95a54e53"`.
 
-<p>A <strong>decimal number</strong> can be split up into these components (in order):</p>
+Formally, a **valid number** is defined using one of the following definitions:
 
-<ol>
-	<li>(Optional) A sign character (either <code>&#39;+&#39;</code> or <code>&#39;-&#39;</code>).</li>
-	<li>
-	One of the following formats:
-	<ol>
-		<li>One or more digits, followed by a dot <code>&#39;.&#39;</code>.</li>
-		<li>One or more digits, followed by a dot <code>&#39;.&#39;</code>, followed by one or more digits.</li>
-		<li>A dot <code>&#39;.&#39;</code>, followed by one or more digits.</li>
-	</ol>
-	</li>
-</ol>
+1. An **integer number** followed by an **optional exponent**.
+2. A **decimal number** followed by an **optional exponent**.
 
-<p>An <strong>integer</strong> can be split up into these components (in order):</p>
+An **integer number** is defined with an **optional sign** `'-'` or `'+'` followed by **digits**.
 
-<ol>
-	<li>(Optional) A sign character (either <code>&#39;+&#39;</code> or <code>&#39;-&#39;</code>).</li>
-	<li>One or more digits.</li>
-</ol>
+A **decimal number** is defined with an **optional sign** `'-'` or `'+'` followed by one of the following definitions:
 
-<p>For example, all the following are valid numbers: <code>[&quot;2&quot;, &quot;0089&quot;, &quot;-0.1&quot;, &quot;+3.14&quot;, &quot;4.&quot;, &quot;-.9&quot;, &quot;2e10&quot;, &quot;-90E3&quot;, &quot;3e+7&quot;, &quot;+6e-1&quot;, &quot;53.5e93&quot;, &quot;-123.456e789&quot;]</code>, while the following are not valid numbers: <code>[&quot;abc&quot;, &quot;1a&quot;, &quot;1e&quot;, &quot;e3&quot;, &quot;99e2.5&quot;, &quot;--6&quot;, &quot;-+3&quot;, &quot;95a54e53&quot;]</code>.</p>
+1. **Digits** followed by a **dot** `'.'`.
+2. **Digits** followed by a **dot** `'.'` followed by **digits**.
+3. A **dot** `'.'` followed by **digits**.
 
-<p>Given a string <code>s</code>, return <code>true</code><em> if </em><code>s</code><em> is a <strong>valid number</strong></em>.</p>
+An **exponent** is defined with an **exponent notation** `'e'` or `'E'` followed by an **integer number**.
 
-<p>&nbsp;</p>
-<p><strong class="example">Example 1:</strong></p>
+The **digits** are defined as one or more digits.
 
-<pre>
-<strong>Input:</strong> s = &quot;0&quot;
-<strong>Output:</strong> true
-</pre>
+**Example 1:**
 
-<p><strong class="example">Example 2:</strong></p>
+```text
+Input:  s = "0"
+Output: true
+```
 
-<pre>
-<strong>Input:</strong> s = &quot;e&quot;
-<strong>Output:</strong> false
-</pre>
+**Example 2:**
 
-<p><strong class="example">Example 3:</strong></p>
+```text
+Input:  s = "e"
+Output: false
+```
 
-<pre>
-<strong>Input:</strong> s = &quot;.&quot;
-<strong>Output:</strong> false
-</pre>
+**Example 3:**
 
-<p>&nbsp;</p>
-<p><strong>Constraints:</strong></p>
+```text
+Input:  s = "."
+Output: false
+```
 
-<ul>
-	<li><code>1 &lt;= s.length &lt;= 20</code></li>
-	<li><code>s</code> consists of only English letters (both uppercase and lowercase), digits (<code>0-9</code>), plus <code>&#39;+&#39;</code>, minus <code>&#39;-&#39;</code>, or dot <code>&#39;.&#39;</code>.</li>
-</ul>
+**Constraints:**
+
+- $1 \le$ `s.length` $\le 20$
+- `s` consists of only English letters (both uppercase and lowercase), digits (`0-9`), plus `'+'`, minus `'-'`, or dot `'.'`.
 
 ## Solution approach
 
 ### Intuition
 
-A valid number follows a fixed pattern: an optional sign, digits with an optional decimal point, and an optional exponent part (`e` or `E`, optional sign, digits). Patterns like this are recognised by a deterministic finite automaton (DFA). Each state remembers how much of the pattern has been read, and each character either moves to a new state or makes the string invalid. The DFA is drawn in the diagram inside the solution block below.
+The grammar is a **regular language**: it can be recognised by a small finite automaton that reads the string once. Drawn out, the automaton looks like this (double circles are accepting states):
+
+```mermaid
+flowchart LR
+    start([start]) -- "+ / -" --> sign([sign])
+    start -- digit --> int(((int)))
+    sign -- digit --> int
+    start -- "." --> dot([dot])
+    sign -- "." --> dot
+    int -- digit --> int
+    int -- "." --> frac(((frac)))
+    dot -- digit --> frac
+    frac -- digit --> frac
+    int -- "e / E" --> exp([exp])
+    frac -- "e / E" --> exp
+    exp -- "+ / -" --> esign([exp sign])
+    exp -- digit --> eint(((exp int)))
+    esign -- digit --> eint
+    eint -- digit --> eint
+    classDef acc fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    classDef mid fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
+    class int,frac,eint acc
+    class start,sign,dot,exp,esign mid
+```
+
+Any character with no outgoing arrow from the current state makes the string invalid. Rather than storing the table, we can track the same information with three flags, because the automaton only ever needs to know:
+
+- `seenDigit` — has the **current part** (mantissa, or exponent after an `e`) got at least one digit?
+- `seenDot` — has a `.` appeared? Only one is allowed, and only in the mantissa.
+- `seenExp` — has an `e`/`E` appeared? Only one is allowed, and only after a mantissa with digits.
+
+A sign is legal only at the very start or immediately after `e`/`E`. Every rule of the grammar maps onto one of these checks, and the string is valid when the scan finishes with `seenDigit` true (so neither the mantissa nor the exponent is empty).
 
 ### Algorithm
 
-1. `states` is the transition table: `states[s][c]` is the next state from state `s` on character class `c`. State `0` is unused, and the start state is `1`.
-2. Map each character to a class: `' '` to `"blank"`, `'+'`/`'-'` to `"sign"`, `'0'`–`'9'` to `"digit"`. Any other character (`.`, `e`, `E`, letters) keeps its own value.
-3. For each character, if its class has no transition from `currentState`, return `False`; otherwise move to the next state.
-4. At the end, accept only if `currentState` is one of the final states `3`, `5`, `8`, `9` (after an integer, after a decimal, after an exponent, or in trailing blanks).
+1. Set `seenDigit = seenDot = seenExp = false`.
+2. For each index `i` with character `c = s[i]`:
+   - **Digit:** set `seenDigit = true`.
+   - **`+` or `-`:** valid only if `i == 0` or `s[i - 1]` is `e`/`E`; otherwise return `false`.
+   - **`e` or `E`:** if `seenExp` is already set or the mantissa has no digit (`!seenDigit`), return `false`. Set `seenExp = true` and reset `seenDigit = false`, because the exponent needs digits of its own.
+   - **`.`:** if `seenDot` or `seenExp` is set, return `false`; otherwise set `seenDot = true`.
+   - **Anything else** (letters other than `e`/`E`): return `false`.
+3. Return `seenDigit`.
+
+### Walkthrough
+
+| `s` | Decisive step | Result |
+| --- | --- | --- |
+| `"-123.456e789"` | sign at `i = 0`, one dot before `e`, digits on both sides of `e` | `true` |
+| `"4."` | one dot, mantissa has digits, no exponent | `true` |
+| `"1e"` | `seenDigit` reset at `e` and never set again | `false` |
+| `"99e2.5"` | `.` after `seenExp` | `false` |
+| `"-+3"` | `+` at `i = 1`, previous char is not `e` | `false` |
+| `"."` | ends with `seenDigit = false` | `false` |
 
 ### Complexity
 
-- **Time:** $O(n)$ — one constant-time transition per character.
-- **Space:** $O(1)$ — the table has a fixed size.
+- **Time:** $O(n)$ — one constant-time check per character.
+- **Space:** $O(1)$ — three booleans.
 
 ### Edge cases
 
-- **A lone `"."` or `"e"`**: `"."` ends in non-final state `4`, and `"e"` has no transition from the start state.
-- **Leading or trailing spaces**: the `"blank"` transitions in states `1` and `9` allow them.
-
-![DFA Design](../../../../assets/img/dfa.png "DFA Valid Number")
+- **A lone `"."` or `".e1"`:** the mantissa has no digit, so `.` is accepted but `e` (or the end of the string) fails on `seenDigit`.
+- **`"e3"`:** `e` arrives with `seenDigit = false` and is rejected.
+- **Trailing dot before exponent (`"1.e5"`):** allowed by rule 1 of decimal numbers; the dot comes before `seenExp`, so it passes.
 
 ## Code
 
-```py title="Python"
-class Solution:
-    def isNumber(self, s: str) -> bool:
-        states = [{},
-                  {"blank": 1, "digit": 3, "sign": 2, ".": 4},
-                  {"digit": 3, ".": 4},
-                  {"digit": 3, "blank": 9, "e": 6, "E": 6, ".": 5},
-                  {"digit": 5},
-                  {"E": 6, "e": 6, "digit": 5, "blank": 9},
-                  {"sign": 7, "digit": 8},
-                  {"digit": 8},
-                  {"digit": 8, "blank": 9},
-                  {"blank": 9}]
-        currentState = 1
-
-        for i in s:
-            c = i
-            if i == ' ':
-                c = "blank"
-            elif i in ['+', '-']:
-                c = "sign"
-            elif i >= "0" and i <= '9':
-                c = "digit"
-
-            if c not in states[currentState].keys():
-                return False
-
-            currentState = states[currentState][c]
-
-        if currentState not in [3, 5, 8, 9]:
-            return False
-
-        return True
-
+```cpp title="C++"
+class Solution {
+   public:
+    bool isNumber(string s) {
+        bool seenDigit = false, seenDot = false, seenExp = false;
+        for (size_t i = 0; i < s.size(); i++) {
+            char c = s[i];
+            if (c >= '0' && c <= '9') {
+                seenDigit = true;
+            } else if (c == '+' || c == '-') {
+                if (i > 0 && s[i - 1] != 'e' && s[i - 1] != 'E') return false;
+            } else if (c == 'e' || c == 'E') {
+                if (seenExp || !seenDigit) return false;
+                seenExp = true;
+                seenDigit = false;  // the exponent needs its own digits
+            } else if (c == '.') {
+                if (seenDot || seenExp) return false;
+                seenDot = true;
+            } else {
+                return false;
+            }
+        }
+        return seenDigit;
+    }
+};
 ```

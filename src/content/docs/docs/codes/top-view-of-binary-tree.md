@@ -1,72 +1,135 @@
 ---
 title: "Top View of Binary Tree"
-description: "Given below is a binary tree. The task is to print the top view of binary tree. Top view of a binary tree is the set of nodes visible when the tree is…"
-source: "https://practice.geeksforgeeks.org/problems/top-view-of-binary-tree/1"
-tags: ["Stack", "Tree", "Depth-First Search", "Binary Tree"]
+description: "Return the nodes seen when a binary tree is viewed from above, left to right, using a level-order traversal that keeps the first node reached in each column."
+source: "https://www.geeksforgeeks.org/problems/top-view-of-binary-tree/1"
+difficulty: "Medium"
+tags: ["Tree"]
 complexity:
-  time: "O(n \\log n)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-<p></p><p><span>Given below is a binary tree. The task is to print the top view of binary tree. Top view of a binary tree is the set of nodes visible when the tree is viewed from the top. For the given below tree</span></p>
+Given a binary tree, the task is to return its **top view**. The top view of a binary tree is the set of nodes visible when the tree is viewed from the top.
 
-<p><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1<br/>
-&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp;&nbsp;&nbsp; \<br/>
-&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3<br/>
-&nbsp; /&nbsp; \&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp; \<br/>
-4&nbsp;&nbsp;&nbsp; 5&nbsp; 6&nbsp;&nbsp; 7</span></p>
+- Return the nodes from the leftmost node to the rightmost node.
+- If multiple nodes overlap at the same horizontal position, only the topmost (closest to the root) node is included in the view.
 
-<p><span>Top view will be: 4 2 1 3 7<br/>
-<strong>Note: </strong>Return nodes from <strong>leftmost </strong>node to <strong>rightmost </strong>node.</span></p>
+Complete the function `topView()`, which takes the `root` of the tree and returns the list of node values in the top view.
 
-<p><strong><span>Your Task:</span></strong><br/>
-<span>Since this is a function problem. You don't have to take input. Just complete the function<strong>&nbsp;topView() </strong>that takes <strong>root node </strong>as parameter and returns a list of nodes visible from the top view from left to right.</span></p>
+**Example 1:**
+
+![Tree 1 with children 2 and 3; all three nodes are green](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/700490/Web/Other/blobid0_1733898095.png)
+
+```text
+Input:  root = [1, 2, 3]
+Output: [2, 1, 3]
+Explanation: The green coloured nodes represent the top view in the binary tree above.
+```
+
+**Example 2:**
+
+![Tree rooted at 10; 40, 20, 10, 30 and 100 are green](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/700490/Web/Other/blobid1_1733898122.png)
+
+```text
+Input:  root = [10, 20, 30, 40, 60, 90, 100]
+Output: [40, 20, 10, 30, 100]
+Explanation: The green coloured nodes represent the top view in the binary tree above.
+```
+
+**Constraints:**
+
+- $1 \le$ number of nodes $\le 10^5$
+- $1 \le node.data \le 10^5$
 
 ## Solution approach
 
 ### Intuition
 
-Give every node a column index: the code uses `c + 1` for a left child and `c - 1` for a right child. The top view shows, for each column, the node with the smallest depth. A DFS can record, per column, the shallowest node seen so far, replacing it only when it finds a strictly shallower one. Because the DFS visits the left subtree first, ties at the same depth keep the node further left, the same one a level-order traversal would meet first.
+Give every node a **horizontal distance** (column): the root is column `0`, a left child is one column left of its parent (`col - 1`) and a right child one column right (`col + 1`). Looking from above, each column shows exactly one node — the one **closest to the root** in that column.
+
+A level-order traversal (BFS) visits nodes in increasing depth, and within one depth from left to right. So the **first** node BFS reaches in a column is the topmost one (and among equally deep nodes, the leftmost, which is the convention the judge uses). We just record a column's value the first time we see it and ignore later nodes.
+
+Columns are contiguous and lie in `[-(n - 1), n - 1]`, so instead of an ordered map we can store them in a vector `top` indexed by `col + n` and remember the smallest and largest column seen; reading `top[minCol + n .. maxCol + n]` gives the answer in left-to-right order without sorting.
+
+A depth-first version needs a depth comparison per column to be correct, and on a skewed tree of $10^5$ nodes its recursion can overflow the stack; BFS has neither problem.
 
 ### Algorithm
 
-1. `traversal(root, c, h)` visits each node with column `c` and depth `h`.
-2. If column `c` is not in `height` yet, or `height[c] > h`, store `root->data` in `mp[c]` and `h` in `height[c]`.
-3. Recurse on `root->left` with `c + 1` and on `root->right` with `c - 1`, both at depth `h + 1`.
-4. In `topView`, read `mp` in key order. Since left columns have **larger** keys here, reverse `view` so the leftmost column comes first.
+1. Let `n` be the number of nodes (counted first with the same BFS, or any upper bound). Create `top` of size `2n + 1`, filled with `-1` (values are positive, so `-1` means "column not seen yet"), and set `minCol = maxCol = 0`.
+2. BFS from `(root, 0)` with a queue of `(node, col)` pairs. For each popped pair:
+   - if `top[col + n] == -1`, set it to `node->data` and update `minCol` / `maxCol`;
+   - push `(node->left, col - 1)` and `(node->right, col + 1)` for the children that exist.
+3. Return `top[minCol + n], ..., top[maxCol + n]`.
+
+### Walkthrough
+
+Example 2 with each node's column. BFS reaches `10` (col 0), `20` (col -1), `30` (col 1), `40` (col -2), `60` (col 0, already taken), `90` (col 0, taken), `100` (col 2). The green nodes are the first in their column:
+
+```mermaid
+flowchart TD
+    A["10 · col 0"] --> B["20 · col -1"]
+    A --> C["30 · col 1"]
+    B --> D["40 · col -2"]
+    B --> E["60 · col 0"]
+    C --> F["90 · col 0"]
+    C --> G["100 · col 2"]
+    classDef seen fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    classDef hidden fill:#e9eaed,stroke:#b4b8bf,color:#5b6270
+    class A,B,C,D,G seen
+    class E,F hidden
+```
+
+Reading columns `-2 .. 2` gives `[40, 20, 10, 30, 100]`.
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — each of the $n$ nodes does $O(\log n)$ work in the ordered maps.
-- **Space:** $O(n)$ — the two maps, plus the recursion stack of height $h$.
+- **Time:** $O(n)$ — each node is enqueued and dequeued once (twice counting the size pass), and the output scan covers at most `2n + 1` slots.
+- **Space:** $O(n)$ — the queue and the `top` array.
+
+### Edge cases
+
+- **Skewed tree** (a chain of $10^5$ left children): every node opens a new column; BFS uses no recursion, so there is no stack overflow.
+- **Overlapping nodes deeper down** (`60` and `90` in Example 2 share column `0` with the root): BFS reaches the root first, so the deeper nodes are ignored.
+- **Single node:** the answer is `[root->data]`.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    map<int, int> mp, height;
-
    public:
-    void traversal(Node *root, int c, int h) {
-        if (!root) return;
-        if (height.find(c) == height.end() || height[c] > h) {
-            mp[c] = root->data;
-            height[c] = h;
-        }
-        traversal(root->left, c + 1, h + 1);
-        traversal(root->right, c - 1, h + 1);
-    }
-
     vector<int> topView(Node *root) {
-        vector<int> view;
-        traversal(root, 0, 0);
-        for (auto i : mp) {
-            view.push_back(i.second);
+        if (!root) return {};
+
+        int n = 0;  // number of nodes: columns lie in [-(n - 1), n - 1]
+        queue<Node *> nodes;
+        nodes.push(root);
+        while (!nodes.empty()) {
+            Node *cur = nodes.front();
+            nodes.pop();
+            n++;
+            if (cur->left) nodes.push(cur->left);
+            if (cur->right) nodes.push(cur->right);
         }
-        reverse(view.begin(), view.end());
-        return view;
+
+        vector<int> top(2 * n + 1, -1);  // top[col + n] = first value seen in that column
+        int minCol = 0, maxCol = 0;
+        queue<pair<Node *, int>> q;
+        q.push({root, 0});
+        while (!q.empty()) {
+            auto [cur, col] = q.front();
+            q.pop();
+            if (top[col + n] == -1) {
+                top[col + n] = cur->data;
+                minCol = min(minCol, col);
+                maxCol = max(maxCol, col);
+            }
+            if (cur->left) q.push({cur->left, col - 1});
+            if (cur->right) q.push({cur->right, col + 1});
+        }
+
+        return vector<int>(top.begin() + minCol + n, top.begin() + maxCol + n + 1);
     }
 };
 ```

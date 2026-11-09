@@ -1,134 +1,202 @@
 ---
 title: "Minimum Spanning Tree"
-description: "Given a weighted, undirected and connected graph of V vertices and E edges. The task is to find the sum of weights of the edges of the Minimum Spanning…"
-source: "https://practice.geeksforgeeks.org/problems/minimum-spanning-tree/1"
-tags: ["Graph", "Dynamic Programming", "Heap(Priority_Queue)"]
+description: "Find the total weight of a minimum spanning tree of a connected weighted undirected graph, using Kruskal's algorithm with DSU or Prim's algorithm with a min-heap."
+source: "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1"
+difficulty: "Medium"
+tags: ["Greedy", "Graph"]
+complexity:
+  time: "O(E \\log V)"
+  space: "O(V + E)"
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Problem
 
-Given a weighted, undirected and connected graph of V vertices and E edges. The task is to find the sum of weights of the edges of the Minimum Spanning Tree.
+Given a weighted, undirected, and connected graph represented by an adjacency list **`adj[][][]`**, where `adj[u]` contains pairs `[v, w]` representing an edge from `u` to `v` with weight `w`.
+
+Find the total weight of its Minimum Spanning Tree (MST) using Prim's Algorithm.
+
+Complete the function `primMST()`, which takes the adjacency list `adj` and returns the total weight of the MST.
+
+**Example 1:**
+
+![Triangle graph: 0–1 weight 5, 0–2 weight 1, 1–2 weight 3](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/700343/Web/Other/blobid1_1744376821.jpg)
+
+```text
+Input:  adj[][][] = [[[1, 5], [2, 1]], [[0, 5], [2, 3]], [[0, 1], [1, 3]]]
+Output: 4
+```
+
+![The MST keeps edges 0–2 (weight 1) and 1–2 (weight 3)](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/700343/Web/Other/blobid2_1744376854.jpg)
+
+```text
+Explanation: The MST contains edges (0, 2) with weight 1 and (1, 2) with weight 3.
+The total weight is 1 + 3 = 4.
+```
+
+**Example 2:**
+
+![Two vertices joined by an edge of weight 5](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/700343/Web/Other/blobid3_1744376890.jpg)
+
+```text
+Input:  adj[][][] = [[[1, 5]], [[0, 5]]]
+Output: 5
+Explanation: Only one Spanning Tree is possible which has a weight of 5.
+```
+
+**Constraints:**
+
+- $2 \le V \le 1000$
+- $V - 1 \le E \le V(V-1)/2$
+- $1 \le w \le 1000$
+- The graph is connected and doesn't contain self-loops & multiple edges.
 
 ## Solution approach
 
-### Approach 1: Kruskal's Algorithm
+Both classic algorithms rest on the **cut property**: split the vertices into any two non-empty groups; the lightest edge crossing between the groups belongs to some minimum spanning tree. Kruskal applies it edge by edge in global weight order; Prim applies it to the single growing tree. The judge only checks the total weight, so either is accepted (the statement asks for Prim's).
+
+Here is a slightly larger graph (not from the problem) with its MST in bold. The edge labels give the weight and, in brackets, the order in which **Kruskal** accepts the edge; **Prim** from vertex `0` happens to add the same edges in the same order here: 2, 3, 5, 6, total 16.
+
+```mermaid
+flowchart LR
+    v0((0)) ===|"2 (1st)"| v1((1))
+    v1 ===|"3 (2nd)"| v2((2))
+    v1 ===|"5 (3rd)"| v4((4))
+    v0 ===|"6 (4th)"| v3((3))
+    v2 -.-|7 skip| v4
+    v1 -.-|8 skip| v3
+    v3 -.-|9 skip| v4
+    classDef vx fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
+    class v0,v1,v2,v3,v4 vx
+```
+
+Edges `2–4` (7), `1–3` (8) and `3–4` (9) are skipped because when they are reached their endpoints are already connected, so adding them would close a cycle.
+
+### Approach 1: Kruskal's algorithm
 
 **Intuition**
 
-The cheapest edge that joins two different components is always safe to add to a minimum spanning tree. So sort all edges by weight and take each edge unless its endpoints are already connected. A disjoint set union (DSU) answers "already connected?" quickly.
+Process edges from lightest to heaviest. An edge whose endpoints are in **different** components of the forest built so far is the lightest edge crossing the cut "this component vs. everything else", so by the cut property it is safe to take. An edge whose endpoints are already in the **same** component would close a cycle and is never needed. A **disjoint set union** (DSU) with path compression and union by size answers "same component?" in near-constant time.
 
 **Algorithm**
 
-1. Collect every adjacency entry as `{weight, {u, v}}` in `edges`, and call `make(i)` so each vertex starts as its own set in `par`.
-2. Sort `edges` by weight.
-3. For each edge, skip it if `find(u) == find(v)`. Otherwise add `w` to `ans` and `Union(u, v)`.
-4. `find` uses path compression, and `Union` attaches the root of `b` under the root of `a`.
+1. Collect each undirected edge once as `{w, u, v}` (only when `u < v`, since `adj` lists every edge from both ends) and sort `edges` by weight.
+2. Start a DSU where every vertex is its own set (`parent[i] = i`, `sz[i] = 1`).
+3. For each edge in order: if `unite(u, v)` succeeds (the endpoints had different roots), add `w` to `total` and count the edge; stop once `V - 1` edges are taken.
+4. Return `total`.
 
 **Complexity**
 
-- **Time:** $O(E \log E)$ — sorting the edges dominates; each undirected edge appears twice, which does not change the bound.
-- **Space:** $O(E + V)$ — the `edges` list and the `par` array.
+- **Time:** $O(E \log E) = O(E \log V)$ — sorting dominates; the DSU work is $O(E \, \alpha(V))$.
+- **Space:** $O(V + E)$ — the edge list and the DSU arrays.
 
-### Approach 2: Prim's Algorithm
+### Approach 2: Prim's algorithm
 
 **Intuition**
 
-Grow the tree from vertex `0`. At every step, the cheapest edge that connects a vertex outside the tree to a vertex inside it is safe to add. `key[v]` stores the cheapest such edge seen so far for `v`, and a min-heap picks the vertex with the smallest key next.
+Grow one tree from vertex `0`. At every step, the cheapest edge leaving the tree crosses the cut "tree vs. the rest", so it is safe to add. `key[v]` holds the weight of the cheapest edge found so far from the tree to the outside vertex `v`; a min-heap of `{key, vertex}` pairs gives the next vertex to attach. Instead of a decrease-key operation, a better key is simply pushed again, and outdated ("stale") heap entries are skipped when popped.
 
 **Algorithm**
 
-1. Set `key[0] = 0` and every other `key` to `INT_MAX`, and push `{0, 0}` into `pq`.
-2. Pop the vertex `u` with the smallest key and mark `vis[u] = 1`.
-3. For every neighbour `v` with weight `w`, if `v` is not yet visited and `w < key[v]`, set `key[v] = w` and push `{w, v}`.
-4. When the heap is empty, return the sum of all `key` values. These are exactly the weights of the chosen tree edges.
+1. Set `key[0] = 0`, every other `key` to `INT_MAX`, and push `{0, 0}`.
+2. Pop the pair `{k, u}` with the smallest key. If `inMST[u]` is already set, it is a stale entry — skip it. Otherwise mark `inMST[u]`, and add `k` to `total` (the weight of the edge that attached `u`, or `0` for the root).
+3. For every neighbour `[v, w]` of `u`: if `v` is not in the tree and `w < key[v]`, set `key[v] = w` and push `{w, v}`.
+4. When the heap is empty every vertex has been attached exactly once; return `total`.
 
 **Complexity**
 
-- **Time:** $O(E \log V)$ for the heap operations. Stale heap entries are not skipped, so a vertex popped again rescans its adjacency list. This finds nothing new but can add extra work on dense graphs.
-- **Space:** $O(V + E)$ — `key`, `vis` and up to $O(E)$ heap entries.
+- **Time:** $O(E \log V)$ — each edge can push at most one heap entry, so there are $O(E)$ pushes and pops at $O(\log E) = O(\log V)$ each; every adjacency list is scanned once.
+- **Space:** $O(V + E)$ — `key`, `inMST` and up to $O(E)$ heap entries.
+
+On a dense graph ($E \approx V^2/2$ is allowed here) an array-based Prim that scans all `V` keys for the minimum runs in $O(V^2)$, which is slightly better asymptotically; with $V \le 1000$ both are fast.
+
+### Edge cases
+
+- **Two vertices** (Example 2): Kruskal takes the only edge; Prim attaches vertex `1` with key `5`.
+- **Equal weights:** ties can be broken arbitrarily — different MSTs may result, but they all have the same total weight.
+- **Overflow:** the total is at most $999 \times 1000$, well within `int`.
 
 ## Code
 
-<Tabs syncKey="lang">
-<TabItem label="C++">
+<Tabs>
+<TabItem label="Kruskal">
 
-```cpp
+```cpp title="Approach 1: Kruskal's algorithm"
 class Solution {
+    vector<int> parent, sz;
+
+    int find(int x) {
+        while (parent[x] != x) {
+            parent[x] = parent[parent[x]];  // path halving
+            x = parent[x];
+        }
+        return x;
+    }
+
+    bool unite(int a, int b) {
+        a = find(a);
+        b = find(b);
+        if (a == b) return false;
+        if (sz[a] < sz[b]) swap(a, b);
+        parent[b] = a;
+        sz[a] += sz[b];
+        return true;
+    }
+
    public:
-    vector<int> par;
-
-    void make(int v) { par[v] = v; }
-
-    int find(int v) {
-        if (par[v] == v) return v;
-        return par[v] = find(par[v]);
-    }
-
-    void Union(int a, int b) {
-        int pa = find(a);
-        int pb = find(b);
-        par[pb] = pa;
-    }
-
-    int spanningTree(int V, vector<vector<int>> adj[]) {
-        // code here
-        par.resize(V);
-        vector<pair<int, pair<int, int>>> edges;
-        int ans = 0;
-        for (int i = 0; i < V; i++) {
-            for (auto j : adj[i]) {
-                edges.push_back({j[1], {i, j[0]}});
-            }
-            make(i);
-        }
+    int primMST(vector<vector<vector<int>>>& adj) {
+        int V = adj.size();
+        vector<array<int, 3>> edges;  // {w, u, v}
+        for (int u = 0; u < V; u++)
+            for (auto& e : adj[u])
+                if (u < e[0]) edges.push_back({e[1], u, e[0]});
         sort(edges.begin(), edges.end());
-        for (auto e : edges) {
-            int w = e.first;
-            int u = e.second.first;
-            int v = e.second.second;
-            if (find(u) == find(v)) continue;
-            ans += w;
-            Union(u, v);
+
+        parent.resize(V);
+        iota(parent.begin(), parent.end(), 0);
+        sz.assign(V, 1);
+
+        int total = 0, taken = 0;
+        for (auto& [w, u, v] : edges) {
+            if (!unite(u, v)) continue;
+            total += w;
+            if (++taken == V - 1) break;
         }
-        return ans;
+        return total;
     }
 };
 ```
 
 </TabItem>
-<TabItem label="C++">
+<TabItem label="Prim">
 
-```cpp
+```cpp title="Approach 2: Prim's algorithm"
 class Solution {
    public:
-    int spanningTree(int V, vector<vector<int>> adj[]) {
-        priority_queue<pair<int, int>, vector<pair<int, int>>,
-                       greater<pair<int, int>>>
-            pq;
-        vector<int> vis(V, 0);
+    int primMST(vector<vector<vector<int>>>& adj) {
+        int V = adj.size();
         vector<int> key(V, INT_MAX);
+        vector<bool> inMST(V, false);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;  // {key, vertex}
         key[0] = 0;
         pq.push({0, 0});
+        int total = 0;
         while (!pq.empty()) {
-            int u = pq.top().second;
+            auto [k, u] = pq.top();
             pq.pop();
-            vis[u] = 1;
-            for (auto it : adj[u]) {
-                int v = it[0];
-                int w = it[1];
-                if (vis[v] == 0 && w < key[v]) {
+            if (inMST[u]) continue;  // stale entry
+            inMST[u] = true;
+            total += k;
+            for (auto& e : adj[u]) {
+                int v = e[0], w = e[1];
+                if (!inMST[v] && w < key[v]) {
                     key[v] = w;
-                    pq.push({key[v], v});
+                    pq.push({w, v});
                 }
             }
         }
-        int sum = 0;
-        for (int i = 0; i < V; i++) {
-            sum += key[i];
-        }
-        return sum;
+        return total;
     }
 };
 ```

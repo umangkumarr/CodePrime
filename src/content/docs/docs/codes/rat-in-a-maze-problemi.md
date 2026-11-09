@@ -1,8 +1,9 @@
 ---
 title: "Rat in a Maze Problem I"
-description: "Consider a rat placed at (0, 0) in a square matrix of order N N. It has to reach the destination at (N - 1, N - 1). Find all possible paths that the rat…"
-source: "https://practice.geeksforgeeks.org/problems/rat-in-a-maze-problem/1"
-tags: ["Array", "Backtracking"]
+description: "List, in lexicographic order, every path a rat can take through open cells from the top-left to the bottom-right of a maze, using backtracking."
+source: "https://www.geeksforgeeks.org/problems/rat-in-a-maze-problem/1"
+difficulty: "Medium"
+tags: ["Backtracking"]
 complexity:
   time: "O(3^{n^2})"
   space: "O(n^2)"
@@ -10,91 +11,109 @@ complexity:
 
 ## Problem
 
-<p><span>Consider a rat placed at <strong>(0, 0)</strong> in a square matrix<strong> </strong>of order <strong>N * N</strong>. It has to reach the destination at <strong>(N - 1, N - 1)</strong>. Find all possible paths that the rat can take to reach from source to destination. The directions in which the rat can move are <strong>'U'(up)</strong>, <strong>'D'(down)</strong>, <strong>'L' (left)</strong>, <strong>'R' (right)</strong>. Value 0 at a cell in the matrix represents that it is blocked and rat cannot move to it while value 1 at a cell in the matrix represents that&nbsp;rat&nbsp;can be travel&nbsp;through it.<br/>
-<strong>Note</strong>: In a path, no cell can be visited more than one time.</span>&nbsp;<span>If the source cell is&nbsp;0, the rat cannot move to any other cell.</span></p>
+Given a square binary matrix `maze[][]` containing values `0` and `1`, find all possible paths for a rat to travel from the top-left cell to the bottom-right cell. The rat can move in four directions: up (`U`), down (`D`), left (`L`), and right (`R`).
+
+- `1` represents an open cell through which the rat can move.
+- `0` represents a blocked cell that cannot be traversed.
+
+The rat can move only through open cells and cannot visit the same cell more than once in a path. Return all valid paths as strings consisting of `'U'`, `'D'`, `'L'`, and `'R'`, representing the sequence of moves taken by the rat.
+
+**Note:** Return the paths in lexicographically increasing order. If no valid path exists, return an empty list.
+
+Complete the function `ratInMaze()` which takes the matrix `maze` and returns the list of paths.
+
+**Example 1:**
+
+![The two paths through the 4 x 4 maze of Example 1](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/929574/Web/Other/blobid0_1781254127.png)
+
+```text
+Input:  maze[][] = [[1, 0, 0, 0], [1, 1, 0, 1], [1, 1, 0, 0], [0, 1, 1, 1]]
+Output: ["DDRDRR", "DRDDRR"]
+Explanation: There are two valid paths from the source cell (0, 0) to the destination cell (3, 3).
+```
+
+**Example 2:**
+
+```text
+Input:  maze[][] = [[1, 0], [1, 0]]
+Output: []
+Explanation: No path exists as the destination cell (1, 1) is blocked.
+```
+
+**Constraints:**
+
+- $2 \le n \le 5$, where `n` is the size of the matrix
+- $0 \le$ `maze[i][j]` $\le 1$
 
 ## Solution approach
 
 ### Intuition
 
-We need every path from `(0, 0)` to `(N - 1, N - 1)` that never visits a cell twice, so backtracking is the natural fit. From the current cell, try each open neighbour, recurse, and then undo the move. Blocking the current cell before moving away stops a path from coming back through it.
+We need **every** simple path, so there is no shortcut: we must explore them all, and backtracking explores each one exactly once. From the current cell, try each open, unvisited neighbour, extend the move string, recurse, and then undo the move so the next option starts from the same state.
+
+Two details make it work:
+
+- **No revisits.** Before leaving a cell we mark it blocked (`maze[r][c] = 0`) and restore it to `1` when we backtrack. So a cell is blocked exactly while it is on the current path, which is precisely the "visit each cell at most once per path" rule.
+- **Sorted output for free.** Trying the moves in alphabetical order `D`, `L`, `R`, `U` makes the search produce paths in lexicographic order: two paths first differ at some move, and the branch with the smaller letter is explored completely first. No path is a prefix of another (a path stops at the destination), so the order is exactly lexicographic and no sort is needed.
 
 ### Algorithm
 
-1. Copy the input into `maze`, store `n`, and start `compute(0, 0)` only if the source cell is open.
-2. In `compute(i, j)`, if `(i, j)` is the destination, push the move string `s` into `ans` and return.
-3. Otherwise try the four moves in the order `'U'`, `'L'`, `'D'`, `'R'`. For each one whose target is inside the grid and open:
-   - Set `maze[i][j] = 0` to block the current cell, and append the move letter to `s`.
-   - Recurse into the neighbour.
-   - Pop the letter and set `maze[i][j] = 1` to backtrack.
-4. Return `ans`.
+1. If `maze[0][0]` or `maze[n-1][n-1]` is `0`, return an empty list.
+2. `dfs(r, c)`: if `(r, c)` is the destination, append `path` to `result` and return.
+3. Otherwise set `maze[r][c] = 0`, and for each move `k` in the order `D`, `L`, `R`, `U` (arrays `dr`, `dc`, `dir`): if the neighbour `(nr, nc)` is inside the grid and `maze[nr][nc] == 1`, push `dir[k]` onto `path`, call `dfs(nr, nc)`, then pop it.
+4. After trying all moves, restore `maze[r][c] = 1`.
+5. Call `dfs(0, 0)` and return `result`.
+
+### Walkthrough
+
+Example 1. Blue is the current path (blocked while on it), red is a dead end being backtracked from, green is a completed path:
+
+![Backtracking search through the maze of Example 1](/img/codes/rat-in-a-maze-problemi/backtrack.gif)
 
 ### Complexity
 
-- **Time:** $O(3^{n^2})$ in the worst case — a path can cover up to $n^2$ cells, and from each cell at most three directions are new, since the one we came from is blocked.
-- **Space:** $O(n^2)$ — the copy of `maze` and a recursion stack (and string `s`) up to $n^2$ deep, not counting the output.
+- **Time:** $O(3^{n^2})$ in the worst case — a path visits at most $n^2$ cells and from each cell at most three directions are new (the cell we came from is blocked). Each recorded path also costs $O(n^2)$ to copy. With $n \le 5$ this is small in practice.
+- **Space:** $O(n^2)$ — the recursion depth and `path` length are at most $n^2$, not counting the output. The maze is marked in place and fully restored, so no visited array is needed.
 
 ### Edge cases
 
-- **Blocked source**, `m[0][0] == 0`: `compute` is never called, so the answer is empty.
-- **Blocked destination:** no move ever enters it, so the answer is empty.
+- **Blocked destination** (Example 2) or **blocked source:** returns an empty list immediately.
+- **The input is left unchanged:** every cell marked `0` during the search is set back to `1` before its call returns.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    vector<vector<int>> maze;
-    vector<string> ans;
-    string s;
     int n;
+    string path;
+    vector<string> result;
+    const int dr[4] = {1, 0, 0, -1};
+    const int dc[4] = {0, -1, 1, 0};
+    const char dir[4] = {'D', 'L', 'R', 'U'};
 
-   public:
-    void compute(int i, int j) {
-        if (i == n - 1 && j == n - 1) {
-            ans.push_back(s);
+    void dfs(vector<vector<int>>& maze, int r, int c) {
+        if (r == n - 1 && c == n - 1) {
+            result.push_back(path);
             return;
         }
-
-        if (i > 0 && maze[i - 1][j]) {
-            maze[i][j] = 0;
-            s.push_back('U');
-            compute(i - 1, j);
-            s.pop_back();
-            maze[i][j] = 1;
+        maze[r][c] = 0;
+        for (int k = 0; k < 4; k++) {
+            int nr = r + dr[k], nc = c + dc[k];
+            if (nr >= 0 && nr < n && nc >= 0 && nc < n && maze[nr][nc] == 1) {
+                path.push_back(dir[k]);
+                dfs(maze, nr, nc);
+                path.pop_back();
+            }
         }
-
-        if (j > 0 && maze[i][j - 1]) {
-            maze[i][j] = 0;
-            s.push_back('L');
-            compute(i, j - 1);
-            s.pop_back();
-            maze[i][j] = 1;
-        }
-
-        if (i < n - 1 && maze[i + 1][j]) {
-            maze[i][j] = 0;
-            s.push_back('D');
-            compute(i + 1, j);
-            s.pop_back();
-            maze[i][j] = 1;
-        }
-
-        if (j < n - 1 && maze[i][j + 1]) {
-            maze[i][j] = 0;
-            s.push_back('R');
-            compute(i, j + 1);
-            s.pop_back();
-            maze[i][j] = 1;
-        }
+        maze[r][c] = 1;
     }
 
-    vector<string> findPath(vector<vector<int>> &m, int n) {
-        this->n = n;
-        this->maze = m;
-        s = "";
-        this->n = n;
-        if (maze[0][0]) compute(0, 0);
-        return ans;
+   public:
+    vector<string> ratInMaze(vector<vector<int>>& maze) {
+        n = maze.size();
+        if (maze[0][0] == 0 || maze[n - 1][n - 1] == 0) return {};
+        dfs(maze, 0, 0);
+        return result;
     }
 };
 ```
