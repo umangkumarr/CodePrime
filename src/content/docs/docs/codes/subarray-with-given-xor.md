@@ -1,7 +1,9 @@
 ---
 title: "Subarray with given XOR"
-description: "Given an array of integers A and an integer B. Find the total number of subarrays having bitwise XOR of all elements equals to B."
+description: "Count the subarrays whose XOR equals B in one pass, using prefix XORs and a hash map of how often each prefix XOR has occurred."
 source: "https://www.interviewbit.com/problems/subarray-with-given-xor/"
+difficulty: "Medium"
+tags: ["Hash Table", "Bit Manipulation", "Prefix Sum"]
 complexity:
   time: "O(n)"
   space: "O(n)"
@@ -9,51 +11,84 @@ complexity:
 
 ## Problem
 
-Given an array of integers A and an integer B.
+Given an array of integers `A` and an integer `B`.
 
-Find the total number of subarrays having bitwise XOR of all elements equals to B.
+Find the total number of subarrays having bitwise XOR of all elements equal to `B`.
+
+The first argument is the integer array `A`, the second is the integer `B`. Return the total number of subarrays having bitwise XOR equal to `B`.
+
+**Example 1:**
+
+```text
+Input:  A = [4, 2, 2, 6, 4], B = 6
+Output: 4
+Explanation: The subarrays having XOR of their elements as 6 are: [4, 2], [4, 2, 2, 6, 4], [2, 2, 6], [6].
+```
+
+**Example 2:**
+
+```text
+Input:  A = [5, 6, 7, 8, 9], B = 5
+Output: 2
+Explanation: The subarrays having XOR of their elements as 5 are [5] and [5, 6, 7, 8, 9].
+```
+
+**Constraints:**
+
+- $1 \le$ length of the array $\le 10^5$
+- $1 \le A[i], B \le 10^9$
 
 ## Solution approach
 
 ### Intuition
 
-Let `xorr` be the XOR of the prefix ending at index `i`. A subarray ending at `i` has XOR `B` exactly when some earlier prefix XOR `p` satisfies `xorr ^ p = B`, that is, `p = xorr ^ B`. So if we count how many times each prefix XOR has appeared, the number of good subarrays ending at `i` is the count of `xorr ^ B`. Checking every pair of start and end points would take $O(n^2)$.
+Checking every `(start, end)` pair costs $O(n^2)$. Prefix XORs turn the question into a lookup.
+
+Let `xorr` be the XOR of `A[0..i]` and `p` the XOR of some shorter prefix `A[0..j-1]`. Because `x ^ x = 0`, the XOR of the subarray `A[j..i]` is `xorr ^ p`. That equals `B` exactly when
+
+`p = xorr ^ B`.
+
+So the number of good subarrays **ending at `i`** is the number of earlier prefixes whose XOR is `xorr ^ B`. If we keep a hash map `freq` counting how often each prefix XOR has occurred so far, each step is a single lookup. The empty prefix (XOR `0`) is counted once at the start so that subarrays beginning at index `0` are found too.
 
 ### Algorithm
 
-1. Start with `mp[0] = 1` to represent the empty prefix.
-2. For each `i`, update `xorr ^= A[i]`.
-3. If `xorr ^ B` is in `mp`, add `mp[xorr ^ B]` to `ans`.
-4. Increment `mp[xorr]`.
-5. Return `ans`.
+1. Set `freq[0] = 1` (the empty prefix), `xorr = 0`, `ans = 0`.
+2. For each element `a` of `A`:
+   - `xorr ^= a`;
+   - add `freq[xorr ^ B]` (if present) to `ans`;
+   - increment `freq[xorr]`.
+3. Return `ans`.
+
+### Walkthrough
+
+Example 1. Blue is the current element, `xorr` is the prefix XOR up to it, and `freq` holds the prefix XORs seen before it:
+
+![Prefix XOR counting on A = [4,2,2,6,4], B = 6](/img/codes/subarray-with-given-xor/prefix-xor.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — one pass with $O(1)$ average hash-map operations.
-- **Space:** $O(n)$ — the map can hold up to $n + 1$ prefix XOR values.
+- **Time:** $O(n)$ — one pass with average $O(1)$ hash-map operations.
+- **Space:** $O(n)$ — the map holds at most $n + 1$ distinct prefix XORs.
 
 ### Edge cases
 
-- **Subarray starting at index 0**: handled by the initial `mp[0] = 1`.
+- **Subarray starting at index 0:** found through the initial `freq[0] = 1`.
+- **Many answers:** the count can grow like $n^2 / 2$, so it is accumulated in a `long long` to avoid signed overflow; the judge's return type is `int`.
 
 ## Code
 
 ```cpp title="C++"
 int Solution::solve(vector<int> &A, int B) {
-    int n = A.size();
+    unordered_map<int, int> freq;  // prefix XOR -> number of prefixes with that XOR
+    freq[0] = 1;
     int xorr = 0;
-    unordered_map<int, int> mp;
-    mp[0] = 1;
-    int ans = 0;
-    for (int i = 0; i < n; i++) {
-        xorr ^= A[i];
-        if (mp.find(xorr ^ B) != mp.end()) {
-            ans += mp[xorr ^ B];
-        }
-        mp[xorr]++;
-        ;
+    long long ans = 0;
+    for (int a : A) {
+        xorr ^= a;
+        auto it = freq.find(xorr ^ B);
+        if (it != freq.end()) ans += it->second;
+        freq[xorr]++;
     }
     return ans;
 }
-
 ```

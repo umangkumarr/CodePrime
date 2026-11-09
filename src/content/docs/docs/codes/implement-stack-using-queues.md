@@ -1,75 +1,123 @@
 ---
 title: "Implement Stack using Queues"
-description: "Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (push, top,…"
+description: "Build a LIFO stack from a single FIFO queue by rotating the queue after every push so the newest element is always at the front."
 source: "https://leetcode.com/problems/implement-stack-using-queues/"
+difficulty: "Easy"
 tags: ["Stack", "Design", "Queue"]
 complexity:
-  time: "O(1)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-<p>Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (<code>push</code>, <code>top</code>, <code>pop</code>, and <code>empty</code>).</p>
+Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (`push`, `top`, `pop`, and `empty`).
 
-<p>Implement the <code>MyStack</code> class:</p>
+Implement the `MyStack` class:
 
-<ul>
-	<li><code>void push(int x)</code> Pushes element x to the top of the stack.</li>
-	<li><code>int pop()</code> Removes the element on the top of the stack and returns it.</li>
-	<li><code>int top()</code> Returns the element on the top of the stack.</li>
-	<li><code>boolean empty()</code> Returns <code>true</code> if the stack is empty, <code>false</code> otherwise.</li>
-</ul>
+- `void push(int x)` Pushes element `x` to the top of the stack.
+- `int pop()` Removes the element on the top of the stack and returns it.
+- `int top()` Returns the element on the top of the stack.
+- `boolean empty()` Returns `true` if the stack is empty, `false` otherwise.
 
-<p><b>Notes:</b></p>
+**Notes:**
 
-<ul>
-	<li>You must use <strong>only</strong> standard operations of a queue, which means that only <code>push to back</code>, <code>peek/pop from front</code>, <code>size</code> and <code>is empty</code> operations are valid.</li>
-	<li>Depending on your language, the queue may not be supported natively. You may simulate a queue using a list or deque (double-ended queue) as long as you use only a queue&#39;s standard operations.</li>
-</ul>
+- You must use **only** standard operations of a queue, which means that only `push to back`, `peek/pop from front`, `size` and `is empty` operations are valid.
+- Depending on your language, the queue may not be supported natively. You may simulate a queue using a list or deque (double-ended queue) as long as you use only a queue's standard operations.
+
+**Example 1:**
+
+```text
+Input:
+["MyStack", "push", "push", "top", "pop", "empty"]
+[[], [1], [2], [], [], []]
+Output:
+[null, null, null, 2, 2, false]
+
+Explanation:
+MyStack myStack = new MyStack();
+myStack.push(1);
+myStack.push(2);
+myStack.top();   // return 2
+myStack.pop();   // return 2
+myStack.empty(); // return False
+```
+
+**Constraints:**
+
+- $1 \le$ `x` $\le 9$
+- At most `100` calls will be made to `push`, `pop`, `top`, and `empty`.
+- All the calls to `pop` and `top` are valid.
+
+**Follow-up:** Can you implement the stack using only one queue?
 
 ## Solution approach
 
 ### Intuition
 
-A stack needs access to only one end: the most recently added element. This code stores the elements in a `deque` and uses its back as the top of the stack, so every operation is a single deque call.
+A queue gives access only to its **front**, while a stack needs access to the **newest** element. So we make sure the newest element is always at the front of the queue.
+
+Keep this invariant: reading the queue from front to back lists the stack from top to bottom. When `x` is pushed it lands at the back, behind the `k` older elements. Popping each of those `k` elements from the front and pushing it to the back again — a full rotation — moves them behind `x`, in the same relative order. Now `x` is at the front, followed by the old stack from top to bottom, so the invariant holds again.
+
+With that invariant, `top` is just `front`, and `pop` is just popping the front. This uses a single queue, which answers the follow-up (the two-queue version does the same rotation through a helper queue).
 
 ### Algorithm
 
-1. `push(x)` appends `x` with `q.push_back(x)`.
-2. `top()` returns `q.back()`, the most recent element.
-3. `pop()` reads `top()`, removes it with `q.pop_back()`, and returns it.
-4. `empty()` returns `q.empty()`.
+1. `push(x)`: `q.push(x)`, then repeat `q.size() - 1` times: `q.push(q.front()); q.pop();`.
+2. `top()`: return `q.front()`.
+3. `pop()`: save `q.front()`, pop it, and return the saved value.
+4. `empty()`: return `q.empty()`.
+
+### Walkthrough
+
+The queue is written front first:
+
+| Operation | Queue after the operation | Returns |
+| --- | --- | --- |
+| `push(1)` | `[1]` (nothing to rotate) | — |
+| `push(2)` | `[1, 2]` → rotate 1 → `[2, 1]` | — |
+| `push(3)` | `[2, 1, 3]` → rotate 2 → `[3, 2, 1]` | — |
+| `top()` | `[3, 2, 1]` | `3` |
+| `pop()` | `[2, 1]` | `3` |
 
 ### Complexity
 
-- **Time:** $O(1)$ per operation — each is a single deque operation at the back.
-- **Space:** $O(n)$ — one slot per stored element.
+- **Time:** $O(n)$ for `push`, where $n$ is the current number of elements — it rotates the whole queue once. `pop`, `top` and `empty` are $O(1)$.
+- **Space:** $O(n)$ — one queue holding every element.
+
+The cost could instead be moved to `pop` (push in $O(1)$, rotate to reach the newest element when popping). Since `top` would then also need the rotation, putting the work in `push` keeps three of the four operations constant-time.
 
 ### Edge cases
 
-- This uses `push_back`, `back` and `pop_back` on the same end of a `deque`, which are not standard queue operations. The usual intended solution rotates a queue on every `push` so that only `push` to the back and `pop` from the front are used.
+- **Pushing onto an empty stack:** `q.size() - 1 = 0`, so no rotation happens.
+- **`pop` / `top` on an empty stack:** the problem guarantees every call is valid, so no check is needed.
 
 ## Code
 
 ```cpp title="C++"
 class MyStack {
-    deque<int> q;
+    queue<int> q;  // front of q is the top of the stack
 
-   public:
+  public:
     MyStack() {}
 
-    void push(int x) { q.push_back(x); }
+    void push(int x) {
+        q.push(x);
+        // Move the older elements behind x so that x is at the front.
+        for (int i = 0; i + 1 < (int)q.size(); i++) {
+            q.push(q.front());
+            q.pop();
+        }
+    }
 
     int pop() {
-        int x = top();
-        q.pop_back();
+        int x = q.front();
+        q.pop();
         return x;
     }
 
-    int top() { return q.back(); }
+    int top() { return q.front(); }
 
     bool empty() { return q.empty(); }
 };
-
 ```

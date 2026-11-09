@@ -1,94 +1,108 @@
 ---
 title: "Minimum Characters required to make a String Palindromic"
-description: "Given an string A. The only operation allowed is to insert characters in the beginning of the string. Find how many minimum characters are needed to be…"
+description: "Find the fewest characters to insert at the front of a string to make it a palindrome, via its longest palindromic prefix found with the KMP failure function."
 source: "https://www.interviewbit.com/problems/minimum-characters-required-to-make-a-string-palindromic/"
-tags: ["Two Pointer", "String", "String Matching"]
+difficulty: "Medium"
+tags: ["Two Pointers", "String", "String Matching"]
 complexity:
-  time: "O(n \\log n)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-Given an string A. The only operation allowed is to insert  characters in the beginning of the string.
+Given a string `A`. The only operation allowed is to insert characters at the beginning of the string.
 
 Find how many minimum characters are needed to be inserted to make the string a palindrome string.
+
+Complete the function `int Solution::solve(string A)`, which returns the minimum number of characters that must be inserted.
+
+**Example 1:**
+
+```text
+Input:  A = "ABC"
+Output: 2
+Explanation: Insert 'B' at the beginning, the string becomes "BABC".
+             Insert 'C' at the beginning, the string becomes "CBABC".
+```
+
+**Example 2:**
+
+```text
+Input:  A = "AACECAAAA"
+Output: 2
+Explanation: Insert 'A' at the beginning, the string becomes "AAACECAAAA".
+             Insert 'A' at the beginning, the string becomes "AAAACECAAAA".
+```
+
+**Constraints:**
+
+- $1 \le |A| \le 10^6$
 
 ## Solution approach
 
 ### Intuition
 
-Characters can only be added at the front, so the part that is already fine is the longest palindromic prefix of `A`. Everything after that prefix must be mirrored in front, so the answer is `n` minus the length of the longest palindromic prefix.
+Inserting only at the front cannot change anything about how `A` *starts*. Write `A = P + R`, where `P` is the **longest palindromic prefix** of `A`. Prepending `reverse(R)` gives `reverse(R) + P + R`, which is a palindrome, so `|R| = n - |P|` characters always suffice. Conversely, any palindrome of the form `X + A` has a palindromic prefix of `A` at its centre, so no fewer characters can work. The answer is therefore
 
-To test prefixes quickly, the code uses polynomial rolling hashes with base `p = 31` modulo `mod`. A prefix is a palindrome when its forward hash equals the hash of its reversal. The reversal of `A[0..k]` is a suffix of the reversed string `s`, so dropping the first character of `s` at each step walks through shorter and shorter prefixes of `A`.
+$$
+n - (\text{length of the longest palindromic prefix of } A).
+$$
+
+A prefix `A[0..L)` is a palindrome exactly when it equals its own reverse, and the reverse of a prefix of `A` is a **suffix** of `rev = reverse(A)`. So we need the longest prefix of `A` that is also a suffix of `rev` — a classic string-matching question. Run the **KMP** matcher with `A` as the pattern over the text `rev`: after the last character of `rev`, the number of pattern characters matched, `j`, is the length of the longest prefix of `A` that ends the text. That is `|P|`.
+
+Checking every prefix directly is $O(n^2)$, which is too slow for $n = 10^6$; KMP never moves backwards in the text, so it is linear.
 
 ### Algorithm
 
-1. Let `s` be `A` reversed. Build `dp[i]`, the hash of `A[0..i]`, where character `j` is weighted by `powr(p, j)`.
-2. Compute `kmp`, the hash of the whole of `s` with the same weights. If `kmp == dp[n - 1]`, `A` is already a palindrome, so return `0`.
-3. For `i = 0, 1, ...`, remove `s[i]` from the front of the hash: subtract its value (its weight is now `1`) and multiply by `inv(p)`, the modular inverse of `p`. Now `kmp` is the hash of the reversal of `A[0..n - i - 2]`.
-4. If it equals `dp[n - i - 2]`, that prefix is a palindrome, and `i + 1` characters must be added. Return `i + 1`.
+1. Build the KMP failure array `fail`, where `fail[i]` is the length of the longest proper prefix of `A[0..i]` that is also a suffix of it.
+2. Scan `rev` (the characters of `A` from back to front) with `j = 0` matched characters. For each character `c`:
+   - while `j > 0` and `c != A[j]`, fall back with `j = fail[j - 1]`;
+   - if `c == A[j]`, extend the match: `j++`.
+3. `j` is now the length of the longest palindromic prefix; return `n - j`.
+
+`j` can only reach `n` on the very last character of `rev` (that happens exactly when `A` is itself a palindrome), so `A[j]` is never read out of range.
+
+### Walkthrough
+
+Example 2: scanning `rev = "AAAACECAA"`. The blue cell is the character just read; `j` is how many characters of `A = "AACECAAAA"` are currently matched:
+
+![KMP match of A against reverse(A) for AACECAAAA](/img/codes/minimum-characters-required-to-make-a-string-palindromic/kmp.gif)
+
+The scan ends with `j = 7`: the prefix `"AACECAA"` is a palindrome, so `9 - 7 = 2` characters must be added.
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — each `powr(p, i)` call takes $O(\log i)$ steps, and each `inv(p)` call takes $O(\log mod)$ steps.
-- **Space:** $O(n)$ — the `dp` array and the reversed copy `s`.
+- **Time:** $O(n)$ — building `fail` and the scan are both linear, because `j` grows by at most one per character and every fall-back strictly decreases it.
+- **Space:** $O(n)$ — the `fail` array.
 
 ### Edge cases
 
-- **A single character** is already a palindrome, so the answer is `0`.
-- **Hash collisions** are possible in principle, since equal hashes do not strictly prove equal strings.
+- **`A` already a palindrome** (including a single character): the scan matches all `n` characters and the answer is `0`.
+- **All characters distinct**, as in Example 1: only `A[0]` is a palindromic prefix, `j = 1` and the answer is `n - 1`.
+- **Long runs of one character** such as `"AAAB"`: the fall-backs through `fail` keep the scan linear instead of restarting the comparison.
 
 ## Code
 
 ```cpp title="C++"
-const int mod = 1e9 + 7;
-const int p = 31;
-#define ll long long
-
-ll powr(ll a, ll b) {
-    ll ans = 1;
-    while (b) {
-        if (b & 1ll) {
-            ans *= a;
-            ans %= mod;
-        }
-        a *= a;
-        b >>= 1ll;
-        a %= mod;
-    }
-    return ans;
-}
-
-ll inv(ll a) { return powr(a, mod - 2); }
-
 int Solution::solve(string A) {
-    string s = A;
-    reverse(s.begin(), s.end());
-    int n = A.length();
-    ll dp[n];
-    dp[0] = A[0] - 'a' + 1;
-    for (int i = 1; i < n; i++) {
-        dp[i] = (dp[i - 1] + (powr(p, i) * (A[i] - 'a' + 1)) % mod) % mod;
-    }
-    ll kmp = 0;
-    for (int i = 0; i < n; i++) {
-        kmp += powr(p, i) * (s[i] - 'a' + 1);
-        kmp %= mod;
-    }
-    if (kmp == dp[n - 1]) {
-        return 0;
-    }
-    for (int i = 0; i < n; i++) {
-        kmp -= (s[i] - 'a' + 1);
-        kmp *= inv(p);
-        kmp %= mod;
-        kmp += mod;
-        kmp %= mod;
-        if (kmp == dp[n - i - 2]) {
-            return i + 1;
-        }
-    }
-}
+    int n = A.size();
 
+    // fail[i]: longest proper prefix of A[0..i] that is also its suffix
+    vector<int> fail(n, 0);
+    for (int i = 1, k = 0; i < n; i++) {
+        while (k > 0 && A[i] != A[k]) k = fail[k - 1];
+        if (A[i] == A[k]) k++;
+        fail[i] = k;
+    }
+
+    // Match A against reverse(A); j ends as the longest prefix of A that is
+    // a suffix of reverse(A), i.e. the longest palindromic prefix of A.
+    int j = 0;
+    for (int i = n - 1; i >= 0; i--) {
+        while (j > 0 && A[i] != A[j]) j = fail[j - 1];
+        if (A[i] == A[j]) j++;
+    }
+    return n - j;
+}
 ```

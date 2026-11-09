@@ -1,8 +1,9 @@
 ---
 title: "N-Queens"
-description: "The n-queens puzzle is the problem of placing n queens on an n x n chessboard such that no two queens attack each other. Given an integer n, return all…"
+description: "Return every placement of n non-attacking queens on an n x n board, using row-by-row backtracking with O(1) column and diagonal occupancy checks."
 source: "https://leetcode.com/problems/n-queens/"
-tags: ["Array", "Backtracking"]
+difficulty: "Hard"
+tags: ["Array", "Backtracking", "Algorithm X"]
 complexity:
   time: "O(n \\cdot n!)"
   space: "O(n^2)"
@@ -10,92 +11,104 @@ complexity:
 
 ## Problem
 
-<p>The <strong>n-queens</strong> puzzle is the problem of placing <code>n</code> queens on an <code>n x n</code> chessboard such that no two queens attack each other.</p>
+The **n-queens** puzzle is the problem of placing `n` queens on an `n x n` chessboard such that no two queens attack each other.
 
-<p>Given an integer <code>n</code>, return <em>all distinct solutions to the <strong>n-queens puzzle</strong></em>. You may return the answer in <strong>any order</strong>.</p>
+Given an integer `n`, return *all distinct solutions to the **n-queens puzzle***. You may return the answer in **any order**.
 
-<p>Each solution contains a distinct board configuration of the n-queens&#39; placement, where <code>&#39;Q&#39;</code> and <code>&#39;.&#39;</code> both indicate a queen and an empty space, respectively.</p>
+Each solution contains a distinct board configuration of the n-queens' placement, where `'Q'` and `'.'` both indicate a queen and an empty space, respectively.
+
+**Example 1:**
+
+![The two solutions of the 4-queens puzzle](https://assets.leetcode.com/uploads/2020/11/13/queens.jpg)
+
+```text
+Input:  n = 4
+Output: [[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]
+Explanation: There exist two distinct solutions to the 4-queens puzzle as shown above
+```
+
+**Example 2:**
+
+```text
+Input:  n = 1
+Output: [["Q"]]
+```
+
+**Constraints:**
+
+- $1 \le n \le 9$
 
 ## Solution approach
 
 ### Intuition
 
-Use backtracking to try every possible placement of the queens on the board, keeping only the valid ones. Each row must hold exactly one queen, so we place them row by row. The grid `occup` counts how many placed queens attack each square: a square with count `'0'` is safe. When a queen is placed, every square it attacks is incremented. When it is removed during backtracking, the same squares are decremented, so overlapping attacks from different queens are handled correctly.
+Two queens in the same row attack each other, so a solution has **exactly one queen per row**. That turns the search into: for row `0`, then row `1`, and so on, choose a column for that row's queen. This is a natural fit for **backtracking** — place a queen, recurse to the next row, and remove it again to try the next column.
+
+A placement at `(row, col)` is legal only if no earlier queen shares its column or one of its two diagonals. Diagonals have a simple signature:
+
+- on a down-right diagonal (`\`), `row - col` is constant — shift it to `row - col + n - 1` to get an index in `[0, 2n - 2]`;
+- on a down-left diagonal (`/`), `row + col` is constant, already in `[0, 2n - 2]`.
+
+So three boolean arrays — `cols`, `diag` and `anti` — tell in $O(1)$ whether a square is attacked, instead of scanning the board. Marking them on placement and clearing them on removal keeps them in sync with the current partial board. Branches die as soon as a row has no safe column, which prunes the search far below the $n^n$ raw possibilities.
 
 ### Algorithm
 
-1. `solveNQueens` fills `states` with `'.'` and `occup` with `'0'`, then calls `compute(0)`.
-2. `compute(queens)` places a queen in row `queens`. If `queens == n`, every row is filled, so the current `states` is pushed into `ans`.
-3. For each column `i` where `occup[queens][i] == '0'`, increment every square in the same row, the same column and the four diagonal directions, plus the square itself, and set `states[queens][i] = 'Q'`.
-4. Recurse with `compute(queens + 1)`, then undo every increment and reset the square to `'.'`.
+1. Start with `board` as `n` strings of `'.'`, and `cols` (size `n`), `diag` and `anti` (size `2n - 1`) all `false`.
+2. `place(row)`:
+   - if `row == n`, every row has a queen: append a copy of `board` to `ans` and return;
+   - for each `col` in `0 .. n - 1`, skip it if `cols[col]`, `diag[row - col + n - 1]` or `anti[row + col]` is set; otherwise set all three, put `'Q'` at `board[row][col]`, call `place(row + 1)`, then clear the three flags and restore `'.'`.
+3. Call `place(0)` and return `ans`.
+
+### Walkthrough
+
+Backtracking on `n = 4` until the first solution. Blue is the queen just placed, purple the queens already on the board, red the squares in later rows that they attack; a row that is entirely red forces a backtrack:
+
+![Backtracking search for the first 4-queens solution](/img/codes/n-queens/backtrack.gif)
 
 ### Complexity
 
-- **Time:** $O(n \cdot n!)$ — at most `n` choices in the first row, `n - 1` in the next and so on, and each placement or removal updates $O(n)$ squares.
-- **Space:** $O(n^2)$ — the `occup` and `states` grids, plus an $O(n)$ recursion stack (not counting the output).
+- **Time:** $O(n \cdot n!)$ — row `0` has at most `n` choices, row `1` at most `n - 1` safe columns, and so on, so the search tree has $O(n!)$ nodes, each scanning its `n` columns with $O(1)$ checks (in practice pruning keeps it far smaller); copying each of the `S` solutions costs an extra $O(S \cdot n^2)$.
+- **Space:** $O(n^2)$ — the working `board`; the flag arrays and the recursion stack are $O(n)$ (not counting the output).
+
+### Edge cases
+
+- **`n = 1`:** the only square is safe, giving `[["Q"]]`.
+- **`n = 2` and `n = 3`:** no solution exists; every branch dies and an empty list is returned.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    vector<vector<string>> ans;
-    vector<string> occup;
-    vector<string> states;
     int n;
+    vector<string> board;
+    vector<bool> cols, diag, anti;  // diag: row - col + n - 1, anti: row + col
+    vector<vector<string>> ans;
 
-   public:
-    void compute(int queens) {
-        if (queens == n) {
-            ans.push_back(states);
+    void place(int row) {
+        if (row == n) {
+            ans.push_back(board);
             return;
         }
-
-        for (int i = 0; i < n; i++) {
-            if (occup[queens][i] == '0') {
-                for (int j = 0; j < n; j++) {
-                    if (j != i) occup[queens][j] += 1;
-                }
-                for (int j = 0; j < n; j++) {
-                    if (j != queens) occup[j][i] += 1;
-                }
-                int j = i - 1, k = queens - 1;
-                while (j >= 0 && k >= 0) occup[k--][j--] += 1;
-                j = i + 1, k = queens - 1;
-                while (j < n && k >= 0) occup[k--][j++] += 1;
-                j = i - 1, k = queens + 1;
-                while (j >= 0 && k < n) occup[k++][j--] += 1;
-                j = i + 1, k = queens + 1;
-                while (j < n && k < n) occup[k++][j++] += 1;
-                occup[queens][i] += 1;
-                states[queens][i] = 'Q';
-                compute(queens + 1);
-                occup[queens][i] -= 1;
-                states[queens][i] = '.';
-                for (int j = 0; j < n; j++) {
-                    if (j != i) occup[queens][j] -= 1;
-                }
-                for (int j = 0; j < n; j++) {
-                    if (j != queens) occup[j][i] -= 1;
-                }
-                j = i - 1, k = queens - 1;
-                while (j >= 0 && k >= 0) occup[k--][j--] -= 1;
-                j = i + 1, k = queens - 1;
-                while (j < n && k >= 0) occup[k--][j++] -= 1;
-                j = i - 1, k = queens + 1;
-                while (j >= 0 && k < n) occup[k++][j--] -= 1;
-                j = i + 1, k = queens + 1;
-                while (j < n && k < n) occup[k++][j++] -= 1;
-            }
+        for (int col = 0; col < n; col++) {
+            int d = row - col + n - 1, a = row + col;
+            if (cols[col] || diag[d] || anti[a]) continue;
+            cols[col] = diag[d] = anti[a] = true;
+            board[row][col] = 'Q';
+            place(row + 1);
+            board[row][col] = '.';
+            cols[col] = diag[d] = anti[a] = false;
         }
     }
 
+   public:
     vector<vector<string>> solveNQueens(int n) {
         this->n = n;
-        states.assign(n, string(n, '.'));
-        occup.assign(n, string(n, '0'));
-        compute(0);
+        board.assign(n, string(n, '.'));
+        cols.assign(n, false);
+        diag.assign(2 * n - 1, false);
+        anti.assign(2 * n - 1, false);
+        place(0);
         return ans;
     }
 };
-
 ```

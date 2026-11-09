@@ -1,7 +1,8 @@
 ---
 title: "Rotate List"
-description: "Given the head of a linked list, rotate the list to the right by k places."
+description: "Rotate a linked list to the right by k places in O(n) by closing it into a ring and cutting it after node n - k mod n."
 source: "https://leetcode.com/problems/rotate-list/"
+difficulty: "Medium"
 tags: ["Linked List", "Two Pointers"]
 complexity:
   time: "O(n)"
@@ -10,30 +11,74 @@ complexity:
 
 ## Problem
 
-<p>Given the <code>head</code> of a linked&nbsp;list, rotate the list to the right by <code>k</code> places.</p>
+Given the `head` of a linked list, rotate the list to the right by `k` places.
+
+**Example 1:**
+
+![1→2→3→4→5 rotated right once and twice, ending as 4→5→1→2→3](https://assets.leetcode.com/uploads/2020/11/13/rotate1.jpg)
+
+```text
+Input:  head = [1,2,3,4,5], k = 2
+Output: [4,5,1,2,3]
+```
+
+**Example 2:**
+
+![0→1→2 rotated right four times, ending as 2→0→1](https://assets.leetcode.com/uploads/2020/11/13/roate2.jpg)
+
+```text
+Input:  head = [0,1,2], k = 4
+Output: [2,0,1]
+```
+
+**Constraints:**
+
+- The number of nodes in the list is in the range `[0, 500]`.
+- $-100 \le$ `Node.val` $\le 100$
+- $0 \le k \le 2 \times 10^9$
 
 ## Solution approach
 
 ### Intuition
 
-Rotating right by `k` moves the last `k` nodes to the front. Rotating by the list length `n` changes nothing, so only `k % n` matters. If we join the tail to the head to form a ring, we just need to cut the ring at the right place: after the `(n - k)`-th node.
+Rotating right by one moves the last node to the front. Doing that `k` times is far too slow when $k$ can be $2 \times 10^9$, but two observations make it a single pointer surgery:
+
+- Rotating a list of length `n` by `n` places gives back the same list, so only `k % n` matters.
+- Rotating right by `k` (with `0 < k < n`) means the last `k` nodes move, unchanged, to the front. The new head is node number `n - k` (0-based) and the new tail is the node just before it.
+
+If we link the old tail to the old head, the list becomes a **ring** and every rotation of it is the same ring cut at a different place. So: close the ring, walk to the new tail, and cut after it.
+
+```mermaid
+flowchart LR
+    n1["1"] --> n2["2"] --> n3["3 (new tail)"] -. cut .-> n4["4 (new head)"] --> n5["5 (old tail)"]
+    n5 -- "tail->next = head" --> n1
+    classDef cut fill:#fde0e0,stroke:#d64545,color:#7d1a1a
+    classDef head fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    class n3 cut
+    class n4 head
+```
+
+*Example 1: `n = 5`, `k = 2`. The ring is cut after node `3`, which is `n - k - 1 = 2` steps from the old head.*
 
 ### Algorithm
 
-1. Return `head` if the list is empty.
-2. Walk `temp` to the last node while counting the length `n`.
-3. If `k % n == 0`, the list is unchanged, so return `head`. Otherwise set `k = k % n`.
-4. Link the tail to the head with `temp->next = head`, making the list circular.
-5. Walk `temp` from `head` to the `(n - k)`-th node. Its successor is `newhead`. Break the ring with `temp->next = NULL` and return `newhead`.
+1. If the list is empty, return it.
+2. Walk to the old `tail`, counting the length `n`.
+3. `k %= n`. If `k == 0`, the list is unchanged; return `head`.
+4. Close the ring: `tail->next = head`.
+5. Starting at `head`, step `n - k - 1` times to reach `newTail`.
+6. `newHead = newTail->next`, cut with `newTail->next = nullptr`, and return `newHead`.
 
 ### Complexity
 
-- **Time:** $O(n)$ — at most two passes over the list.
-- **Space:** $O(1)$ — only pointers are rearranged.
+- **Time:** $O(n)$ — one pass to measure the list and at most one more partial pass to find the cut.
+- **Space:** $O(1)$ — a few pointers; nodes are relinked, not copied.
 
 ### Edge cases
 
-- **`k` larger than the length**, e.g. `k = 2000000000`: the `k % n` reduction keeps the walk to at most `n` steps.
+- **Empty list:** returned immediately (also avoids `k % 0`).
+- **`k` a multiple of `n`** (including `k = 0`, or a single-node list): `k % n == 0`, return `head` without closing the ring.
+- **`k` larger than `n`** (Example 2: `k = 4`, `n = 3`): reduced to `k = 1`.
 
 ## Code
 
@@ -41,26 +86,21 @@ Rotating right by `k` moves the last `k` nodes to the front. Rotating by the lis
 class Solution {
    public:
     ListNode* rotateRight(ListNode* head, int k) {
-        ListNode* temp = head;
         if (!head) return head;
         int n = 1;
-        while (temp->next) {
+        ListNode* tail = head;
+        while (tail->next) {
+            tail = tail->next;
             n++;
-            temp = temp->next;
         }
-        if (k % n == 0) return head;
-        k = k % n;
-        temp->next = head;
-        temp = head;
-        int cnt = 1;
-        while (cnt < n - k) {
-            cnt++;
-            temp = temp->next;
-        }
-        ListNode* newhead = temp->next;
-        temp->next = NULL;
-        return newhead;
+        k %= n;
+        if (k == 0) return head;
+        tail->next = head;  // close the ring
+        ListNode* newTail = head;
+        for (int i = 0; i < n - k - 1; i++) newTail = newTail->next;
+        ListNode* newHead = newTail->next;
+        newTail->next = nullptr;
+        return newHead;
     }
 };
-
 ```

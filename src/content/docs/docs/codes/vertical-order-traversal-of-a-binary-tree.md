@@ -1,8 +1,9 @@
 ---
 title: "Vertical Order Traversal of a Binary Tree"
-description: "Given the root of a binary tree, calculate the vertical order traversal of the binary tree. For each node at position (row, col), its left and right…"
+description: "List a binary tree's nodes column by column, top to bottom with ties by value, by recording (col, row, value) for every node and sorting."
 source: "https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree/"
-tags: ["Hash Table", "Tree", "Depth-First Search", "Breadth-First Search", "Binary Tree"]
+difficulty: "Hard"
+tags: ["Hash Table", "Tree", "Depth-First Search", "Breadth-First Search", "Sorting", "Binary Tree"]
 complexity:
   time: "O(n \\log n)"
   space: "O(n)"
@@ -10,63 +11,126 @@ complexity:
 
 ## Problem
 
-<p>Given the <code>root</code> of a binary tree, calculate the <strong>vertical order traversal</strong> of the binary tree.</p>
+Given the `root` of a binary tree, calculate the **vertical order traversal** of the binary tree.
 
-<p>For each node at position <code>(row, col)</code>, its left and right children will be at positions <code>(row + 1, col - 1)</code> and <code>(row + 1, col + 1)</code> respectively. The root of the tree is at <code>(0, 0)</code>.</p>
+For each node at position `(row, col)`, its left and right children will be at positions `(row + 1, col - 1)` and `(row + 1, col + 1)` respectively. The root of the tree is at `(0, 0)`.
 
-<p>The <strong>vertical order traversal</strong> of a binary tree is a list of top-to-bottom orderings for each column index starting from the leftmost column and ending on the rightmost column. There may be multiple nodes in the same row and same column. In such a case, sort these nodes by their values.</p>
+The **vertical order traversal** of a binary tree is a list of top-to-bottom orderings for each column index starting from the leftmost column and ending on the rightmost column. There may be multiple nodes in the same row and same column. In such a case, sort these nodes by their values.
 
-<p>Return <em>the <strong>vertical order traversal</strong> of the binary tree</em>.</p>
+Return _the **vertical order traversal** of the binary tree_.
+
+**Example 1:**
+
+![Tree [3,9,20,null,null,15,7] with its columns marked](https://assets.leetcode.com/uploads/2021/01/29/vtree1.jpg)
+
+```text
+Input:  root = [3,9,20,null,null,15,7]
+Output: [[9],[3,15],[20],[7]]
+Explanation:
+Column -1: Only node 9 is in this column.
+Column 0: Nodes 3 and 15 are in this column in that order from top to bottom.
+Column 1: Only node 20 is in this column.
+Column 2: Only node 7 is in this column.
+```
+
+**Example 2:**
+
+![Tree [1,2,3,4,5,6,7] with its columns marked](https://assets.leetcode.com/uploads/2021/01/29/vtree2.jpg)
+
+```text
+Input:  root = [1,2,3,4,5,6,7]
+Output: [[4],[2],[1,5,6],[3],[7]]
+Explanation:
+Column -2: Only node 4 is in this column.
+Column -1: Only node 2 is in this column.
+Column 0: Nodes 1, 5, and 6 are in this column.
+          1 is at the top, so it comes first.
+          5 and 6 are at the same position (2, 0), so we order them by their value, 5 before 6.
+Column 1: Only node 3 is in this column.
+Column 2: Only node 7 is in this column.
+```
+
+**Example 3:**
+
+![Tree [1,2,3,4,6,5,7] with its columns marked](https://assets.leetcode.com/uploads/2021/01/29/vtree3.jpg)
+
+```text
+Input:  root = [1,2,3,4,6,5,7]
+Output: [[4],[2],[1,5,6],[3],[7]]
+Explanation:
+This case is the exact same as example 2, but with nodes 5 and 6 swapped.
+Note that the solution remains the same since 5 and 6 are in the same location and should be
+ordered by their values.
+```
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range $[1, 1000]$.
+- $0 \le$ `Node.val` $\le 1000$
 
 ## Solution approach
 
 ### Intuition
 
-Give each node a column `c` and row `r`: the left child is at `(c - 1, r + 1)` and the right child at `(c + 1, r + 1)`. The output lists columns from left to right; within a column, nodes go from top to bottom, and nodes sharing the same row and column are sorted by value. A nested ordered map `mp[c][r]` keeps columns and rows sorted automatically, so we only need to sort the small groups of nodes that share a position.
+The required output order is a **lexicographic** order on three keys: first by column (left to right), then by row (top to bottom), then by value (for nodes sharing a position). So if we record the triple `{col, row, val}` for every node and sort the triples, they come out in exactly the order we must print them. All that remains is to cut the sorted list wherever the column changes.
+
+Any traversal works for collecting the triples, because the sort, not the visiting order, decides the final order. That also makes ties trivial: two nodes at the same `(row, col)` differ only in `val`, and the sort puts the smaller value first.
 
 ### Algorithm
 
-1. `traverse(root, c, r)` does a DFS and appends `root->val` to `mp[c][r]`.
-2. Recurse on `root->left` with `(c - 1, r + 1)` and on `root->right` with `(c + 1, r + 1)`.
-3. For each column in `mp` (in increasing order), go through its rows in increasing order, sort each row's values, and append them to `v`.
-4. Push `v` into `ans` and return `ans`.
+1. `collect(node, row, col, nodes)` does a DFS: append `{col, row, node->val}` to `nodes`, then recurse into `node->left` with `(row + 1, col - 1)` and `node->right` with `(row + 1, col + 1)`.
+2. Sort `nodes` (`std::array` compares lexicographically: `col`, then `row`, then `val`).
+3. Scan the sorted triples; start a new list in `ans` whenever `col` differs from the previous triple's, and append `val` to the last list.
+4. Return `ans`.
+
+### Walkthrough
+
+Example 3, `root = [1,2,3,4,6,5,7]`. The sorted triples `{col, row, val}` and the groups they form:
+
+| column | sorted triples | group |
+| --- | --- | --- |
+| -2 | `{-2, 2, 4}` | `[4]` |
+| -1 | `{-1, 1, 2}` | `[2]` |
+| 0 | `{0, 0, 1}`, `{0, 2, 5}`, `{0, 2, 6}` | `[1, 5, 6]` |
+| 1 | `{1, 1, 3}` | `[3]` |
+| 2 | `{2, 2, 7}` | `[7]` |
+
+Node `6` is the right child of `2` and `5` the left child of `3`; both land at `(2, 0)`, and the third key orders them `5, 6`.
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — inserting $n$ nodes into ordered maps and sorting the groups both cost $O(n \log n)$.
-- **Space:** $O(n)$ — the map stores every node, plus a recursion stack of height $h$.
+- **Time:** $O(n \log n)$ — the DFS is $O(n)$ and sorting `n` triples is $O(n \log n)$.
+- **Space:** $O(n)$ — the triples and the answer, plus a recursion stack of height $h \le n$.
 
 ### Edge cases
 
-- **Nodes at the same position**: the per-row `sort` puts them in increasing order, as the problem requires.
+- **Single node:** one triple, one column: `[[root->val]]`.
+- **Equal values at the same position:** they compare equal on all keys and both are output; their relative order does not matter because they are identical.
+- **Repeated calls:** all state is local to `verticalTraversal`, so nothing leaks between test cases.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    map<int, map<int, vector<int>>> mp;
-
-   public:
-    void traverse(TreeNode* root, int c, int r) {
-        if (!root) return;
-        mp[c][r].push_back(root->val);
-        traverse(root->left, c - 1, r + 1);
-        traverse(root->right, c + 1, r + 1);
+    void collect(TreeNode* node, int row, int col, vector<array<int, 3>>& nodes) {
+        if (!node) return;
+        nodes.push_back({col, row, node->val});
+        collect(node->left, row + 1, col - 1, nodes);
+        collect(node->right, row + 1, col + 1, nodes);
     }
 
+   public:
     vector<vector<int>> verticalTraversal(TreeNode* root) {
-        traverse(root, 0, 0);
+        vector<array<int, 3>> nodes;  // {col, row, val}
+        collect(root, 0, 0, nodes);
+        sort(nodes.begin(), nodes.end());
+
         vector<vector<int>> ans;
-        for (auto i : mp) {
-            vector<int> v;
-            for (auto j : i.second) {
-                sort(j.second.begin(), j.second.end());
-                for (auto k : j.second) v.push_back(k);
-            }
-            ans.push_back(v);
+        for (size_t i = 0; i < nodes.size(); i++) {
+            if (i == 0 || nodes[i][0] != nodes[i - 1][0]) ans.push_back({});
+            ans.back().push_back(nodes[i][2]);
         }
         return ans;
     }
 };
-
 ```

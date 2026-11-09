@@ -1,55 +1,90 @@
 ---
 title: "Compare Version Numbers"
-description: "Given two version numbers, version1 and version2, compare them. Version numbers consist of one or more revisions joined by a dot '.'. Each revision…"
+description: "Compare two dot-separated version strings revision by revision as integers, parsing both strings in place with two pointers and O(1) extra space."
 source: "https://leetcode.com/problems/compare-version-numbers/"
+difficulty: "Medium"
 tags: ["Two Pointers", "String"]
 complexity:
   time: "O(n + m)"
-  space: "O(n + m)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given two version numbers,&nbsp;<code>version1</code> and <code>version2</code>, compare them.</p>
+Given two **version strings**, `version1` and `version2`, compare them. A version string consists of **revisions** separated by dots `'.'`. The **value of the revision** is its **integer conversion** ignoring leading zeros.
 
-<ul>
-</ul>
+To compare version strings, compare their revision values in **left-to-right order**. If one of the version strings has fewer revisions, treat the missing revision values as `0`.
 
-<p>Version numbers consist of <strong>one or more revisions</strong> joined by a dot&nbsp;<code>&#39;.&#39;</code>. Each revision&nbsp;consists of <strong>digits</strong>&nbsp;and may contain leading <strong>zeros</strong>. Every revision contains <strong>at least one character</strong>. Revisions are <strong>0-indexed from left to right</strong>, with the leftmost revision being revision 0, the next revision being revision 1, and so on. For example&nbsp;<code>2.5.33</code>&nbsp;and&nbsp;<code>0.1</code>&nbsp;are valid version numbers.</p>
+Return the following:
 
-<p>To compare version numbers, compare their revisions in <strong>left-to-right order</strong>. Revisions are compared using their&nbsp;<strong>integer value ignoring any leading zeros</strong>. This means that revisions&nbsp;<code>1</code>&nbsp;and&nbsp;<code>001</code>&nbsp;are considered&nbsp;<strong>equal</strong>. If a version number does not specify a revision at an index, then&nbsp;<strong>treat the revision as&nbsp;<code>0</code></strong>. For example, version&nbsp;<code>1.0</code> is less than version&nbsp;<code>1.1</code>&nbsp;because their revision 0s are the same, but their revision 1s are&nbsp;<code>0</code>&nbsp;and&nbsp;<code>1</code>&nbsp;respectively, and&nbsp;<code>0 &lt; 1</code>.</p>
+- If `version1 < version2`, return `-1`.
+- If `version1 > version2`, return `1`.
+- Otherwise, return `0`.
 
-<p><em>Return the following:</em></p>
+**Example 1:**
 
-<ul>
-	<li>If <code>version1 &lt; version2</code>, return <code>-1</code>.</li>
-	<li>If <code>version1 &gt; version2</code>, return <code>1</code>.</li>
-	<li>Otherwise, return <code>0</code>.</li>
-</ul>
+```text
+Input:  version1 = "1.2", version2 = "1.10"
+Output: -1
+Explanation: version1's second revision is "2" and version2's second revision is "10": 2 < 10, so
+version1 < version2.
+```
+
+**Example 2:**
+
+```text
+Input:  version1 = "1.01", version2 = "1.001"
+Output: 0
+Explanation: Ignoring leading zeroes, both "01" and "001" represent the same integer "1".
+```
+
+**Example 3:**
+
+```text
+Input:  version1 = "1.0", version2 = "1.0.0.0"
+Output: 0
+Explanation: version1 has less revisions, which means every missing revision are treated as "0".
+```
+
+**Constraints:**
+
+- $1 \le$ `version1.length`, `version2.length` $\le 500$
+- `version1` and `version2` only contain digits and `'.'`.
+- `version1` and `version2` **are valid version numbers**.
+- All the given revisions in `version1` and `version2` can be stored in a **32-bit integer**.
 
 ## Solution approach
 
 ### Intuition
 
-Version strings are compared **revision by revision as integers**, so `"1.01"` equals `"1.001"`, and a missing revision counts as `0`. The simplest way to do this is to split both strings at the dots, convert each piece with `stoi` (which also drops leading zeros), pad the shorter list with zeros, and compare the lists element by element.
+Revisions must be compared as **numbers**, not as text: `"10" > "2"` numerically even though `'1' < '2'` as characters, and `"01"` equals `"001"`. Splitting both strings into integer lists works but needs extra memory. We do not need the lists — only the current pair of revisions — so we can parse both strings side by side with one pointer each:
+
+- read the digits of the next revision of each string, building its integer value (leading zeros contribute nothing: `0 * 10 + 0 = 0`);
+- a string that has run out of revisions simply yields `0`, which is exactly the "missing revisions are `0`" rule;
+- the first pair of unequal revisions decides the answer.
 
 ### Algorithm
 
-1. Scan `version1`. Whenever a `'.'` or the end of the string is reached, convert the substring from `last` to `i` with `stoi`, push it into `v1`, and set `last = i + 1`.
-2. Do the same for `version2` to build `v2`.
-3. Append `cnt = abs(sz2 - sz1)` zeros to the shorter of `v1` and `v2`.
-4. Walk both lists together and return `-1` or `1` at the first index where they differ.
-5. If all revisions match, return `0`.
+1. Set `i = 0` (into `version1`) and `j = 0` (into `version2`).
+2. While `i < n` or `j < m`:
+   - Parse revision `a` from `version1`: while `i < n` and `version1[i] != '.'`, do `a = a * 10 + digit` and advance `i`. If `i >= n` already, `a` stays `0`.
+   - Parse revision `b` from `version2` the same way with `j`.
+   - If `a != b`, return `-1` if `a < b`, else `1`.
+   - Advance `i` and `j` by one to skip the dots.
+3. Every revision matched: return `0`.
+
+For Example 1: the first round reads `a = 1`, `b = 1`; the second reads `a = 2`, `b = 10`, and `2 < 10` returns `-1`.
 
 ### Complexity
 
-- **Time:** $O(n + m)$ — each string is scanned and converted once.
-- **Space:** $O(n + m)$ — for the revision lists `v1` and `v2`.
+- **Time:** $O(n + m)$ — every character of both strings is read once.
+- **Space:** $O(1)$ — two indices and two integers.
 
 ### Edge cases
 
-- **Different lengths** such as `"1.0"` and `"1.0.0"`: the padding makes them equal.
-- **Leading zeros** such as `"01"` and `"1"`: `stoi` converts both to `1`.
+- **Different numbers of revisions** (Example 3): the shorter string keeps producing `0` until the longer one is exhausted.
+- **Leading zeros** (Example 2): they add nothing to the value, so `"01"` and `"001"` both parse to `1`.
+- **Overflow:** each revision fits in a 32-bit integer, and the running value never exceeds the final value, so `int` is safe.
 
 ## Code
 
@@ -57,28 +92,16 @@ Version strings are compared **revision by revision as integers**, so `"1.01"` e
 class Solution {
    public:
     int compareVersion(string version1, string version2) {
-        vector<int> v1, v2;
-        int last = 0;
-        for (int i = 0; i <= version1.size(); i++)
-            if (version1[i] == '.' || i == version1.size())
-                v1.push_back(stoi(version1.substr(last, i - last))),
-                    last = i + 1;
-        last = 0;
-        for (int i = 0; i <= version2.size(); i++)
-            if (version2[i] == '.' || i == version2.size())
-                v2.push_back(stoi(version2.substr(last, i - last))),
-                    last = i + 1;
-
-        int sz1 = v1.size(), sz2 = v2.size();
-        int cnt = abs(sz2 - sz1);
-        if (sz1 < sz2)
-            while (cnt--) v1.push_back(0);
-        else
-            while (cnt--) v2.push_back(0);
-        for (int i = 0; i < v1.size(); i++)
-            if (v1[i] != v2[i]) return (v1[i] < v2[i]) ? -1 : 1;
+        int i = 0, j = 0, n = version1.size(), m = version2.size();
+        while (i < n || j < m) {
+            int a = 0, b = 0;
+            while (i < n && version1[i] != '.') a = a * 10 + (version1[i++] - '0');
+            while (j < m && version2[j] != '.') b = b * 10 + (version2[j++] - '0');
+            if (a != b) return a < b ? -1 : 1;
+            i++;  // skip the '.'
+            j++;
+        }
         return 0;
     }
 };
-
 ```

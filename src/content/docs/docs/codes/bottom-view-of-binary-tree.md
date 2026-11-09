@@ -1,88 +1,123 @@
 ---
 title: "Bottom View of Binary Tree"
-description: "Given a binary tree, print the bottom view from left to right. A node is included in bottom view if it can be seen when we look at the tree from bottom.…"
-source: "https://practice.geeksforgeeks.org/problems/bottom-view-of-binary-tree/1"
-tags: ["Stack", "Tree", "Depth-First Search", "Binary Tree"]
+description: "Return the bottom view of a binary tree by a level-order BFS that tracks each node's horizontal distance and keeps the last node seen in every column."
+source: "https://www.geeksforgeeks.org/problems/bottom-view-of-binary-tree/1"
+difficulty: "Medium"
+tags: ["Tree"]
 complexity:
-  time: "O(n \\log n)"
+  time: "O(n)"
   space: "O(n)"
 ---
 
 ## Problem
 
-<p></p><p><span>Given a binary tree, print the bottom view from left to right.<br/>
-A node is included in bottom view if it can be seen when we look at the tree from bottom.</span></p>
+Given a binary tree, return its bottom view. The bottom view of a binary tree is the set of nodes visible when the tree is viewed from the bottom.
 
-<p><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp;&nbsp; \<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp; \&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; 25<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp; \&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10&nbsp;&nbsp;&nbsp; 14</span></p>
+**Note:** If there are multiple bottom-most nodes for a horizontal distance from the root, then the latter one in the level order traversal is considered.
 
-<p><span>For the above tree, the bottom view is 5 10 3 14 25.</span><br/>
-<span>If there are <strong>multiple </strong>bottom-most nodes for a horizontal distance from root, then print the later one in level traversal. For example, in the below diagram, 3 and 4 are both the bottommost nodes at horizontal distance 0, we need to print 4.</span></p>
+Complete the function `bottomView()` which takes the root node of the tree and returns the bottom view as a list of node values, from left to right.
 
-<p><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp;&nbsp; \<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /&nbsp;&nbsp; \&nbsp;&nbsp; &nbsp; /&nbsp;&nbsp; \<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3 4&nbsp;&nbsp;&nbsp;&nbsp; 25<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; /&nbsp; &nbsp; \&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10 &nbsp;&nbsp; &nbsp;&nbsp; 14</span></p>
+**Example 1:**
 
-<p><span>For the above tree the output should be 5 10 4 14 25.</span><br/>
-&nbsp;</p>
+![Tree for Example 1](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/912663/Web/Other/blobid2_1759760218.jpg)
 
-<p><span><strong>Your Task:</strong><br/>
-This is a functional problem, you <strong>don't </strong>need to care about input, just complete the function <strong>bottomView</strong>() which takes the root node of the tree as input and returns an array&nbsp;containing the bottom view of the given tree.</span></p>
+```text
+Input:  root = [1, 2, 3, 4, 5, N, 6]
+Output: [4, 2, 5, 3, 6]
+Explanation: The green nodes represent the bottom view of the binary tree.
+```
+
+![Bottom view of Example 1 highlighted in green](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/912663/Web/Other/blobid3_1759760226.jpg)
+
+**Example 2:**
+
+![Tree for Example 2](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/912663/Web/Other/blobid0_1759760166.jpg)
+
+```text
+Input:  root = [20, 8, 22, 5, 3, 4, 25, N, N, 10, 14, N, N, 28, N]
+Output: [5, 10, 4, 28, 25]
+Explanation: The green nodes represent the bottom view of the binary tree.
+```
+
+![Bottom view of Example 2 highlighted in green](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/912663/Web/Other/blobid1_1759760190.jpg)
+
+**Constraints:**
+
+- $1 \le$ size of binary tree, `Node.data` $\le 10^5$
+
+Expected time complexity: $O(n)$. Expected auxiliary space: $O(n)$.
 
 ## Solution approach
 
 ### Intuition
 
-Give every node a horizontal column: moving to a child shifts the column by one. The bottom view shows, for each column, the **deepest** node in it. So during a traversal we keep, for each column, the depth of the best node seen so far and replace it whenever a node at the same or a greater depth appears.
+Give every node a **horizontal distance** `hd`: the root has `hd = 0`, a left child has its parent's `hd - 1`, and a right child has `hd + 1`. Nodes with the same `hd` lie in the same vertical column, and looking from below we see, in each column, the node that is lowest.
 
-Replacing on equal depth (`<=`) means that when two nodes share both column and depth, the one visited later wins, which matches the problem's rule of picking the later node.
+A level-order traversal (BFS) visits nodes by increasing depth, and within one depth from left to right. So if we simply let every node **overwrite** the entry for its column, the value left at the end is the deepest node of that column, and among equally deep nodes, the one that comes later in level order — exactly the tie-break the problem asks for.
+
+A DFS would also work if it compared depths, but BFS gets the tie-break for free and, being iterative, cannot overflow the call stack on a skewed tree with $10^5$ nodes.
+
+Columns are contiguous: every node's `hd` differs from its parent's by exactly one, so all values between `minHd` and `maxHd` occur. That lets us use a plain array indexed by `hd - minHd` instead of an ordered map.
 
 ### Algorithm
 
-1. Call `traversal(root, 0, 0)` with column `c` and depth `h`.
-2. If column `c` has no entry in `height`, or `height[c] <= h`, set `mp[c] = root->data` and `height[c] = h`.
-3. Recurse into the left child with column `c + 1` and the right child with `c - 1`, both at depth `h + 1`.
-4. The `map` sorts columns in increasing order, which runs from right to left here, so collect `mp`'s values into `view` and reverse it.
-5. Return `view`.
+1. BFS from `(root, 0)` with a queue of `(node, hd)` pairs. For each popped node, append `(hd, node->data)` to `seen`, update `minHd` and `maxHd`, and push the left child with `hd - 1` and the right child with `hd + 1`.
+2. Create `view` of size `maxHd - minHd + 1`.
+3. Go through `seen` in order and set `view[hd - minHd] = data`; later entries overwrite earlier ones.
+4. Return `view`, which is already ordered from the leftmost column to the rightmost.
+
+### Walkthrough
+
+Example 2 with each node's `hd`. Green nodes are the last ones written into their column. Column `0` holds `20`, `3` and `4`; `3` and `4` are both at depth 2, and `4` comes later in level order, so it wins. Likewise `28` beats `14` in column `1`:
+
+```mermaid
+flowchart TD
+    A["20<br/>hd 0"] --> B["8<br/>hd -1"]
+    A --> C["22<br/>hd 1"]
+    B --> D["5<br/>hd -2"]
+    B --> E["3<br/>hd 0"]
+    C --> F["4<br/>hd 0"]
+    C --> G["25<br/>hd 2"]
+    E --> H["10<br/>hd -1"]
+    E --> I["14<br/>hd 1"]
+    G --> J["28<br/>hd 1"]
+    classDef seen fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    class D,H,F,J,G seen
+```
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — each node is visited once, and each operation on the ordered maps costs $O(\log n)$.
-- **Space:** $O(n)$ — for the two maps; the recursion stack adds $O(h)$.
+- **Time:** $O(n)$ — each node is enqueued and dequeued once, and `seen` is scanned once.
+- **Space:** $O(n)$ — the queue, `seen` and `view` each hold at most $n$ entries.
+
+### Edge cases
+
+- **Single node:** `minHd = maxHd = 0` and the view is `[root->data]`.
+- **Skewed tree:** every node is in its own column and appears in the view; the iterative BFS has no recursion depth problem.
+- **Ties at the same depth and column:** resolved by overwrite order, which is level order.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    map<int, int> mp, height;
-
    public:
-    void traversal(Node *root, int c, int h) {
-        if (!root) return;
-        if (height.find(c) == height.end() || height[c] <= h) {
-            mp[c] = root->data;
-            height[c] = h;
+    vector<int> bottomView(Node* root) {
+        if (!root) return {};
+        vector<pair<int, int>> seen;  // (hd, data) in level order
+        queue<pair<Node*, int>> q;
+        q.push({root, 0});
+        int minHd = 0, maxHd = 0;
+        while (!q.empty()) {
+            auto [node, hd] = q.front();
+            q.pop();
+            seen.push_back({hd, node->data});
+            minHd = min(minHd, hd);
+            maxHd = max(maxHd, hd);
+            if (node->left) q.push({node->left, hd - 1});
+            if (node->right) q.push({node->right, hd + 1});
         }
-        traversal(root->left, c + 1, h + 1);
-        traversal(root->right, c - 1, h + 1);
-    }
-
-    vector<int> bottomView(Node *root) {
-        vector<int> view;
-        traversal(root, 0, 0);
-        for (auto i : mp) {
-            view.push_back(i.second);
-        }
-        reverse(view.begin(), view.end());
+        vector<int> view(maxHd - minHd + 1);
+        for (auto [hd, data] : seen) view[hd - minHd] = data;  // later in level order wins
         return view;
     }
 };

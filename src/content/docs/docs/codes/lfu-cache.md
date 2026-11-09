@@ -1,186 +1,176 @@
 ---
 title: "LFU Cache"
-description: "Design and implement a data structure for a Least Frequently Used (LFU) cache. Implement the LFUCache class: LFUCache(int capacity) Initializes the object…"
+description: "Design an LFU cache with O(1) get and put by bucketing keys into per-frequency recency lists and tracking the minimum frequency."
 source: "https://leetcode.com/problems/lfu-cache/"
+difficulty: "Hard"
 tags: ["Hash Table", "Linked List", "Design", "Doubly-Linked List"]
 complexity:
-  time: "O(\\log n)"
+  time: "O(1)"
   space: "O(\\text{capacity})"
 ---
 
 ## Problem
 
-<p>Design and implement a data structure for a <a href="https://en.wikipedia.org/wiki/Least_frequently_used" target="_blank">Least Frequently Used (LFU)</a> cache.</p>
+Design and implement a data structure for a [Least Frequently Used (LFU)](https://en.wikipedia.org/wiki/Least_frequently_used) cache.
 
-<p>Implement the <code>LFUCache</code> class:</p>
+Implement the `LFUCache` class:
 
-<ul>
-	<li><code>LFUCache(int capacity)</code> Initializes the object with the <code>capacity</code> of the data structure.</li>
-	<li><code>int get(int key)</code> Gets the value of the <code>key</code> if the <code>key</code> exists in the cache. Otherwise, returns <code>-1</code>.</li>
-	<li><code>void put(int key, int value)</code> Update the value of the <code>key</code> if present, or inserts the <code>key</code> if not already present. When the cache reaches its <code>capacity</code>, it should invalidate and remove the <strong>least frequently used</strong> key before inserting a new item. For this problem, when there is a <strong>tie</strong> (i.e., two or more keys with the same frequency), the <strong>least recently used</strong> <code>key</code> would be invalidated.</li>
-</ul>
+- `LFUCache(int capacity)` Initializes the object with the `capacity` of the data structure.
+- `int get(int key)` Gets the value of the `key` if the `key` exists in the cache. Otherwise, returns `-1`.
+- `void put(int key, int value)` Update the value of the `key` if present, or inserts the `key` if not already present. When the cache reaches its `capacity`, it should invalidate and remove the **least frequently used** key before inserting a new item. For this problem, when there is a **tie** (i.e., two or more keys with the same frequency), the **least recently used** `key` would be invalidated.
 
-<p>To determine the least frequently used key, a <strong>use counter</strong> is maintained for each key in the cache. The key with the smallest <strong>use counter</strong> is the least frequently used key.</p>
+To determine the least frequently used key, a **use counter** is maintained for each key in the cache. The key with the smallest **use counter** is the least frequently used key.
 
-<p>When a key is first inserted into the cache, its <strong>use counter</strong> is set to <code>1</code> (due to the <code>put</code> operation). The <strong>use counter</strong> for a key in the cache is incremented either a <code>get</code> or <code>put</code> operation is called on it.</p>
+When a key is first inserted into the cache, its **use counter** is set to `1` (due to the `put` operation). The **use counter** for a key in the cache is incremented either a `get` or `put` operation is called on it.
 
-<p>The functions&nbsp;<code data-stringify-type="code">get</code>&nbsp;and&nbsp;<code data-stringify-type="code">put</code>&nbsp;must each run in <code>O(1)</code> average time complexity.</p>
+The functions `get` and `put` must each run in $O(1)$ average time complexity.
+
+**Example 1:**
+
+```text
+Input
+["LFUCache", "put", "put", "get", "put", "get", "get", "put", "get", "get", "get"]
+[[2], [1, 1], [2, 2], [1], [3, 3], [2], [3], [4, 4], [1], [3], [4]]
+Output
+[null, null, null, 1, null, -1, 3, null, -1, 3, 4]
+
+Explanation
+// cnt(x) = the use counter for key x
+// cache=[] will show the last used order for tiebreakers (leftmost element is  most recent)
+LFUCache lfu = new LFUCache(2);
+lfu.put(1, 1);   // cache=[1,_], cnt(1)=1
+lfu.put(2, 2);   // cache=[2,1], cnt(2)=1, cnt(1)=1
+lfu.get(1);      // return 1
+                 // cache=[1,2], cnt(2)=1, cnt(1)=2
+lfu.put(3, 3);   // 2 is the LFU key because cnt(2)=1 is the smallest, invalidate 2.
+                 // cache=[3,1], cnt(3)=1, cnt(1)=2
+lfu.get(2);      // return -1 (not found)
+lfu.get(3);      // return 3
+                 // cache=[3,1], cnt(3)=2, cnt(1)=2
+lfu.put(4, 4);   // Both 1 and 3 have the same cnt, but 1 is LRU, invalidate 1.
+                 // cache=[4,3], cnt(4)=1, cnt(3)=2
+lfu.get(1);      // return -1 (not found)
+lfu.get(3);      // return 3
+                 // cache=[3,4], cnt(4)=1, cnt(3)=3
+lfu.get(4);      // return 4
+                 // cache=[4,3], cnt(4)=2, cnt(3)=3
+```
+
+**Constraints:**
+
+- $1 \le$ `capacity` $\le 10^4$
+- $0 \le$ `key` $\le 10^5$
+- $0 \le$ `value` $\le 10^9$
+- At most $2 \times 10^5$ calls will be made to `get` and `put`.
 
 ## Solution approach
 
 ### Intuition
 
-An LFU cache evicts the key with the lowest use count, and among those, the least recently used one. Grouping keys **by frequency** makes this cheap: each frequency gets its own doubly linked list ordered by recency (newest at the head), and we track the minimum frequency `mf`. The victim is then always the tail of the list for `mf`.
+On eviction we need "the least recently used key among those with the smallest use counter". A heap or an ordered map keyed by `(freq, time)` finds it in $O(\log n)$, but the problem demands $O(1)$. Three observations get us there:
 
-A second map from key to its list node lets us find, unlink and move any key without scanning.
+1. **Bucket keys by frequency.** For every frequency `f` keep a list of the keys that currently have counter `f`, ordered by recency (most recent at the front). Within one bucket the LRU key is simply the **back** of the list.
+2. **Counters only move by one.** A `get` or `put` on an existing key moves it from bucket `f` to the **front** of bucket `f + 1`. With a key-to-node map, that is an $O(1)$ unlink plus an $O(1)$ insert (`list::splice` does both without reallocating).
+3. **The minimum frequency is easy to maintain.** Keep `minFreq`. It only changes in two ways:
+   - a new key is inserted with counter `1`, so `minFreq = 1`;
+   - a key is promoted out of bucket `minFreq` and leaves it empty, so `minFreq` becomes `minFreq + 1` (the promoted key is now there).
+
+   Eviction never needs to search for a new minimum, because it is always immediately followed by an insert that sets `minFreq = 1`.
+
+So the victim is always `byFreq[minFreq].back()`, found in $O(1)$.
+
+```mermaid
+flowchart LR
+    subgraph before["Before put(4, 4): minFreq = 2"]
+        direction LR
+        f2a["freq 2"] --> k3a["3"] --> k1a["1 (LRU)"]
+    end
+    subgraph after["After put(4, 4): minFreq = 1"]
+        direction LR
+        f1b["freq 1"] --> k4b["4"]
+        f2b["freq 2"] --> k3b["3"]
+    end
+    before -- "evict back of byFreq[2], insert 4 into byFreq[1]" --> after
+    classDef evict fill:#fde0e0,stroke:#d64545,color:#7d1a1a
+    classDef fresh fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    class k1a evict
+    class k4b fresh
+```
 
 ### Algorithm
 
-1. `dlist` is a doubly linked list with dummy `head` and `tail`; `addNode` inserts at the front and `delNode` unlinks a node. `mp` maps key to `Node`, and `fmap` maps frequency to its `dlist`.
-2. `get(key)`: return `-1` if the key is missing. Otherwise unlink its node from `fmap[ptr->freq]`; if that list becomes empty, erase it and, if it was the minimum, set `mf = ptr->freq + 1`. Re-insert the key at the front of `fmap[ptr->freq + 1]` (creating that list if needed), update `mp`, and return the value.
-3. `put(key, value)` on an existing key: same promotion as `get`, but the new node stores the new `value`.
-4. `put` on a new key: if `cnt == cap`, evict `fmap[mf]->tail->prev`, erase an emptied list, and remove the key from `mp`. Then set `mf = 0` and insert the key with frequency `0` at the front of `fmap[0]`.
+State: `capacity`, `minFreq`, `byFreq` (frequency → `list<Entry>`, most recent first) and `where` (key → iterator to its `Entry`, which stores `key`, `value`, `freq`).
+
+- `touch(it)` — promote an entry: splice it out of `byFreq[f]` and onto the front of `byFreq[f + 1]` and set `freq = f + 1`. If `byFreq[f]` became empty, erase it, and if `f == minFreq`, increment `minFreq`.
+- `get(key)`: if `key` is not in `where`, return `-1`. Otherwise `touch` its entry and return its `value`.
+- `put(key, value)`:
+  1. If `key` exists, overwrite its `value` and `touch` it.
+  2. Otherwise, if the cache is full (`where.size() == capacity`), evict `byFreq[minFreq].back()`: erase its key from `where`, pop it, and erase the bucket if it became empty.
+  3. Insert `{key, value, 1}` at the front of `byFreq[1]`, record it in `where`, and set `minFreq = 1`.
 
 ### Complexity
 
-- **Time:** $O(\log n)$ per `get` and `put` — `mp` and `fmap` are ordered `map`s; the list operations themselves are $O(1)$.
-- **Space:** $O(\text{capacity})$ — at most `cap` live nodes plus one list per distinct frequency.
+- **Time:** $O(1)$ average per `get` and `put` — a constant number of hash-map lookups and list splices/pushes/pops.
+- **Space:** $O(\text{capacity})$ — one entry per cached key, and at most one non-empty bucket per distinct frequency among them.
 
 ### Edge cases
 
-- **`capacity` is `0`:** `put` returns immediately and nothing is stored.
-- **Tie on frequency:** the tail of `fmap[mf]` is the least recently used key with that count, so it is evicted first.
+- **Tie on frequency** (the `put(4, 4)` step above): bucket `2` holds `[3, 1]`; `1` was used less recently, so it is at the back and is evicted.
+- **`put` on an existing key** counts as a use: the value is overwritten **and** the key is promoted, and no eviction happens.
+- **Capacity `1`:** every insert of a new key evicts the only key; `minFreq` is then reset to `1` by the insert.
 
 ## Code
 
 ```cpp title="C++"
-struct Node {
-    int key, value, freq;
-    Node *next;
-    Node *prev;
-    Node(int k, int v, int f) {
-        key = k, value = v, freq = f;
-        next = prev = NULL;
-    }
-};
-
-struct dlist {
-    Node *head, *tail;
-    int size;
-
-    dlist() {
-        head = new Node(-1, -1, 0);
-        tail = new Node(-1, -1, 0);
-        head->next = tail;
-        tail->prev = head;
-        size = 0;
-    }
-
-    Node *addNode(int k, int v, int f) {
-        size++;
-        Node *newNode = new Node(k, v, f);
-        newNode->next = head->next;
-        head->next->prev = newNode;
-        newNode->prev = head;
-        head->next = newNode;
-        return newNode;
-    }
-
-    void delNode(Node *&node) {
-        size--;
-        node->prev->next = node->next;
-        node->next->prev = node->prev;
-    }
-
-    int empty() { return size == 0; }
-};
-
 class LFUCache {
-    int cap, cnt, mf;
-    map<int, Node *> mp;
-    map<int, dlist *> fmap;
+    struct Entry {
+        int key, value, freq;
+    };
+
+    int capacity, minFreq = 0;
+    unordered_map<int, list<Entry>> byFreq;           // freq -> entries, most recent first
+    unordered_map<int, list<Entry>::iterator> where;  // key -> its entry
+
+    // Count one more use: move the entry to the front of the next bucket.
+    void touch(list<Entry>::iterator it) {
+        int f = it->freq;
+        list<Entry>& from = byFreq[f];
+        list<Entry>& to = byFreq[f + 1];
+        to.splice(to.begin(), from, it);
+        it->freq = f + 1;
+        if (from.empty()) {
+            byFreq.erase(f);
+            if (minFreq == f) minFreq = f + 1;
+        }
+    }
 
    public:
-    LFUCache(int capacity) {
-        cap = capacity;
-        cnt = 0;
-        mf = 0;
-    }
+    LFUCache(int capacity) : capacity(capacity) {}
 
     int get(int key) {
-        if (mp.find(key) == mp.end()) return -1;
-        Node *ptr = mp[key];
-        fmap[ptr->freq]->delNode(ptr);
-        cnt--;
-        if (fmap[ptr->freq]->empty()) {
-            if (mf == ptr->freq) mf = ptr->freq + 1;
-            fmap.erase(ptr->freq);
-        }
-
-        if (fmap.find(ptr->freq + 1) != fmap.end()) {
-            Node *ptrr =
-                fmap[ptr->freq + 1]->addNode(key, ptr->value, ptr->freq + 1);
-            mp[key] = ptrr;
-            cnt++;
-        } else {
-            cnt++;
-            dlist *ptrr = new dlist();
-            fmap[ptr->freq + 1] = ptrr;
-            Node *node =
-                fmap[ptr->freq + 1]->addNode(key, ptr->value, ptr->freq + 1);
-            mp[key] = node;
-        }
-
-        return ptr->value;
+        auto found = where.find(key);
+        if (found == where.end()) return -1;
+        touch(found->second);
+        return found->second->value;
     }
 
     void put(int key, int value) {
-        if (cap == 0) return;
-        if (mp.find(key) != mp.end()) {
-            Node *ptr = mp[key];
-            fmap[ptr->freq]->delNode(ptr);
-            if (fmap[ptr->freq]->empty()) {
-                if (mf == ptr->freq) mf = ptr->freq + 1;
-                fmap.erase(ptr->freq);
-            }
-            if (fmap.find(ptr->freq + 1) != fmap.end()) {
-                Node *node =
-                    fmap[ptr->freq + 1]->addNode(key, value, ptr->freq + 1);
-                mp[key] = node;
-            } else {
-                dlist *ptrr = new dlist();
-                fmap[ptr->freq + 1] = ptrr;
-                Node *node =
-                    fmap[ptr->freq + 1]->addNode(key, value, ptr->freq + 1);
-                mp[key] = node;
-            }
+        auto found = where.find(key);
+        if (found != where.end()) {
+            found->second->value = value;
+            touch(found->second);
             return;
         }
-
-        if (cnt == cap) {
-            Node *ptr = fmap[mf]->tail->prev;
-            fmap[mf]->delNode(ptr);
-            cnt--;
-            if (fmap[mf]->empty()) {
-                fmap.erase(mf);
-            }
-            mp.erase(ptr->key);
+        if ((int)where.size() == capacity) {
+            list<Entry>& bucket = byFreq[minFreq];
+            where.erase(bucket.back().key);
+            bucket.pop_back();
+            if (bucket.empty()) byFreq.erase(minFreq);
         }
-
-        mf = 0;
-        if (fmap.find(mf) != fmap.end()) {
-            Node *ptr = fmap[mf]->addNode(key, value, mf);
-            mp[key] = ptr;
-            cnt++;
-            return;
-        }
-
-        cnt++;
-        dlist *ptr = new dlist();
-        fmap[mf] = ptr;
-        Node *node = fmap[mf]->addNode(key, value, mf);
-        mp[key] = node;
+        list<Entry>& ones = byFreq[1];
+        ones.push_front({key, value, 1});
+        where[key] = ones.begin();
+        minFreq = 1;
     }
 };
-
 ```

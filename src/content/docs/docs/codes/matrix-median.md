@@ -1,69 +1,116 @@
 ---
 title: "Matrix Median"
-description: "Given a matrix of integers A of size N x M in which each row is sorted. Find an return the overall median of the matrix A. Note: No extra memory is…"
+description: "Find the median of a matrix whose rows are sorted, without extra memory, by binary searching on the answer value and counting elements per row."
 source: "https://www.interviewbit.com/problems/matrix-median/"
-tags: ["Divide Conquer", "Matrix"]
+difficulty: "Medium"
+tags: ["Binary Search", "Matrix"]
 complexity:
-  time: "O(n \\log m \\cdot \\log R)"
+  time: "O(N \\log M \\cdot \\log R)"
   space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given a matrix of integers <strong>A</strong> of size <strong>N x M</strong> in which each row is sorted.</p>
+Given a matrix of integers **A** of size **N x M** in which each row is sorted.
 
-<p>Find an return the overall median of the matrix <strong>A</strong>.</p>
+Find and return the overall median of matrix **A**.
 
-<p><strong>Note:</strong> No extra memory is allowed.</p>
+**NOTE:** No extra memory is allowed.
 
-<p><strong>Note:</strong> Rows are numbered from top to bottom and columns are numbered from left to right.</p>
+**NOTE:** Rows are numbered from top to bottom and columns are numbered from left to right.
+
+Complete the function `findMedian()`, which takes the matrix `A` and returns its median.
+
+**Example 1:**
+
+```text
+Input:  A = [ [1, 3, 5],
+              [2, 6, 9],
+              [3, 6, 9] ]
+Output: 5
+Explanation: A = [1, 2, 3, 3, 5, 6, 6, 9, 9]
+Median is 5. So, we return 5.
+```
+
+**Example 2:**
+
+```text
+Input:  A = [ [5, 17, 100] ]
+Output: 17
+Explanation: Median is 17.
+```
+
+**Constraints:**
+
+- $1 \le N, M \le 10^5$
+- $1 \le N \cdot M \le 10^6$
+- $1 \le$ `A[i]` $\le 10^9$
+- `N*M` is odd
 
 ## Solution approach
 
 ### Intuition
 
-Every row is sorted, and the total number of elements `n * m` is odd. Instead of merging the rows, binary-search on the **value** of the answer: the median is the smallest value `x` such that at least `(n * m + 1) / 2` elements of the matrix are less than or equal to `x`.
+Copying all elements and sorting them is $O(NM \log NM)$ time and $O(NM)$ memory, which the note forbids. Instead of searching for the median's **position**, binary-search on its **value**.
 
-For a candidate `x`, that count can be computed with a binary search (`upper_bound`) on every row, and then summed. If the sum reaches `desired`, the median is `x` or smaller; otherwise it is larger.
+Since `N*M` is odd, the median is the element at sorted position `half = (N*M + 1) / 2` (1-based). Define `count(x)` = number of elements `<= x`. Then:
+
+- `count(x)` never decreases as `x` grows, and
+- the median is the **smallest** `x` with `count(x) >= half`: for `x` equal to the median, at least `half` elements are `<= x` (the median and everything before it in sorted order), while for any smaller `x`, at most `half - 1` are.
+
+So we can binary-search for the smallest such `x` between the smallest and largest element. Because each row is sorted, `count(x)` for one row is just `upper_bound(row, x)`, an $O(\log M)$ binary search, and the whole count takes $O(N \log M)$.
+
+The answer found this way is always an element of the matrix: the smallest `x` whose count reaches `half` must be a value at which the count increases, i.e. a value present in `A`.
 
 ### Algorithm
 
-1. Set `min` to the smallest first element and `max` to the largest last element over all rows.
-2. Let `desired = (m * n + 1) / 2`.
-3. While `min < max`, take `mid` and count `p`, the number of elements `<= mid`, by summing `upper_bound` positions over all rows.
-4. If `p < desired`, set `min = mid + 1`; otherwise set `max = mid`.
-5. Return `min`.
+1. Set `lo` to the minimum of the first column and `hi` to the maximum of the last column — the smallest and largest elements.
+2. Let `half = (N * M + 1) / 2`.
+3. While `lo < hi`:
+   - `mid = lo + (hi - lo) / 2`;
+   - `cnt` = sum over rows of `upper_bound(row, mid)`, the number of elements `<= mid`;
+   - if `cnt < half`, the median is larger: `lo = mid + 1`; otherwise it is `mid` or smaller: `hi = mid`.
+4. Return `lo`.
+
+### Walkthrough
+
+Example 1, `half = 5`. Green cells are the elements `<= mid` counted in that step:
+
+![Binary search on the median value of a 3x3 matrix](/img/codes/matrix-median/search.gif)
 
 ### Complexity
 
-- **Time:** $O(n \log m \cdot \log R)$ — $\log R$ value-search steps (where $R$ is the initial `max - min`, so $\log R \le 32$ for 32-bit values), each doing `n` row searches of $O(\log m)$.
-- **Space:** $O(1)$ — only a few counters are used.
+- **Time:** $O(N \log M \cdot \log R)$ — where $R$ is the difference between the largest and smallest element ($\log R \le 30$ for values up to $10^9$); each of those steps does `N` row searches of $O(\log M)$.
+- **Space:** $O(1)$ — a few counters, no copy of the matrix.
+
+### Edge cases
+
+- **One row** (Example 2): the count is a single `upper_bound`; the search still converges on `17`.
+- **All elements equal:** `lo == hi` from the start, and that value is returned without iterating.
+- **Overflow:** `lo + (hi - lo) / 2` avoids overflowing `lo + hi`, and `cnt` is at most $10^6$.
 
 ## Code
 
 ```cpp title="C++"
-int Solution::findMedian(vector<vector<int> > &A) {
-    int min = INT_MAX, max = INT_MIN;
-    int n = A.size();
-    int m = A[0].size();
+int Solution::findMedian(vector<vector<int> >& A) {
+    int n = A.size(), m = A[0].size();
+    int lo = INT_MAX, hi = INT_MIN;
     for (int i = 0; i < n; i++) {
-        min = min < A[i][0] ? min : A[i][0];
-        max = max > A[i][m - 1] ? max : A[i][m - 1];
+        lo = min(lo, A[i][0]);
+        hi = max(hi, A[i][m - 1]);
     }
 
-    int desired = (m * n + 1) / 2;
-    while (min < max) {
-        int mid = min + (max - min) / 2;
-        int p = 0;
-        for (int i = 0; i < n; i++) {
-            p += upper_bound(A[i].begin(), A[i].end(), mid) - A[i].begin();
-        }
-        if (p < desired) {
-            min = mid + 1;
-        } else
-            max = mid;
+    int half = (n * m + 1) / 2;  // 1-based position of the median
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        int cnt = 0;  // number of elements <= mid
+        for (int i = 0; i < n; i++)
+            cnt += upper_bound(A[i].begin(), A[i].end(), mid) - A[i].begin();
+        if (cnt < half)
+            lo = mid + 1;
+        else
+            hi = mid;
     }
-    return min;
+    return lo;
 }
-
 ```

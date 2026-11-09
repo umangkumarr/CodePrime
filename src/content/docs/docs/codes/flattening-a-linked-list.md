@@ -1,77 +1,131 @@
 ---
 title: "Flattening a Linked List"
-description: "Given a Linked List of size N, where every node represents a sub-linked-list and contains two pointers: - a next pointer to the next node, - a bottom…"
+description: "Merge n sorted vertical linked lists, joined through next pointers, into one sorted list linked by bottom pointers, using a min-heap k-way merge."
 source: "https://practice.geeksforgeeks.org/problems/flattening-a-linked-list/1"
+difficulty: "Medium"
+tags: ["Linked List"]
 complexity:
-  time: "O(N \\cdot k)"
-  space: "O(k)"
+  time: "O(N \\log n)"
+  space: "O(n)"
 ---
 
 ## Problem
 
-Given a Linked List of size N, where every node represents a sub-linked-list and contains two pointers:
+In a linked list, every node has two pointers: **next** and **bottom**. The heads of **n** linked lists are connected using the `next` pointer, while the `bottom` pointer points to the next node in the current linked list.
 
-- a <strong>next</strong> pointer to the next node,
-- a <strong>bottom</strong> pointer to a linked list where this node is head.
+Each linked list is sorted in non-decreasing order of data, and the head nodes are also sorted in non-decreasing order.
 
-Each of the sub-linked-list is in sorted order.
-Flatten the Link List such that all the nodes appear in a single level while maintaining the sorted order. 
-<strong>Note:</strong> The flattened list will be printed using the bottom pointer instead of next pointer.
+Given the **head** of the first linked list, flatten the linked lists into a single sorted linked list such that every node is connected using only the `bottom` pointers.
+
+Complete the function `flatten()` which takes the `head` of the first list and returns the head of the flattened list.
+
+**Example 1:**
+
+![Four vertical lists 5-7-8, 10-20, 19-22 and 28-40-45 joined by next pointers](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/935163/Web/Other/blobid0_1792134717.webp)
+
+```text
+Input:  head = [[5,7,8],[10,20],[19,22],[28,40,45]]
+Output: 5 -> 7 -> 8 -> 10 -> 19 -> 20 -> 22 -> 28 -> 40 -> 45
+Explanation: Bottom pointer of 5 is pointing to 7.
+Bottom pointer of 7 is pointing to 8.
+Bottom pointer of 10 is pointing to 20 and so on.
+So, after flattening the linked list the sorted list will be
+5 -> 7 -> 8 -> 10 -> 19 -> 20 -> 22 -> 28 -> 40 -> 45.
+```
+
+**Example 2:**
+
+![Four vertical lists 5-7-8-30, 10, 19-22-50 and 28 joined by next pointers](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/935163/Web/Other/blobid1_1792134741.webp)
+
+```text
+Input:  head = [[5,7,8,30],[10],[19,22,50],[28]]
+Output: 5 -> 7 -> 8 -> 10 -> 19 -> 22 -> 28 -> 30 -> 50
+Explanation: Bottom pointer of 5 is pointing to 7.
+Bottom pointer of 7 is pointing to 8.
+Bottom pointer of 8 is pointing to 30 and so on.
+So, after flattening the linked list the sorted list will be
+5 -> 7 -> 8 -> 10 -> 19 -> 22 -> 28 -> 30 -> 50.
+```
+
+**Constraints:**
+
+- $0 \le n \le 10^4$
+- $1 \le$ number of nodes in each list $\le 50$
+- $1 \le$ `node->data` $\le 5 \times 10^5$
+
+**Expected complexities:** Time $O(n \cdot m \cdot \log n)$, auxiliary space $O(n)$, where `m` is the length of a vertical list.
 
 ## Solution approach
 
 ### Intuition
 
-Each top-level node starts a sorted vertical list linked through `child`. Flattening means merging all these sorted lists into one sorted `child` list. If the lists to the right of `head` are already flattened into a single sorted list, only one more merge is needed: merge `head`'s list with it. That gives a natural recursion from right to left.
+This is a **k-way merge**: there are `n` sorted vertical lists, and we want one sorted list containing all their nodes. At any moment the next node of the answer must be the smallest node among the current fronts of the `n` lists — every node behind a front is at least as large as that front, because each list is sorted.
+
+A min-heap keyed on `data` gives us that smallest front in $O(\log n)$. When a node is taken from the heap, the only new candidate it creates is the node directly below it (`node->bottom`), so we push that one in its place. The heap therefore never holds more than one node per list.
+
+The usual alternative — recursively merging the last two lists, then the result with the one before, and so on — is shorter to write, but the growing merged list is walked again for every one of the `n` lists, which is $O(N \cdot n)$ in total.
 
 ### Algorithm
 
-1. Base case: if `head` is `NULL` or `head->next` is `NULL`, return `head`.
-2. Recursively flatten everything after `head` and store it in `head->next`.
-3. `MergeList(head, head->next)` merges two sorted `child` lists. It uses a dummy node `newhead` and a pointer `ptr`, always attaching the smaller of `l1->data` and `l2->data` and advancing that list.
-4. Append whichever list is left over, set the merged head's `next` to `NULL`, and return `newhead->child`.
+1. Walk the top row through `next` and push every list head into the min-heap `pq`.
+2. Keep a stack-allocated `dummy` node and a pointer `tail` to the last node of the answer.
+3. While `pq` is not empty:
+   - Pop the smallest node `node`.
+   - If `node->bottom` exists, push it: it is the new front of that list.
+   - Clear `node->next` (the answer must use only `bottom` links), attach it with `tail->bottom = node`, and move `tail` to it.
+4. Return `dummy.bottom`.
+
+The last node popped had no `bottom` (otherwise its successor would still be in the heap), so the answer is correctly terminated without extra work.
+
+### Walkthrough
+
+On Example 1 the heap starts with the four heads `{5, 10, 19, 28}`:
+
+| Pop | Push | Heap afterwards | Answer so far |
+| --- | --- | --- | --- |
+| 5 | 7 | 7, 10, 19, 28 | 5 |
+| 7 | 8 | 8, 10, 19, 28 | 5 7 |
+| 8 | — | 10, 19, 28 | 5 7 8 |
+| 10 | 20 | 19, 20, 28 | 5 7 8 10 |
+| 19 | 22 | 20, 22, 28 | 5 7 8 10 19 |
+| 20 | — | 22, 28 | ... 19 20 |
+| 22 | — | 28 | ... 20 22 |
+| 28 | 40 | 40 | ... 22 28 |
+| 40 | 45 | 45 | ... 28 40 |
+| 45 | — | (empty) | ... 40 45 |
 
 ### Complexity
 
-- **Time:** $O(N \cdot k)$, where $N$ is the total number of nodes and $k$ the number of top-level lists — each of the $k$ merges can walk through up to $N$ nodes.
-- **Space:** $O(k)$ — the recursion goes one level per top-level node; the merge itself is iterative.
+- **Time:** $O(N \log n)$, where $N$ is the total number of nodes and $n$ the number of vertical lists — every node is pushed and popped exactly once, and the heap holds at most $n$ nodes. With $N \le n \cdot m$ this is within the expected $O(n \cdot m \cdot \log n)$.
+- **Space:** $O(n)$ — the heap holds at most one node per list; the answer reuses the existing nodes.
 
 ### Edge cases
 
-- **Single vertical list:** the base case returns it unchanged.
-- Each `MergeList` call allocates a dummy `Node(-1)` that is never freed. This leaks a little memory but does not affect the answer.
+- **Empty input (`n = 0`):** nothing is pushed, and `dummy.bottom` is `nullptr`.
+- **A single list:** its nodes come out of the heap one by one in their original order.
+- **Equal values in different lists:** either order is a valid sorted output; the heap simply picks one.
 
 ## Code
 
 ```cpp title="C++"
-Node* MergeList(Node* l1, Node* l2) {
-    Node* newhead = new Node(-1);
-    Node* ptr = newhead;
-    while (l1 && l2) {
-        if (l1->data <= l2->data) {
-            ptr->child = l1;
-            ptr = ptr->child;
-            l1 = l1->child;
-        } else {
-            ptr->child = l2;
-            ptr = ptr->child;
-            l2 = l2->child;
-        }
-    }
-    if (l1) {
-        ptr->child = l1;
-    }
-    if (l2) {
-        ptr->child = l2;
-    }
-    newhead->child->next = NULL;
-    return newhead->child;
-}
+class Solution {
+  public:
+    Node* flatten(Node* head) {
+        auto greaterData = [](Node* a, Node* b) { return a->data > b->data; };
+        priority_queue<Node*, vector<Node*>, decltype(greaterData)> pq(greaterData);
+        for (Node* list = head; list; list = list->next) pq.push(list);
 
-Node* flattenLinkedList(Node* head) {
-    if (head == NULL || head->next == NULL) return head;
-    head->next = flattenLinkedList(head->next);
-    head = MergeList(head, head->next);
-    return head;
-}
+        Node dummy(0);
+        Node* tail = &dummy;
+        while (!pq.empty()) {
+            Node* node = pq.top();
+            pq.pop();
+            if (node->bottom) pq.push(node->bottom);
+            node->next = nullptr;
+            tail->bottom = node;
+            tail = node;
+        }
+        return dummy.bottom;
+    }
+};
 ```

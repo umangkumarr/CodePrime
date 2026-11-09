@@ -1,53 +1,110 @@
 ---
 title: "Subset Sums"
-description: "Given a list arr of N integers, print sums of all subsets in it."
-source: "https://practice.geeksforgeeks.org/problems/subset-sums2234/1"
-tags: ["Bit Manipulationa", "Recursion"]
+description: "Return the sum of every subset of an array in O(2^n) time, using a take-or-skip recursion that carries the running sum."
+source: "https://www.geeksforgeeks.org/problems/subset-sums2234/1"
+difficulty: "Medium"
+tags: ["Recursion"]
 complexity:
-  time: "O(N \\cdot 2^N)"
-  space: "O(2^N)"
+  time: "O(2^n)"
+  space: "O(n)"
 ---
 
 ## Problem
 
-<span>Given a&nbsp;list <strong>arr</strong>&nbsp;of <strong>N</strong> integers, print sums of all subsets in it.</span>
+Given an array `arr` of integers, return the sums of all subsets in the list. Return the sums in any order.
+
+Complete the function `subsetSums()`, which takes the array `arr` and returns a list of the $2^n$ subset sums.
+
+**Example 1:**
+
+```text
+Input:  arr[] = [2, 3]
+Output: [0, 2, 3, 5]
+Explanation: When no elements are taken then Sum = 0. When only 2 is taken then Sum = 2. When only 3 is taken then Sum = 3. When elements 2 and 3 are taken then Sum = 2 + 3 = 5.
+```
+
+**Example 2:**
+
+```text
+Input:  arr[] = [1, 2, 1]
+Output: [0, 1, 1, 2, 2, 3, 3, 4]
+Explanation: The possible subset sums are 0 (no elements), 1 (either of the 1's), 2 (the element 2), and their combinations.
+```
+
+**Example 3:**
+
+```text
+Input:  arr[] = [5, 6, 7]
+Output: [0, 5, 6, 7, 11, 12, 13, 18]
+Explanation: The possible subset sums are 0 (no elements), 5, 6, 7, and their combinations.
+```
+
+**Constraints:**
+
+- $1 \le arr.size() \le 15$
+- $0 \le arr[i] \le 10^5$
 
 ## Solution approach
 
 ### Intuition
 
-We need the sum of every subset, so we have to visit all $2^N$ subsets; this can be done with recursion or with bitmasking, and this code uses bitmasking. Each integer `i` from `0` to $2^N - 1$ represents one subset: bit `j` of `i` is set exactly when `arr[j]` is in the subset.
+Every subset is a sequence of `n` independent decisions: for each element, **take** it or **skip** it. Walking those decisions recursively gives a binary tree of depth `n` whose $2^n$ leaves are exactly the subsets.
+
+The trick that makes this optimal is to carry the **running sum** down the tree instead of the subset itself. Each call then does $O(1)$ work, and when we reach a leaf (`i == n`) the sum is ready to record. Recomputing every subset's sum from a bitmask would cost $O(n)$ per subset, $O(n \cdot 2^n)$ overall.
 
 ### Algorithm
 
-1. Let `end` be $2^N$.
-2. For each mask `i` from `0` to `end - 1`, reset `sm` to `0`.
-3. For each `j`, if bit `j` of `i` is set (`(1 << j) & i`), add `arr[j]` to `sm`.
-4. Push `sm` into `ans` and return `ans` after all masks.
+1. `collect(i, sum)`: if `i == arr.size()`, push `sum` into `sums` and return.
+2. Otherwise call `collect(i + 1, sum + arr[i])` (take `arr[i]`) and `collect(i + 1, sum)` (skip it).
+3. Start with `collect(0, 0)` and return `sums`.
+
+### Walkthrough
+
+The recursion tree for `arr = [2, 3]`; each node shows `(i, sum)` and each leaf is one subset sum:
+
+```mermaid
+flowchart TD
+    A["(0, 0)"] -->|take 2| B["(1, 2)"]
+    A -->|skip 2| C["(1, 0)"]
+    B -->|take 3| D["(2, 5)"]
+    B -->|skip 3| E["(2, 2)"]
+    C -->|take 3| F["(2, 3)"]
+    C -->|skip 3| G["(2, 0)"]
+    classDef leaf fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    class D,E,F,G leaf
+```
+
+The leaves, left to right, give `[5, 2, 3, 0]`; any order is accepted.
 
 ### Complexity
 
-- **Time:** $O(N \cdot 2^N)$ — there are $2^N$ masks and each is checked bit by bit.
-- **Space:** $O(2^N)$ — the output holds one sum per subset.
+- **Time:** $O(2^n)$ — the tree has $2^{n+1} - 1$ nodes and each does constant work. Since the output itself has $2^n$ values, this is optimal.
+- **Space:** $O(n)$ auxiliary for the recursion depth, plus the $2^n$ output values.
+
+### Edge cases
+
+- **Zeros or duplicates** (`[1, 2, 1]`): every subset is a different leaf, so repeated sums are reported as many times as they occur, as the examples require.
+- **Largest sum:** at most $15 \cdot 10^5$, well inside `int`.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-   public:
-    vector<int> subsetSums(vector<int> arr, int N) {
-        vector<int> ans;
-        int end = pow(2, N), sm = 0;
-        for (int i = 0; i < end; i++) {
-            sm = 0;
-            for (int j = 0; j < N; j++) {
-                int bit = (1 << j) & i;
-                if (bit) sm += arr[j];
-            }
-            ans.push_back(sm);
+    void collect(const vector<int>& arr, int i, int sum, vector<int>& sums) {
+        if (i == (int)arr.size()) {
+            sums.push_back(sum);
+            return;
         }
-        return ans;
+        collect(arr, i + 1, sum + arr[i], sums);  // take arr[i]
+        collect(arr, i + 1, sum, sums);           // skip arr[i]
+    }
+
+   public:
+    vector<int> subsetSums(vector<int>& arr) {
+        vector<int> sums;
+        sums.reserve(1 << arr.size());
+        collect(arr, 0, 0, sums);
+        return sums;
     }
 };
-
 ```

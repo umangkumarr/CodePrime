@@ -1,7 +1,8 @@
 ---
 title: "Maximum Meetings"
-description: "There is one meeting room in a firm. There are N meetings in the form of (start[i], end[i]) where start[i] is start time of meeting i and end[i] is finish…"
-source: "https://practice.geeksforgeeks.org/problems/n-meetings-in-one-room-1587115620/1"
+description: "Find the maximum number of non-overlapping meetings one room can hold, greedily picking the meeting that ends earliest after sorting by end time."
+source: "https://www.geeksforgeeks.org/problems/n-meetings-in-one-room-1587115620/1"
+difficulty: "Medium"
 tags: ["Greedy", "Sorting"]
 complexity:
   time: "O(n \\log n)"
@@ -10,52 +11,92 @@ complexity:
 
 ## Problem
 
-<span>There is <strong>one</strong> meeting room in a firm. There are <strong>N</strong> meetings in the form of <strong>(start[i], end[i])</strong> where <strong>start[i]&nbsp;</strong>is start time of meeting <strong>i </strong>and <strong>end[i] </strong>is finish time of meeting <strong>i.</strong><br/>
-What is the <strong>maximum</strong> number of meetings that can be accommodated in the meeting room when only one meeting can be held in the meeting room at a particular time? </span>
-<p><span><strong>Note:</strong>&nbsp;Start time of one chosen meeting can't be equal to the end time of the other chosen meeting.</span></p>
+There is **one** meeting room in a firm. There are **N** meetings in the form of **(start[i], end[i])** where **start[i]** is start time of meeting **i** and **end[i]** is finish time of meeting **i**.
+
+What is the **maximum** number of meetings that can be accommodated in the meeting room when only one meeting can be held in the meeting room at a particular time?
+
+**Note:** Start time of one chosen meeting can't be equal to the end time of the other chosen meeting.
+
+Complete the function `maxMeetings()` which takes `n` and the arrays `start[]` and `end[]` and returns the maximum number of meetings that can be held in the room. Expected time complexity: $O(N \log N)$; expected auxiliary space: $O(N)$.
+
+**Example 1:**
+
+```text
+Input:  N = 6, start[] = {1, 3, 0, 5, 8, 5}, end[] = {2, 4, 6, 7, 9, 9}
+Output: 4
+Explanation: Maximum four meetings can be held with given start and end timings.
+The meetings are - (1, 2), (3, 4), (5, 7) and (8, 9).
+```
+
+**Example 2:**
+
+```text
+Input:  N = 3, start[] = {10, 12, 20}, end[] = {20, 25, 30}
+Output: 1
+Explanation: Only one meeting can be held with given start and end timings.
+```
+
+**Constraints:**
+
+- $1 \le N \le 2 \times 10^5$
+- $0 \le$ `start[i]` $\le$ `end[i]` $\le 10^9$
+
+**Note:** GeeksforGeeks now redirects this problem to [Activity Selection](https://www.geeksforgeeks.org/problems/activity-selection-1587115620/1), the same task with the signature `int activitySelection(vector<int>& start, vector<int>& finish)`; the constraints above are the ones listed there. The code below works unchanged for it if you rename the function and pass `start.size()`, `start.data()`, `finish.data()`.
 
 ## Solution approach
 
 ### Intuition
 
-To fit the most meetings in one room, always pick the meeting that **finishes earliest** among those that can still start. Finishing early leaves as much time as possible for the remaining meetings, and swapping any optimal schedule's first meeting for the earliest-finishing one never makes it worse.
+This is the classic **activity selection** problem. Among all meetings, consider the one that **ends earliest**. Some optimal schedule starts with it: take any optimal schedule and replace its first meeting with the earliest-ending one. The replacement ends no later than the meeting it replaces, so it cannot clash with the rest of the schedule, and the count is unchanged.
+
+After committing to that meeting, the remaining problem is the same one restricted to meetings that start strictly after it ends. Applying the same argument again and again gives the greedy rule: **sort by end time and take every meeting that starts after the last chosen meeting ends.**
+
+Choosing by earliest *start* or *shortest duration* both fail: a meeting that starts first may run all day, and a short meeting may sit across two otherwise compatible ones.
 
 ### Algorithm
 
-1. Build `v` with pairs `{end[i], start[i]}` and sort it, so meetings are in increasing order of finish time.
-2. Select the first meeting in sorted order: `ans = 1`, and `j = 0` points to the last selected meeting, whose finish time `v[j].first` acts as the time limit.
-3. For every later meeting `i`, if its start `v[i].second` is strictly greater than the finish time of the last selected meeting `v[j].first`, select it: increment `ans` and set `j = i`.
-4. Return the count `ans`. The code returns only the number of meetings, not their order.
+1. Build `meetings` as pairs `{end[i], start[i]}` and sort them, which orders them by end time.
+2. Set `lastEnd = -1` (all times are non-negative) and `count = 0`.
+3. For each meeting `{e, s}` in order: if `s > lastEnd`, select it — increment `count` and set `lastEnd = e`.
+4. Return `count`.
+
+The comparison is strict (`s > lastEnd`) because the note forbids a meeting starting exactly when the previous one ends.
+
+### Walkthrough
+
+Example 1, with meetings sorted by end time. Green meetings are selected; red ones start at or before the end of the last selected meeting and are skipped:
+
+![Greedy meeting selection on Example 1](/img/codes/maximum-meetings/greedy.svg)
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — dominated by sorting the meetings.
-- **Space:** $O(n)$ — the vector `v` of pairs.
+- **Time:** $O(n \log n)$ — sorting dominates; the selection pass is $O(n)$.
+- **Space:** $O(n)$ — the `meetings` array of pairs.
 
 ### Edge cases
 
-- **A meeting starting exactly when the previous one ends** is not selected, because the comparison is strict.
+- **A meeting starts exactly when the previous one ends** (Example 2, `(10, 20)` then `(20, 30)`): `20 > 20` is false, so it is skipped.
+- **Zero-length meetings** (`start[i] == end[i]`, allowed by the constraints): they sort by their end time like any other meeting and are handled by the same rule.
+- **Several meetings with the same end time:** after the first of them is taken, the others start no later than that end time, so at most one is selected, which is correct.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
    public:
-    int maxMeetings(int start[], int end[], int n) {
-        vector<pair<int, int>> v(n);
-        for (int i = 0; i < n; i++) {
-            v[i] = {end[i], start[i]};
-        }
-        sort(v.begin(), v.end());
-        int ans = 1;
-        int j = 0;
-        for (int i = 1; i < n; i++) {
-            if (v[i].second > v[j].first) {
-                ans++;
-                j = i;
+    int maxMeetings(int n, int start[], int end[]) {
+        vector<pair<int, int>> meetings(n);  // {end, start}, so sorting orders by end time
+        for (int i = 0; i < n; i++) meetings[i] = {end[i], start[i]};
+        sort(meetings.begin(), meetings.end());
+
+        int count = 0, lastEnd = -1;
+        for (auto& [e, s] : meetings) {
+            if (s > lastEnd) {  // must start strictly after the last chosen meeting ends
+                count++;
+                lastEnd = e;
             }
         }
-        return ans;
+        return count;
     }
 };
 ```

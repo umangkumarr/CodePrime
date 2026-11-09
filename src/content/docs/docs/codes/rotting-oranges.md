@@ -1,113 +1,127 @@
 ---
 title: "Rotting Oranges"
-description: "You are given an m x n grid where each cell can have one of three values: 0 representing an empty cell, 1 representing a fresh orange, or 2 representing a…"
+description: "Find the minutes until every orange in a grid has rotted, or -1 if some never can, using a multi-source BFS that starts from all rotten oranges at once."
 source: "https://leetcode.com/problems/rotting-oranges/"
+difficulty: "Medium"
 tags: ["Array", "Breadth-First Search", "Matrix"]
 complexity:
-  time: "O(k \\cdot 3^{n \\cdot m})"
-  space: "O(n \\cdot m)"
+  time: "O(m \\cdot n)"
+  space: "O(m \\cdot n)"
 ---
 
 ## Problem
 
-<p>You are given an <code>m x n</code> <code>grid</code> where each cell can have one of three values:</p>
+You are given an `m x n` `grid` where each cell can have one of three values:
 
-<ul>
-	<li><code>0</code> representing an empty cell,</li>
-	<li><code>1</code> representing a fresh orange, or</li>
-	<li><code>2</code> representing a rotten orange.</li>
-</ul>
+- `0` representing an empty cell,
+- `1` representing a fresh orange, or
+- `2` representing a rotten orange.
 
-<p>Every minute, any fresh orange that is <strong>4-directionally adjacent</strong> to a rotten orange becomes rotten.</p>
+Every minute, any fresh orange that is **4-directionally adjacent** to a rotten orange becomes rotten.
 
-<p>Return <em>the minimum number of minutes that must elapse until no cell has a fresh orange</em>. If <em>this is impossible, return</em> <code>-1</code>.</p>
+Return *the minimum number of minutes that must elapse until no cell has a fresh orange*. If *this is impossible, return* `-1`.
 
-<p>&nbsp;</p>
-<p><strong>Example 1:</strong></p>
-<img alt="" src="https://assets.leetcode.com/uploads/2019/02/16/oranges.png" style={ {width: "650px", height: "137px"} } /> <br/>
-<pre>
-<strong>Input:</strong> grid = [[2,1,1],[1,1,0],[0,1,1]] <br/>
-<strong>Output:</strong> 4 <br/>
-</pre>
+**Example 1:**
+
+![A 3 x 3 grid of oranges rotting over minutes 0 to 4](https://assets.leetcode.com/uploads/2019/02/16/oranges.png)
+
+```text
+Input:  grid = [[2,1,1],[1,1,0],[0,1,1]]
+Output: 4
+```
+
+**Example 2:**
+
+```text
+Input:  grid = [[2,1,1],[0,1,1],[1,0,1]]
+Output: -1
+Explanation: The orange in the bottom left corner (row 2, column 0) is never rotten, because rotting only happens 4-directionally.
+```
+
+**Example 3:**
+
+```text
+Input:  grid = [[0,2]]
+Output: 0
+Explanation: Since there are already no fresh oranges at minute 0, the answer is just 0.
+```
+
+**Constraints:**
+
+- `m == grid.length`
+- `n == grid[i].length`
+- $1 \le m, n \le 10$
+- `grid[i][j]` is `0`, `1`, or `2`.
 
 ## Solution approach
 
 ### Intuition
 
-The time a fresh orange rots is its shortest distance, moving through fresh oranges, to the nearest rotten one. This code finds those distances with a depth-first search started from **each** rotten orange. It keeps the best time found so far for each cell in `ans`, and revisits a cell when a new path reaches it no later than the stored time. The answer is the largest time over all oranges, or `-1` if some orange is never reached.
+Rot spreads exactly like a breadth-first search: everything rotten at minute `t` infects its fresh neighbours at minute `t + 1`. A fresh orange therefore rots at a time equal to its shortest distance (through oranges) to the **nearest** rotten orange.
+
+Running a separate search from each rotten orange would repeat work. Instead, put **all** initially rotten oranges in the queue at once — a *multi-source* BFS. The queue then processes cells in non-decreasing order of rotting time, so the first time a fresh orange is reached is the earliest it can rot, and it never needs to be visited again. Processing the queue one level at a time makes each level exactly one minute.
+
+If any fresh orange is still left when the queue empties, it is cut off from every rotten orange and the answer is `-1`.
 
 ### Algorithm
 
-1. Initialise `ans` to `INT_MAX` everywhere, and keep `vis1` as an all-unvisited template.
-2. For every rotten cell `(i, j)`, reset `vis = vis1` and call `dfs(i, j, 0)`.
-3. In `dfs`, stop if the cell was already visited in this search and `ans[i][j] < time`. Otherwise mark it visited, set `ans[i][j] = min(ans[i][j], time)`, and recurse into each in-grid neighbour that is fresh (`g[x][y] == 1`) with `time + 1`.
-4. Finally, scan every non-empty cell. If any still has `INT_MAX` it was never reached, so return `-1`; otherwise return the largest `ans` value.
+1. Scan the grid: push every rotten cell into the queue `q`, and count the fresh cells in `fresh`.
+2. Set `minutes = 0`. While `q` is not empty and `fresh > 0`:
+   - Increment `minutes`.
+   - Pop exactly the `q.size()` cells that were in the queue at the start of this minute. For each of its four neighbours that is inside the grid and fresh, set it to `2`, decrement `fresh`, and push it.
+3. Return `fresh == 0 ? minutes : -1`.
+
+Marking a cell rotten (`grid[x][y] = 2`) when it is pushed doubles as the "visited" mark, so each cell enters the queue at most once.
+
+### Walkthrough
+
+Example 1, one frame per minute. Orange cells rotted during that minute; red cells are rotten; green cells are still fresh:
+
+![Multi-source BFS on [[2,1,1],[1,1,0],[0,1,1]]](/img/codes/rotting-oranges/bfs.gif)
 
 ### Complexity
 
-- **Time:** exponential in the worst case, loosely bounded by $O(k \cdot 3^{n \cdot m})$ for `k` rotten oranges — a cell reached again with an equal or smaller time is explored again, so DFS can follow many different paths through the same cells.
-- **Space:** $O(n \cdot m)$ — the grids `g`, `ans`, `vis` and `vis1`, plus a recursion stack up to $n \cdot m$ deep.
+- **Time:** $O(m \cdot n)$ — every cell is scanned once and pushed and popped at most once, with four neighbour checks each.
+- **Space:** $O(m \cdot n)$ — the queue can hold a large fraction of the grid.
 
 ### Edge cases
 
-- **No fresh oranges:** every non-empty cell is rotten with time `0`, so the answer is `0`.
-- **An isolated fresh orange:** its `ans` stays `INT_MAX`, so the answer is `-1`.
+- **No fresh oranges** (Example 3): `fresh == 0`, the loop never runs, and the answer is `0` — even if there are no rotten oranges at all.
+- **Fresh oranges but no rotten ones:** the queue starts empty, so the loop never runs and `fresh > 0` gives `-1`.
+- **Unreachable fresh orange** (Example 2): BFS ends with `fresh > 0`, so `-1`.
+- The loop also stops as soon as `fresh` reaches `0`, so the last level does not add an extra minute.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    deque<pair<int, int>> dq;
-    vector<vector<int>> ans, vis, vis1;
-    int n, m;
-    vector<vector<int>> g;
-
    public:
-    void dfs(int i, int j, int time) {
-        if (vis[i][j] == 1 && ans[i][j] < time) return;
-        vis[i][j] = 1;
-        ans[i][j] = min(ans[i][j], time);
-
-        int dx[] = {1, -1, 0, 0};
-        int dy[] = {0, 0, 1, -1};
-        for (int k = 0; k < 4; k++) {
-            int x = i + dx[k];
-            int y = j + dy[k];
-            if ((!(x < 0 || x >= n || y < 0 || y >= m)) && g[x][y] == 1) {
-                dfs(x, y, time + 1);
-            }
-        }
-    }
-
     int orangesRotting(vector<vector<int>>& grid) {
-        g = grid;
-        n = grid.size();
-        m = grid[0].size();
-        ans.resize(n, vector<int>(m, INT_MAX));
-        vis = ans;
-        vis1 = vis;
+        int m = grid.size(), n = grid[0].size(), fresh = 0;
+        queue<pair<int, int>> q;
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 2) q.push({i, j});
+                else if (grid[i][j] == 1) fresh++;
+            }
 
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (grid[i][j] == 2) {
-                    g = grid;
-                    vis = vis1;
-                    dfs(i, j, 0);
+        const int dr[] = {1, -1, 0, 0}, dc[] = {0, 0, 1, -1};
+        int minutes = 0;
+        while (!q.empty() && fresh > 0) {
+            minutes++;
+            for (int sz = q.size(); sz > 0; sz--) {
+                auto [r, c] = q.front();
+                q.pop();
+                for (int d = 0; d < 4; d++) {
+                    int x = r + dr[d], y = c + dc[d];
+                    if (x < 0 || x >= m || y < 0 || y >= n || grid[x][y] != 1) continue;
+                    grid[x][y] = 2;
+                    fresh--;
+                    q.push({x, y});
                 }
             }
         }
-
-        int res = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (grid[i][j] != 0) {
-                    res = max(res, ans[i][j]);
-                    if (res == INT_MAX) return -1;
-                }
-            }
-        }
-
-        return res;
+        return fresh == 0 ? minutes : -1;
     }
 };
 ```

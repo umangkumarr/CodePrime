@@ -1,88 +1,132 @@
 ---
 title: "Is Graph Bipartite?"
-description: "There is an undirected graph with n nodes, where each node is numbered between 0 and n - 1. You are given a 2D array graph, where graph[u] is an array of…"
+description: "Decide whether an undirected, possibly disconnected graph can be split into two independent sets, by two-colouring each component with BFS."
 source: "https://leetcode.com/problems/is-graph-bipartite/"
-tags: ["Depth-First Search", "Breadth-First Search", "Union Find", "Graph"]
+difficulty: "Medium"
+tags: ["Depth-First Search", "Breadth-First Search", "Union Find", "Graph", "Graph Coloring", "Bipartite Graph"]
 complexity:
-  time: "O(V \\cdot (V + E))"
-  space: "O(V \\cdot (V + E))"
+  time: "O(V + E)"
+  space: "O(V)"
 ---
 
 ## Problem
 
-<p>There is an <strong>undirected</strong> graph with <code>n</code> nodes, where each node is numbered between <code>0</code> and <code>n - 1</code>. You are given a 2D array <code>graph</code>, where <code>graph[u]</code> is an array of nodes that node <code>u</code> is adjacent to. More formally, for each <code>v</code> in <code>graph[u]</code>, there is an undirected edge between node <code>u</code> and node <code>v</code>. The graph has the following properties:</p>
+There is an **undirected** graph with `n` nodes, where each node is numbered between `0` and `n - 1`. You are given a 2D array `graph`, where `graph[u]` is an array of nodes that node `u` is adjacent to. More formally, for each `v` in `graph[u]`, there is an undirected edge between node `u` and node `v`. The graph has the following properties:
 
-<ul>
-	<li>There are no self-edges (<code>graph[u]</code> does not contain <code>u</code>).</li>
-	<li>There are no parallel edges (<code>graph[u]</code> does not contain duplicate values).</li>
-	<li>If <code>v</code> is in <code>graph[u]</code>, then <code>u</code> is in <code>graph[v]</code> (the graph is undirected).</li>
-	<li>The graph may not be connected, meaning there may be two nodes <code>u</code> and <code>v</code> such that there is no path between them.</li>
-</ul>
+- There are no self-edges (`graph[u]` does not contain `u`).
+- There are no parallel edges (`graph[u]` does not contain duplicate values).
+- If `v` is in `graph[u]`, then `u` is in `graph[v]` (the graph is undirected).
+- The graph may not be connected, meaning there may be two nodes `u` and `v` such that there is no path between them.
 
-<p>A graph is <strong>bipartite</strong> if the nodes can be partitioned into two independent sets <code>A</code> and <code>B</code> such that <strong>every</strong> edge in the graph connects a node in set <code>A</code> and a node in set <code>B</code>.</p>
+A graph is **bipartite** if the nodes can be partitioned into two independent sets `A` and `B` such that **every** edge in the graph connects a node in set `A` and a node in set `B`.
 
-<p>Return <code>true</code><em> if and only if it is <strong>bipartite</strong></em>.</p>
+Return `true` _if and only if it is **bipartite**_.
+
+**Example 1:**
+
+![Four nodes where 0, 1, 2 form a triangle](https://assets.leetcode.com/uploads/2020/10/21/bi2.jpg)
+
+```text
+Input:  graph = [[1,2,3],[0,2],[0,1,3],[0,2]]
+Output: false
+Explanation: There is no way to partition the nodes into two independent sets such that every edge connects a node in one and a node in the other.
+```
+
+**Example 2:**
+
+![A four-node cycle 0-1-2-3-0](https://assets.leetcode.com/uploads/2020/10/21/bi1.jpg)
+
+```text
+Input:  graph = [[1,3],[0,2],[1,3],[0,2]]
+Output: true
+Explanation: We can partition the nodes into two sets: {0, 2} and {1, 3}.
+```
+
+**Constraints:**
+
+- `graph.length == n`
+- $1 \le n \le 100$
+- $0 \le$ `graph[u].length` $\lt n$
+- $0 \le$ `graph[u][i]` $\le n - 1$
+- `graph[u]` does not contain `u`.
+- All the values of `graph[u]` are **unique**.
+- If `graph[u]` contains `v`, then `graph[v]` contains `u`.
 
 ## Solution approach
 
 ### Intuition
 
-A graph is bipartite if we can paint every vertex with one of two colours so that no edge joins two vertices of the same colour. A DFS can try this greedily: paint the start vertex colour `1`, then every unvisited neighbour gets the opposite colour. If we ever reach an already painted neighbour with the **same** colour as the current vertex, the two-colouring is impossible.
+Putting a node in set `A` or `B` is the same as painting it with one of two colours so that every edge joins two **different** colours.
 
-The graph may be disconnected, so the DFS is started from every vertex that has not been painted yet.
+Inside one connected component there is no freedom once the first node is painted: its neighbours must get the other colour, their neighbours the first colour again, and so on. So we paint greedily with a BFS. If we ever find an edge whose two ends already carry the **same** colour, no valid painting exists — the edge closes a cycle of odd length, and an odd cycle can never alternate between two colours. If the BFS finishes without such an edge, the painting itself is the partition.
+
+The graph may be disconnected, so a fresh BFS starts from every node that is still unpainted; each component can choose its colours independently.
+
+```mermaid
+flowchart LR
+    n0((0)) --- n1((1))
+    n0 --- n2((2))
+    n0 --- n3((3))
+    n1 --- n2
+    n2 --- n3
+    classDef a fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
+    classDef b fill:#ffeccc,stroke:#d9822b,color:#7a4106
+    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
+    class n0 a
+    class n1,n3 b
+    class n2 bad
+```
+
+Example 1: node `0` gets colour 0 (blue), so `1`, `2` and `3` all get colour 1. When node `1` is processed, its neighbour `2` already has colour 1 — the same as `1` — so the edge `1-2` is a conflict (the triangle `0-1-2` is an odd cycle) and the answer is `false`.
 
 ### Algorithm
 
-1. `isBipartite` calls `dfs(graph, n)`, which creates `visited` (0 means unpainted) and starts `dfs_helper` from each unpainted vertex `i` with colour `1`.
-2. `dfs_helper` paints `node` with `color`, then looks at each neighbour `nbr`:
-   - if `nbr` is not the parent `par` and is unpainted, recurse with colour `3 - color` (switching between `1` and `2`); propagate a `false` result;
-   - otherwise, if `visited[nbr] == color`, the edge joins two same-coloured vertices, so return `false`.
-3. If every component is painted without conflict, return `true`.
+1. Create `color` of size `n`, filled with `-1` (unpainted).
+2. For every node `start` with `color[start] == -1`:
+   - paint it `0` and push it into the queue `q`;
+   - while `q` is not empty, pop `u`; for each neighbour `v` in `graph[u]`:
+     - if `v` is unpainted, set `color[v] = 1 - color[u]` and push `v`;
+     - else if `color[v] == color[u]`, return `false`.
+3. Return `true`.
 
 ### Complexity
 
-- **Time:** $O(V \cdot (V + E))$ — the DFS itself visits each vertex and edge once, but `dfs_helper` takes `Graph` **by value**, so each of the $V$ calls copies the whole adjacency list.
-- **Space:** $O(V \cdot (V + E))$ — the recursion stack can be $V$ frames deep, and each frame holds its own copy of `Graph`.
+- **Time:** $O(V + E)$ — every node is pushed once and every adjacency list is scanned once.
+- **Space:** $O(V)$ — the `color` array and the queue.
 
 ### Edge cases
 
-- **Disconnected graph:** the loop in `dfs` starts a new DFS for every component.
-- **Odd cycle** such as a triangle: the last vertex meets a neighbour painted with its own colour, so the answer is `false`.
+- **Disconnected graph / isolated nodes:** the outer loop starts a new BFS for each unpainted node; an isolated node is simply painted `0`.
+- **Even cycle** (Example 2): colours alternate around the cycle and no conflict appears.
+- **Odd cycle** (Example 1): some edge ends up with equal colours on both ends and `false` is returned.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
    public:
-    bool dfs_helper(vector<vector<int>> Graph, vector<int>& visited, int par,
-                    int node, int color) {
-        visited[node] = color;          // painted
-        for (auto nbr : Graph[node]) {  // traversing nbrs
-            if (nbr != par and visited[nbr] == 0) {
-                bool value = dfs_helper(Graph, visited, node, nbr, 3 - color);
-                if (value == false) return false;
-            } else if (visited[nbr] == color)
-                return false;
-        }
-        return true;
-    }
-
-    bool dfs(vector<vector<int>> Graph, int N) {
-        vector<int> visited(N + 1);
-        int color = 1;
-        for (int i = 0; i < N; i++) {
-            if (visited[i] == 0) {
-                bool ans = dfs_helper(Graph, visited, -1, i, 1);
-                if (ans == false) return ans;
+    bool isBipartite(vector<vector<int>>& graph) {
+        int n = graph.size();
+        vector<int> color(n, -1);
+        queue<int> q;
+        for (int start = 0; start < n; start++) {
+            if (color[start] != -1) continue;
+            color[start] = 0;
+            q.push(start);
+            while (!q.empty()) {
+                int u = q.front();
+                q.pop();
+                for (int v : graph[u]) {
+                    if (color[v] == -1) {
+                        color[v] = 1 - color[u];
+                        q.push(v);
+                    } else if (color[v] == color[u]) {
+                        return false;
+                    }
+                }
             }
         }
         return true;
     }
-
-    bool isBipartite(vector<vector<int>>& graph) {
-        int n = graph.size();
-        return dfs(graph, n);
-    }
 };
-
 ```

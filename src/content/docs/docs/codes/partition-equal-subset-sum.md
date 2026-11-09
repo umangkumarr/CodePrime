@@ -1,36 +1,76 @@
 ---
 title: "Partition Equal Subset Sum"
-description: "Given a non-empty array nums containing only positive integers, find if the array can be partitioned into two subsets such that the sum of elements in…"
+description: "Decide whether an array can be split into two subsets with equal sums by checking if half the total is a reachable subset sum, using a bitset 0/1 knapsack."
 source: "https://leetcode.com/problems/partition-equal-subset-sum/"
-tags: ["Array", "Dynamic Programming"]
+difficulty: "Medium"
+tags: ["Array", "Dynamic Programming", "Knapsack Problem", "0-1 Knapsack"]
 complexity:
-  time: "O(n \\cdot sm)"
-  space: "O(n \\cdot sm)"
+  time: "O(n \\cdot S / w)"
+  space: "O(S / w)"
 ---
 
 ## Problem
 
-<p>Given a <strong>non-empty</strong> array <code>nums</code> containing <strong>only positive integers</strong>, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.</p>
+Given an integer array `nums`, return `true` *if you can partition the array into two subsets such that the sum of the elements in both subsets is equal or* `false` *otherwise*.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,5,11,5]
+Output: true
+Explanation: The array can be partitioned as [1, 5, 5] and [11].
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [1,2,3,5]
+Output: false
+Explanation: The array cannot be partitioned into equal sum subsets.
+```
+
+**Constraints:**
+
+- $1 \le$ `nums.length` $\le 200$
+- $1 \le$ `nums[i]` $\le 100$
 
 ## Solution approach
 
 ### Intuition
 
-The array can be split into two equal-sum parts only if the total `sm` is even, and then one part must sum to exactly `sm / 2`. This becomes a 0/1 knapsack: with capacity `sm / 2`, where each number has weight and value equal to itself, find the largest subset sum that fits. If that largest sum equals the capacity, a valid subset exists. Trying all $2^n$ subsets would be far too slow.
+If the total is `total`, the two subsets must each sum to `total / 2`. So `total` must be even, and then the question becomes: **is there a subset that sums to exactly `target = total / 2`?** (The remaining elements automatically sum to `target` too.)
+
+Trying all $2^n$ subsets is far too slow, but the sums are small: at most $200 \cdot 100 = 20\,000$, so `target` is at most `10 000`. Track the **set of sums reachable** by some subset of the elements seen so far. Initially only `0` is reachable (the empty subset). When element `x` arrives, every old reachable sum `s` stays reachable (skip `x`) and `s + x` becomes reachable (take `x`). Each element is used at most once, because new sums are built only from the **old** set.
+
+Store that set as a bitset `reach`, where bit `s` is 1 when sum `s` is reachable. "Add `x` to every reachable sum" is just a left shift, so one element is processed with `reach |= reach << x`, which works on 64 bits per machine word.
 
 ### Algorithm
 
-1. Compute the total `sm`. If it is odd return `false`; otherwise set `sm /= 2`.
-2. Sort `nums` and build a table `knap` of size `(n + 1) x (sm + 1)`, where `knap[i][j]` is the largest subset sum not exceeding `j` using the first `i` numbers.
-3. For each `i` and `j`:
-   - If `nums[i - 1] > j`, the number cannot fit, so take the better of `knap[i - 1][j]` and `knap[i][j - 1]`.
-   - Otherwise take the maximum of including it (`knap[i - 1][j - nums[i - 1]] + nums[i - 1]`), excluding it (`knap[i - 1][j]`) and `knap[i][j - 1]`.
-4. Return whether `knap[n][sm] == sm`.
+1. Compute `total`. If it is odd, return `false`. Otherwise `target = total / 2`.
+2. Start with `reach` having only bit `0` set.
+3. For each `x` in `nums`, do `reach |= reach << x`. The right-hand side uses the bitset from before this element, so `x` is taken at most once.
+4. Return `reach[target]`.
+
+The bitset has `10001` bits, enough for every possible `target`; sums beyond it are shifted out and do not matter, since they exceed any `target`.
+
+### Walkthrough
+
+Example 1 (`target = 11`). After each element, green cells are the newly reachable sums, orange were reachable before:
+
+![Reachable subset sums for [1,5,11,5] up to 11](/img/codes/partition-equal-subset-sum/reach.gif)
 
 ### Complexity
 
-- **Time:** $O(n \cdot sm)$ — each cell of the table is filled in $O(1)$, where `sm` is half the total; sorting adds $O(n \log n)$.
-- **Space:** $O(n \cdot sm)$ — the full 2D `knap` table.
+Let `S` be the bitset size (`10001`) and `w = 64` the word size.
+
+- **Time:** $O(n \cdot S / w)$ — one shift and one OR of the bitset per element. (A plain boolean array gives the same algorithm in $O(n \cdot target)$.)
+- **Space:** $O(S / w)$ — one bitset.
+
+### Edge cases
+
+- **Odd total** (e.g. Example 2, total `11`): returns `false` immediately.
+- **Single element:** the total is that element; if it is even, `target` is half of it but only `0` and `x` are reachable, so the answer is correctly `false`.
+- **An element larger than `target`:** shifting by it only produces sums above `target`, so it never helps reach `target`.
 
 ## Code
 
@@ -38,30 +78,14 @@ The array can be split into two equal-sum parts only if the total `sm` is even, 
 class Solution {
    public:
     bool canPartition(vector<int>& nums) {
-        int n = nums.size();
-        int sm = 0;
-        for (int i = 0; i < n; i++) sm += nums[i];
-        if (sm % 2) return 0;
-        sm /= 2;
+        int total = accumulate(nums.begin(), nums.end(), 0);
+        if (total % 2 != 0) return false;
+        int target = total / 2;
 
-        sort(nums.begin(), nums.end());
-        vector<vector<int>> knap(nums.size() + 1, vector<int>(sm + 1));
-
-        for (int i = 1; i <= nums.size(); i++) {
-            for (int j = 1; j <= sm; j++) {
-                if (nums[i - 1] > j) {
-                    knap[i][j] = max(knap[i - 1][j], knap[i][j - 1]);
-                    continue;
-                }
-                knap[i][j] =
-                    max(knap[i][j], knap[i - 1][j - nums[i - 1]] + nums[i - 1]);
-                knap[i][j] = max(knap[i][j], knap[i - 1][j]);
-                knap[i][j] = max(knap[i][j], knap[i][j - 1]);
-            }
-        }
-
-        return knap[nums.size()][sm] == sm;
+        bitset<10001> reach;
+        reach[0] = 1;
+        for (int x : nums) reach |= reach << x;
+        return reach[target];
     }
 };
-
 ```

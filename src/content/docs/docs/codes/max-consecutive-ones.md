@@ -1,7 +1,8 @@
 ---
 title: "Max Consecutive Ones"
-description: "Given a binary array nums, return the maximum number of consecutive 1's in the array."
+description: "Return the length of the longest run of consecutive 1s in a binary array with a single pass that tracks the current run length."
 source: "https://leetcode.com/problems/max-consecutive-ones/"
+difficulty: "Easy"
 tags: ["Array"]
 complexity:
   time: "O(n)"
@@ -10,20 +11,45 @@ complexity:
 
 ## Problem
 
-<p>Given a binary array <code>nums</code>, return <em>the maximum number of consecutive </em><code>1</code><em>&#39;s in the array</em>.</p>
+Given a binary array `nums`, return *the maximum number of consecutive* `1`*'s in the array*.
+
+**Example 1:**
+
+```text
+Input:  nums = [1,1,0,1,1,1]
+Output: 3
+Explanation: The first two digits or the last three digits are consecutive 1s. The maximum number of consecutive 1s is 3.
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [1,0,1,1,0,1]
+Output: 2
+```
+
+**Constraints:**
+
+- $1 \le$ `nums.length` $\le 10^5$
+- `nums[i]` is either `0` or `1`.
 
 ## Solution approach
 
 ### Intuition
 
-Scan the array once while keeping the length of the current run of `1`s. A `0` ends the run, so that is the moment to compare it against the best run so far.
+Every run of `1`s ends either at a `0` or at the end of the array. Scan once while keeping `cur`, the length of the run of `1`s ending at the current index: a `1` extends it by one, a `0` resets it to zero. The answer is the largest value `cur` ever reaches.
+
+Updating `best` right after every increment (rather than only when a `0` is seen) means a run that reaches the end of the array is counted without a special check after the loop.
 
 ### Algorithm
 
-1. Keep `cnt` for the current run and `ans` for the best run.
-2. For each `nums[i]`: if it is `1`, increment `cnt`; otherwise update `ans` with `cnt` and reset `cnt = 0`.
-3. After the loop, update `ans` with `cnt` once more, in case the array ends in a run of `1`s.
-4. Return `ans`.
+1. Set `best = 0`, `cur = 0`.
+2. For each `x` in `nums`: if `x == 1`, increment `cur` and set `best = max(best, cur)`; otherwise reset `cur = 0`.
+3. Return `best`.
+
+### Walkthrough
+
+For `nums = [1,1,0,1,1,1]`, `cur` takes the values `1, 2, 0, 1, 2, 3`, so `best = 3`.
 
 ### Complexity
 
@@ -32,7 +58,8 @@ Scan the array once while keeping the length of the current run of `1`s. A `0` e
 
 ### Edge cases
 
-- **Array ends with `1`s:** the final `max` after the loop catches that last run.
+- **Array ends with `1`s** (Example 1): `best` is updated on every `1`, so the final run is included.
+- **No `1`s at all:** `cur` never increases and `best` stays `0`.
 
 ## Code
 
@@ -40,19 +67,16 @@ Scan the array once while keeping the length of the current run of `1`s. A `0` e
 class Solution {
    public:
     int findMaxConsecutiveOnes(vector<int>& nums) {
-        int ans = 0, cnt = 0;
-        int n = nums.size();
-        for (int i = 0; i < n; i++) {
-            if (nums[i])
-                cnt++;
-            else {
-                ans = max(ans, cnt);
-                cnt = 0;
+        int best = 0, cur = 0;  // cur = length of the run of 1s ending here
+        for (int x : nums) {
+            if (x == 1) {
+                cur++;
+                best = max(best, cur);
+            } else {
+                cur = 0;
             }
         }
-        ans = max(ans, cnt);
-        return ans;
+        return best;
     }
 };
-
 ```

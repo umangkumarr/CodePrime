@@ -1,63 +1,136 @@
 ---
 title: "M-Coloring Problem"
-description: "Given an undirected graph and an integer M. The task is to determine if the graph can be colored with at most M colors such that no two adjacent vertices…"
-source: "https://practice.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1#"
-tags: ["Array", "Backtracking"]
+description: "Decide whether a graph's vertices can be coloured with at most m colours so that no edge joins two equal colours, using backtracking over vertices."
+source: "https://www.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1"
+difficulty: "Medium"
+tags: ["Backtracking"]
 complexity:
-  time: "O(n \\cdot m^n)"
-  space: "O(n)"
+  time: "O(V \\cdot m^V)"
+  space: "O(V + E)"
 ---
 
 ## Problem
 
-<span >Given an undirected graph and an integer&nbsp;<strong>M</strong>. The task is to determine if the graph can be colored with at most M&nbsp;colors such that no two adjacent vertices of the graph are colored with the same color. Here coloring of a graph means the assignment of colors to all vertices. Print 1&nbsp;if it is possible to colour vertices and 0&nbsp;otherwise.</span>
+Given an undirected graph consisting of **V** vertices and edges represented as a 2d array **edges[][]**, along with an integer **m**. Find if it is possible to color the graph using at most `m` different colors such that no two adjacent vertices share the same color.
+
+**Note:** The graph is indexed with 0-based indexing.
+
+Complete the function `graphColoring()` which takes `v`, `edges` and `m` and returns `true` if such a colouring exists, otherwise `false`.
+
+**Example 1:**
+
+![Graph with 4 vertices coloured with 3 colours](https://media.geeksforgeeks.org/img-practice/prod/addEditProblem/893404/Web/Other/blobid3_1746162701.jpg)
+
+```text
+Input:  V = 4, edges[][] = [[0, 1], [1, 3], [2, 3], [3, 0], [0, 2]], m = 3
+Output: true
+Explanation: It is possible to color the given graph using 3 colors, for example, one of the possible ways vertices can be colored as follows:
+Vertex 0: Color 1
+Vertex 1: Color 2
+Vertex 2: Color 2
+Vertex 3: Color 3
+```
+
+**Example 2:**
+
+```text
+Input:  V = 3, edges[][] = [[0, 1], [1, 2], [0, 2]], m = 2
+Output: false
+Explanation: It is not possible to color the given graph using only 2 colors because vertices 0, 1, and 2 form a triangle.
+```
+
+**Constraints:**
+
+- $1 \le V \le 10$
+- $1 \le E =$ `edges.size()` $\le V(V-1)/2$
+- $0 \le$ `edges[i][j]` $\le V - 1$
+- $1 \le m \le V$
 
 ## Solution approach
 
 ### Intuition
 
-Use backtracking to explore the possible colourings of the graph and keep a valid one. Colour the vertices one at a time in index order. For the current vertex, try each of the `m` colours, and keep a colour only if no adjacent vertex already has it. If the remaining vertices cannot be coloured, undo the choice and try the next colour. Checking each colour as soon as it is placed prunes most dead-end branches early.
+The problem is NP-complete in general, but with $V \le 10$ an exhaustive search is fine — as long as it abandons hopeless partial colourings early.
+
+Colour the vertices one at a time in index order. Before giving vertex `v` colour `c`, check only the neighbours of `v`: if one of them already has colour `c`, that choice can never be completed, so skip it. If no colour works for `v`, the colours of the earlier vertices are to blame, so return `false` and let the caller try its next colour (**backtracking**). Reaching `v == V` means every vertex got a colour with no conflict.
+
+Because each check happens as soon as a colour is placed, an invalid prefix is cut off immediately instead of being extended into $m^{V - v}$ full assignments.
 
 ### Algorithm
 
-1. `graphColoring` creates the `color` array filled with `0` (uncoloured) and calls `graphColor` from vertex `0`.
-2. `graphColor(graph, vertex, n, m, color)` returns `true` once `vertex == n`, meaning every vertex is coloured.
-3. Otherwise, for each colour `j` from `1` to `m`, set `color[vertex] = j` and call `isGood`, which checks all `n` vertices for a neighbour with the same colour.
-4. If `isGood` passes and the recursive call for `vertex + 1` succeeds, return `true`; otherwise reset `color[vertex] = 0` and try the next colour.
-5. Return `false` if no colour works.
+1. Build the adjacency list `adj` from `edges` (both directions) and a `color` array of `0`s (uncoloured).
+2. `solve(v)`:
+   - If `v == V`, return `true`.
+   - For each `c` from `1` to `m`: if no neighbour `u` of `v` has `color[u] == c`, set `color[v] = c` and return `true` if `solve(v + 1)` does.
+   - Reset `color[v] = 0` and return `false`.
+3. Return `solve(0)`.
+
+### Walkthrough
+
+Example 2 (triangle, `m = 2`). Red leaves are rejected by the neighbour check; once both colours fail for vertex `2`, the search backtracks:
+
+```mermaid
+flowchart TD
+    s["start"] --> a1["v0 = 1"]
+    s --> a2["v0 = 2"]
+    a1 --> b1["v1 = 1: clashes with v0"]
+    a1 --> b2["v1 = 2"]
+    b2 --> c1["v2 = 1: clashes with v0"]
+    b2 --> c2["v2 = 2: clashes with v1"]
+    a2 --> d["symmetric: also fails"]
+    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
+    classDef ok fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
+    class b1,c1,c2,d bad
+    class a1,a2,b2 ok
+```
+
+Every branch fails, so the answer is `false`. In Example 1 the first successful path is `v0 = 1, v1 = 2, v2 = 2, v3 = 3`, exactly the colouring in the statement.
 
 ### Complexity
 
-- **Time:** $O(n \cdot m^n)$ — up to $m^n$ colour assignments are explored, and each `isGood` check scans `n` vertices.
-- **Space:** $O(n)$ — the `color` array and the recursion stack of depth `n`.
+- **Time:** $O(V \cdot m^V)$ in the worst case — at most $m^V$ partial assignments, each colour check scanning at most `V - 1` neighbours. Pruning makes the real count much smaller.
+- **Space:** $O(V + E)$ — the adjacency list, plus `color` and a recursion stack of depth `V`.
+
+### Edge cases
+
+- **Isolated vertices:** they have no neighbours to clash with, so they take colour `1` immediately.
+- **`m = 1`:** any edge makes the first colour fail for its second endpoint, so the answer is `false` whenever there is at least one edge.
 
 ## Code
 
 ```cpp title="C++"
-bool isGood(bool graph[101][101], int vertex, int color[], int n) {
-    for (int i = 0; i < n; i++) {
-        if (graph[vertex][i] && color[vertex] == color[i]) return false;
-    }
-    return true;
-}
+class Solution {
+    vector<vector<int>> adj;
+    vector<int> color;  // 0 = uncoloured, otherwise 1..m
+    int m;
 
-bool graphColor(bool graph[101][101], int vertex, int n, int m, int color[]) {
-    if (n == vertex) return true;
-
-    for (int j = 1; j <= m; j++) {
-        color[vertex] = j;
-        if (isGood(graph, vertex, color, n)) {
-            if (graphColor(graph, vertex + 1, n, m, color)) return true;
+    bool solve(int v) {
+        if (v == (int)adj.size()) return true;
+        for (int c = 1; c <= m; c++) {
+            bool clash = false;
+            for (int u : adj[v])
+                if (color[u] == c) {
+                    clash = true;
+                    break;
+                }
+            if (clash) continue;
+            color[v] = c;
+            if (solve(v + 1)) return true;
         }
-        color[vertex] = 0;
+        color[v] = 0;
+        return false;
     }
-    return false;
-}
 
-bool graphColoring(bool graph[101][101], int m, int n) {
-    int color[n];
-    memset(color, 0, sizeof(color));
-    return graphColor(graph, 0, n, m, color);
-}
-
+   public:
+    bool graphColoring(int v, vector<vector<int>>& edges, int m) {
+        adj.assign(v, {});
+        for (auto& e : edges) {
+            adj[e[0]].push_back(e[1]);
+            adj[e[1]].push_back(e[0]);
+        }
+        color.assign(v, 0);
+        this->m = m;
+        return solve(0);
+    }
+};
 ```

@@ -1,7 +1,8 @@
 ---
 title: "Lowest Common Ancestor of a Binary Tree"
-description: "Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree. According to the definition of LCA on Wikipedia: “The lowest…"
+description: "Find the lowest common ancestor of two nodes in a binary tree with one post-order DFS that reports which subtrees contain p or q."
 source: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/"
+difficulty: "Medium"
 tags: ["Tree", "Depth-First Search", "Binary Tree"]
 complexity:
   time: "O(n)"
@@ -10,56 +11,112 @@ complexity:
 
 ## Problem
 
-<p>Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.</p>
+Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.
 
-<p>According to the <a href="https://en.wikipedia.org/wiki/Lowest_common_ancestor" target="_blank">definition of LCA on Wikipedia</a>: &ldquo;The lowest common ancestor is defined between two nodes <code>p</code> and <code>q</code> as the lowest node in <code>T</code> that has both <code>p</code> and <code>q</code> as descendants (where we allow <b>a node to be a descendant of itself</b>).&rdquo;</p>
+According to the [definition of LCA on Wikipedia](https://en.wikipedia.org/wiki/Lowest_common_ancestor): "The lowest common ancestor is defined between two nodes `p` and `q` as the lowest node in `T` that has both `p` and `q` as descendants (where we allow **a node to be a descendant of itself**)."
+
+**Example 1:**
+
+![Binary tree [3,5,1,6,2,0,8,null,null,7,4]](https://assets.leetcode.com/uploads/2018/12/14/binarytree.png)
+
+```text
+Input:  root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+Output: 3
+Explanation: The LCA of nodes 5 and 1 is 3.
+```
+
+**Example 2:**
+
+![Binary tree [3,5,1,6,2,0,8,null,null,7,4]](https://assets.leetcode.com/uploads/2018/12/14/binarytree.png)
+
+```text
+Input:  root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4
+Output: 5
+Explanation: The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself according to the LCA definition.
+```
+
+**Example 3:**
+
+```text
+Input:  root = [1,2], p = 1, q = 2
+Output: 1
+```
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range $[2, 10^5]$.
+- $-10^9 \le$ `Node.val` $\le 10^9$
+- All `Node.val` are **unique**.
+- `p != q`
+- `p` and `q` will exist in the tree.
 
 ## Solution approach
 
 ### Intuition
 
-Count how many of the two targets lie in each subtree. The lowest node whose subtree, including itself, contains **both** targets is the LCA. A post-order traversal computes these counts bottom-up, so the first node to reach a count of `2` is the deepest one.
+Unlike a BST, the values tell us nothing about where `p` and `q` are, so we have to search. Let the recursive call on a subtree return:
+
+- `p` or `q` if that node is found in the subtree (whichever is met first going down),
+- the LCA if **both** are in the subtree,
+- `nullptr` if neither is.
+
+Combine the answers bottom-up (post-order). At a node `root`:
+
+- If `root` is `p` or `q`, return it. If the other target is below it, `root` is still the LCA (a node is a descendant of itself), and if the other target is elsewhere, an ancestor will notice.
+- If the left subtree and the right subtree both return non-null, `p` is on one side and `q` on the other. `root` is the lowest node joining them — the LCA.
+- If only one side returns non-null, pass that result up: it is either one target (the other is not below `root`) or an LCA already found deeper.
 
 ### Algorithm
 
-1. `traverse(root, p, q)` returns `0` for a null node.
-2. Otherwise it adds the counts from the left and right subtrees, plus `1` if `root->val` equals `p->val` and `1` if it equals `q->val`.
-3. When the count `c` reaches `2`, store `root` in `LCA` and return `0`, so that no ancestor also reaches `2` and overwrites it.
-4. `lowestCommonAncestor` runs `traverse` and returns `LCA`.
+1. If `root` is `nullptr`, `p` or `q`, return `root`.
+2. `left = lowestCommonAncestor(root->left, p, q)`, `right = lowestCommonAncestor(root->right, p, q)`.
+3. If both are non-null, return `root`; otherwise return whichever is non-null (or `nullptr`).
+
+### Walkthrough
+
+Example 1 (`p = 5`, `q = 1`). Each edge is labelled with what the child returns to its parent:
+
+```mermaid
+flowchart TD
+    n3((3)) -- "returns 5" --- n5((5))
+    n3 -- "returns 1" --- n1((1))
+    n5 -.- n6((6))
+    n5 -.- n2((2))
+    n1 -.- n0((0))
+    n1 -.- n8((8))
+    n2 -.- n7((7))
+    n2 -.- n4((4))
+    classDef ans fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    classDef target fill:#ffeccc,stroke:#d9822b,color:#7a4106
+    classDef skip fill:#e9eaed,stroke:#b4b8bf,color:#5b6270
+    class n3 ans
+    class n5,n1 target
+    class n6,n2,n0,n8,n7,n4 skip
+```
+
+The calls on `5` and `1` return immediately because those nodes are targets (grey subtrees are never explored). At `3` both sides are non-null, so `3` is the LCA. In Example 2 (`q = 4` inside the subtree of `5`), the call on `5` again returns `5` straight away and the right side returns `nullptr`, so `5` is passed up as the answer.
 
 ### Complexity
 
-- **Time:** $O(n)$ — every node is visited once.
-- **Space:** $O(h)$ — the recursion stack, where `h` is the tree height.
+- **Time:** $O(n)$ — each node is visited at most once.
+- **Space:** $O(h)$ — the recursion stack, where `h` is the height of the tree ($O(n)$ for a skewed tree).
 
 ### Edge cases
 
-- **One target is an ancestor of the other:** the ancestor sees count `1` from below and `1` from itself, so it becomes the `LCA`.
+- **One target is an ancestor of the other** (Examples 2 and 3): the search stops at the upper target and returns it, which is the correct LCA.
+- **Targets are compared by pointer**, not value, so the code relies only on `p` and `q` being nodes of this tree.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    int cnt;
-    TreeNode* LCA;
-
    public:
-    int traverse(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if (!root) return 0;
-        int c = traverse(root->left, p, q) + traverse(root->right, p, q);
-        c += (root->val == p->val) + (root->val == q->val);
-        if (c == 2) {
-            LCA = root;
-            return 0;
-        }
-        return c;
-    }
-
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        cnt = 0;
-        traverse(root, p, q);
-        return LCA;
+        if (!root || root == p || root == q) return root;
+        TreeNode* left = lowestCommonAncestor(root->left, p, q);
+        TreeNode* right = lowestCommonAncestor(root->right, p, q);
+        if (left && right) return root;  // p and q are on different sides
+        return left ? left : right;
     }
 };
-
 ```

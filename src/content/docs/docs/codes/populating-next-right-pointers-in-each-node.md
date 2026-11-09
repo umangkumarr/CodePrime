@@ -1,18 +1,19 @@
 ---
 title: "Populating Next Right Pointers in Each Node"
-description: "You are given a perfect binary tree where all leaves are on the same level, and every parent has two children. The binary tree has the following…"
+description: "Link every node of a perfect binary tree to its right neighbour on the same level in O(1) extra space, using the next pointers of the level above."
 source: "https://leetcode.com/problems/populating-next-right-pointers-in-each-node/"
+difficulty: "Medium"
 tags: ["Linked List", "Tree", "Depth-First Search", "Breadth-First Search", "Binary Tree"]
 complexity:
-  time: "O(n \\log h)"
-  space: "O(n)"
+  time: "O(n)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>You are given a <strong>perfect binary tree</strong> where all leaves are on the same level, and every parent has two children. The binary tree has the following definition:</p>
+You are given a **perfect binary tree** where all leaves are on the same level, and every parent has two children. The binary tree has the following definition:
 
-```
+```text
 struct Node {
   int val;
   Node *left;
@@ -21,51 +22,105 @@ struct Node {
 }
 ```
 
-<p>Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to <code>NULL</code>.</p>
+Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to `NULL`.
 
-<p>Initially, all next pointers are set to <code>NULL</code>.</p>
+Initially, all next pointers are set to `NULL`.
+
+**Example 1:**
+
+![Figure A: the perfect binary tree; Figure B: the same tree with next pointers linking each level](https://assets.leetcode.com/uploads/2019/02/14/116_sample.png)
+
+```text
+Input:  root = [1,2,3,4,5,6,7]
+Output: [1,#,2,3,#,4,5,6,7,#]
+Explanation: Given the above perfect binary tree (Figure A), your function should populate each next pointer to point to its next right node, just like in Figure B. The serialized output is in level order as connected by the next pointers, with '#' signifying the end of each level.
+```
+
+**Example 2:**
+
+```text
+Input:  root = []
+Output: []
+```
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range $[0, 2^{12} - 1]$.
+- $-1000 \le$ `Node.val` $\le 1000$
+
+**Follow-up:**
+
+- You may only use constant extra space.
+- The recursive approach is fine. You may assume implicit stack space does not count as extra space for this problem.
 
 ## Solution approach
 
 ### Intuition
 
-Every `next` pointer links a node to the node immediately to its right **on the same level**. A preorder DFS that visits the left child before the right child reaches the nodes of each level in left-to-right order. So if we group nodes by depth in visiting order, we only need to link neighbours within each group.
+A level-order BFS with a queue links each level easily, but the queue holds up to $n/2$ nodes, which breaks the constant-space follow-up.
+
+The trick is that once a level is linked, it **is** a linked list we can walk from left to right without any queue. While walking level `d` we can link level `d + 1`, because in a perfect tree there are only two kinds of next pointers on the child level:
+
+1. **Siblings:** `node->left->next = node->right` — both children of the same parent.
+2. **Cousins across parents:** `node->right->next = node->next->left` — the right child of `node` is followed by the left child of the parent's right neighbour, which `node->next` already gives us.
+
+Every node on the child level is the left or right child of exactly one parent, so these two rules set every next pointer on that level. The rightmost node of each level never gets assigned and keeps its initial `NULL`.
 
 ### Algorithm
 
-1. `traversal(root, h)` appends `root` to `mp[h]`, where `h` is its depth, then recurses into the left child and then the right child with `h + 1`.
-2. In `connect`, run `traversal(root, 0)`.
-3. For each level in `mp`, set `next` of the `j`-th node to the `(j + 1)`-th node. The last node of each level keeps its default `NULL`.
-4. Return `root`.
+1. If `root` is null, return it.
+2. Let `leftmost = root`. While `leftmost->left` exists (the level below is not empty):
+   - Walk `node` from `leftmost` along `next`:
+     - `node->left->next = node->right`;
+     - if `node->next` exists, `node->right->next = node->next->left`.
+   - Move down: `leftmost = leftmost->left`.
+3. Return `root`.
+
+### Walkthrough
+
+Example 1 after `connect`; dashed arrows are next pointers. Walking the root's level sets `2 → 3`. Walking the list `2 → 3` then sets `4 → 5` and `6 → 7` (siblings) and `5 → 6`, the cousin link `node->right->next = node->next->left` with `node = 2` (orange):
+
+```mermaid
+flowchart TD
+    n1((1)) --> n2((2))
+    n1 --> n3((3))
+    n2 --> n4((4))
+    n2 --> n5((5))
+    n3 --> n6((6))
+    n3 --> n7((7))
+    n2 -.->|next| n3
+    n4 -.->|next| n5
+    n5 -.->|"next (cousin)"| n6
+    n6 -.->|next| n7
+    classDef cousin fill:#ffeccc,stroke:#d9822b,color:#7a4106
+    class n5,n6 cousin
+```
 
 ### Complexity
 
-- **Time:** $O(n \log h)$ — each of the `n` nodes is inserted into the ordered `map` keyed by depth, which has `h` keys. For the perfect binary tree in this problem `h` is about $\log n$, so this is practically linear.
-- **Space:** $O(n)$ — the map stores every node pointer, plus an $O(h)$ recursion stack.
+- **Time:** $O(n)$ — every node is visited once as `node`, doing $O(1)$ work.
+- **Space:** $O(1)$ — only the pointers `leftmost` and `node`; no queue and no recursion.
+
+### Edge cases
+
+- **Empty tree** (Example 2): returns `nullptr` immediately.
+- **Single node:** `root->left` is null, so the loop does not run and `root->next` stays `NULL`.
+- **Rightmost node of a level:** `node->next` is null, so its right child's `next` is left as `NULL`, as required.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    map<int, vector<Node*>> mp;
-
    public:
-    void traversal(Node* root, int h) {
-        if (!root) return;
-        mp[h].push_back(root);
-        traversal(root->left, h + 1);
-        traversal(root->right, h + 1);
-    }
-
     Node* connect(Node* root) {
-        traversal(root, 0);
-        for (auto i : mp) {
-            for (int j = 0; j < i.second.size() - 1; j++) {
-                i.second[j]->next = i.second[j + 1];
+        if (!root) return root;
+        for (Node* leftmost = root; leftmost->left; leftmost = leftmost->left) {
+            for (Node* node = leftmost; node; node = node->next) {
+                node->left->next = node->right;
+                if (node->next) node->right->next = node->next->left;
             }
         }
         return root;
     }
 };
-
 ```

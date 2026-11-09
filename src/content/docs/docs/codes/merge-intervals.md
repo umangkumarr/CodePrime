@@ -1,7 +1,8 @@
 ---
 title: "Merge Intervals"
-description: "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals…"
+description: "Merge all overlapping intervals by sorting them by start and sweeping once, extending the last merged interval while the next one starts inside it."
 source: "https://leetcode.com/problems/merge-intervals/"
+difficulty: "Medium"
 tags: ["Array", "Sorting"]
 complexity:
   time: "O(n \\log n)"
@@ -10,30 +11,76 @@ complexity:
 
 ## Problem
 
-<p>Given an array&nbsp;of <code>intervals</code>&nbsp;where <code>intervals[i] = [starti, endi]</code>, merge all overlapping intervals, and return <em>an array of the non-overlapping intervals that cover all the intervals in the input</em>.</p>
+Given an array of `intervals` where `intervals[i] = [starti, endi]`, merge all overlapping intervals, and return _an array of the non-overlapping intervals that cover all the intervals in the input_.
+
+**Example 1:**
+
+```text
+Input:  intervals = [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]
+Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+```
+
+**Example 2:**
+
+```text
+Input:  intervals = [[1,4],[4,5]]
+Output: [[1,5]]
+Explanation: Intervals [1,4] and [4,5] are considered overlapping.
+```
+
+**Example 3:**
+
+```text
+Input:  intervals = [[4,7],[1,4]]
+Output: [[1,7]]
+Explanation: Intervals [1,4] and [4,7] are considered overlapping.
+```
+
+**Constraints:**
+
+- $1 \le$ `intervals.length` $\le 10^4$
+- `intervals[i].length == 2`
+- $0 \le$ `starti` $\le$ `endi` $\le 10^4$
 
 ## Solution approach
 
 ### Intuition
 
-After sorting the intervals by start, any intervals that overlap sit next to each other. So one sweep is enough: keep growing the current merged interval while the next interval starts before it ends, and close it as soon as there is a gap.
+Sort the intervals by their start. Now consider the merged intervals built so far; the last one, `[s, e]`, has the largest start of all of them. The next interval `[l, r]` starts at `l >= s`, so it can only overlap the **last** merged interval, and it does exactly when `l <= e`:
+
+- if `l <= e`, it belongs to the same merged block, whose end becomes `max(e, r)` (the `max` matters when `[l, r]` is nested inside);
+- otherwise there is a gap, and since every later interval starts at `>= l > e`, the block `[s, e]` is final, so we start a new one.
+
+Comparing every pair of intervals would be $O(n^2)$; after sorting, one sweep suffices.
 
 ### Algorithm
 
-1. Sort `intervals` and start the current interval with `front = intervals[0][0]` and `back = intervals[0][1]`.
-2. For each later interval `[left, right]`, if it overlaps the current one (`left <= back && front <= right`), extend the current interval with `front = min(left, front)` and `back = max(back, right)`.
-3. Otherwise push `{front, back}` into `ans` and start a new current interval from `[left, right]`.
-4. After the loop, push the last interval and return `ans`.
+1. Sort `intervals` (lexicographically, i.e. by start).
+2. For each interval in order: if `merged` is empty or `interval[0] > merged.back()[1]`, append it as a new block; otherwise set `merged.back()[1] = max(merged.back()[1], interval[1])`.
+3. Return `merged`.
+
+### Walkthrough
+
+Example 1, already sorted:
+
+| Interval | Compared with | Action | `merged` |
+| --- | --- | --- | --- |
+| `[1,3]` | — | new block | `[[1,3]]` |
+| `[2,6]` | `2 <= 3` | extend end to 6 | `[[1,6]]` |
+| `[8,10]` | `8 > 6` | new block | `[[1,6],[8,10]]` |
+| `[15,18]` | `15 > 10` | new block | `[[1,6],[8,10],[15,18]]` |
 
 ### Complexity
 
-- **Time:** $O(n \log n)$ — dominated by the sort; the sweep is linear.
-- **Space:** $O(n)$ — the output `ans`.
+- **Time:** $O(n \log n)$ — the sort dominates; the sweep is linear.
+- **Space:** $O(n)$ — the output, plus the sort's internal stack.
 
 ### Edge cases
 
-- **Touching intervals** such as `[1, 4]` and `[4, 5]` are merged, because the check uses `left <= back`.
-- **Nested intervals** such as `[1, 10]` and `[2, 3]` keep `back = 10` thanks to the `max`.
+- **Touching intervals** such as `[1,4]` and `[4,5]` (Example 2) are merged, because the test for a gap is the strict `interval[0] > merged.back()[1]`.
+- **Unsorted input** (Example 3) is handled by the initial sort.
+- **Nested intervals** such as `[1,10]` and `[2,3]` keep the end `10` thanks to the `max`.
 
 ## Code
 
@@ -41,27 +88,15 @@ After sorting the intervals by start, any intervals that overlap sit next to eac
 class Solution {
    public:
     vector<vector<int>> merge(vector<vector<int>>& intervals) {
-        vector<vector<int>> ans;
         sort(intervals.begin(), intervals.end());
-        int front = intervals[0][0];
-        int back = intervals[0][1];
-
-        for (int i = 1; i < intervals.size(); i++) {
-            int left = intervals[i][0];
-            int right = intervals[i][1];
-            if (left <= back && front <= right) {
-                front = min(left, front);
-                back = max(back, right);
-            } else {
-                ans.push_back({front, back});
-                front = left;
-                back = right;
-            }
+        vector<vector<int>> merged;
+        for (const auto& interval : intervals) {
+            if (merged.empty() || interval[0] > merged.back()[1])
+                merged.push_back(interval);
+            else
+                merged.back()[1] = max(merged.back()[1], interval[1]);
         }
-        ans.push_back({front, back});
-
-        return ans;
+        return merged;
     }
 };
-
 ```

@@ -1,71 +1,114 @@
 ---
 title: "Palindrome Partitioning"
-description: "Given a string s, partition s such that every substring of the partition is a palindrome. Return all possible palindrome partitioning of s. A palindrome…"
+description: "List every way to split a string into palindromic substrings, using backtracking over cut positions with a precomputed palindrome table."
 source: "https://leetcode.com/problems/palindrome-partitioning/"
+difficulty: "Medium"
 tags: ["String", "Dynamic Programming", "Backtracking"]
 complexity:
-  time: "O(n^2 \\cdot 2^n)"
-  space: "O(n)"
+  time: "O(n \\cdot 2^n)"
+  space: "O(n^2)"
 ---
 
 ## Problem
 
-<p>Given a string <code>s</code>, partition <code>s</code> such that every substring of the partition is a <strong>palindrome</strong>. Return all possible palindrome partitioning of <code>s</code>.</p>
+Given a string `s`, partition `s` such that every substring of the partition is a **palindrome**. Return *all possible palindrome partitioning of* `s`.
 
-<p>A <strong>palindrome</strong> string is a string that reads the same backward as forward.</p>
+**Example 1:**
+
+```text
+Input:  s = "aab"
+Output: [["a","a","b"],["aa","b"]]
+```
+
+**Example 2:**
+
+```text
+Input:  s = "a"
+Output: [["a"]]
+```
+
+**Constraints:**
+
+- $1 \le$ `s.length` $\le 16$
+- `s` contains only lowercase English letters.
 
 ## Solution approach
 
 ### Intuition
 
-Every partition is built by choosing a first piece, which must be a palindrome, and then partitioning the rest of the string in the same way. This is classic backtracking: at position `indx`, try every palindromic prefix of the remaining string, recurse on what follows it, then undo the choice.
+A partition is decided left to right: choose the first piece `s[0..j]`, then partition the rest `s[j+1..]` the same way. Only palindromic first pieces are allowed, so at each position we try every end `j` for which `s[start..j]` is a palindrome, recurse, and undo the choice afterwards (**backtracking**). Every path that reaches the end of the string is one valid partition, and every valid partition is reached by exactly one path, so nothing is missed or duplicated.
+
+Checking "is `s[start..j]` a palindrome?" by reversing the substring costs $O(n)$ each time. Precompute it instead: `pal[i][j]` is true when `s[i] == s[j]` and the inside `s[i+1..j-1]` is a palindrome (or has length at most 1). Filling `i` from right to left guarantees `pal[i+1][j-1]` is ready. Each check is then $O(1)$.
 
 ### Algorithm
 
-1. Store the string in `w` and its length in `n`, then call `partition(0)`.
-2. In `partition(indx)`, if `indx == n` the whole string has been split, so push a copy of the current pieces `arr` into `ans`.
-3. Otherwise extend a candidate piece `s` one character at a time for `j` from `indx` to `n - 1`. Reverse a copy `ss`; if `ss == s` the piece is a palindrome, so push it into `arr`, recurse with `partition(j + 1)`, and pop it afterwards.
-4. Return `ans`.
+1. Let `n = s.size()`. Fill `pal[i][j]` for `i` from `n - 1` down to `0` and `j` from `i` to `n - 1`: `pal[i][j] = s[i] == s[j] && (j - i < 2 || pal[i + 1][j - 1])`.
+2. `dfs(start)`: if `start == n`, append the current pieces `cur` to `result` and return.
+3. Otherwise, for each `j` from `start` to `n - 1` with `pal[start][j]`, push `s.substr(start, j - start + 1)` onto `cur`, call `dfs(j + 1)`, then pop it.
+4. Call `dfs(0)` and return `result`.
+
+### Walkthrough
+
+The recursion tree for `s = "aab"`. Each edge is a palindromic piece cut from the front; red leaves are prefixes that are not palindromes (never explored), green leaves are complete partitions:
+
+```mermaid
+flowchart TD
+    r["dfs(0): 'aab'"] -->|"a"| x1["dfs(1): 'ab'"]
+    r -->|"aa"| x2["dfs(2): 'b'"]
+    r -.->|"aab"| no1["not a palindrome"]
+    x1 -->|"a"| y1["dfs(2): 'b'"]
+    x1 -.->|"ab"| no2["not a palindrome"]
+    y1 -->|"b"| ok1["[a, a, b]"]
+    x2 -->|"b"| ok2["[aa, b]"]
+    classDef good fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
+    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
+    class ok1,ok2 good
+    class no1,no2 bad
+```
 
 ### Complexity
 
-- **Time:** $O(n^2 \cdot 2^n)$ in the worst case — a string such as `"aaaa"` has $2^{n-1}$ partitions, and each recursive call tries up to `n` prefixes, each checked by an $O(n)$ reverse and compare.
-- **Space:** $O(n)$ for the recursion stack and `arr`, not counting the output `ans`, which can hold $O(n \cdot 2^n)$ characters.
+- **Time:** $O(n \cdot 2^n)$ — there are $n - 1$ gaps, each cut or not, so at most $2^{n-1}$ partitions; building each one copies at most $n$ characters. The table costs $O(n^2)$. A string like `"aaaa…a"` really has $2^{n-1}$ partitions, so no algorithm can do better in the worst case.
+- **Space:** $O(n^2)$ for `pal`, plus $O(n)$ for the recursion and `cur` (not counting the output).
+
+### Edge cases
+
+- **Single character** (Example 2): `pal[0][0]` is true, so the only partition is `["a"]`.
+- **All characters equal:** every substring is a palindrome, giving the maximum $2^{n-1}$ partitions; the table keeps each check $O(1)$.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-    int n;
-    string w;
-    vector<string> arr;
-    vector<vector<string>> ans;
+    vector<vector<bool>> pal;
+    vector<string> cur;
+    vector<vector<string>> result;
 
-   public:
-    void partition(int indx) {
-        if (indx == n) {
-            ans.push_back(arr);
+    void dfs(const string& s, int start) {
+        int n = s.size();
+        if (start == n) {
+            result.push_back(cur);
             return;
         }
-        string s = "", ss;
-        for (int j = indx; j < n; j++) {
-            s.push_back(w[j]);
-            ss = s;
-            reverse(ss.begin(), ss.end());
-            if (ss == s) {
-                arr.push_back(s);
-                partition(j + 1);
-                arr.pop_back();
-            }
+        for (int j = start; j < n; j++) {
+            if (!pal[start][j]) continue;
+            cur.push_back(s.substr(start, j - start + 1));
+            dfs(s, j + 1);
+            cur.pop_back();
         }
     }
 
+   public:
     vector<vector<string>> partition(string s) {
-        this->n = s.length();
-        this->w = s;
-        partition(0);
-        return ans;
+        int n = s.size();
+        pal.assign(n, vector<bool>(n, false));
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                pal[i][j] = s[i] == s[j] && (j - i < 2 || pal[i + 1][j - 1]);
+            }
+        }
+        dfs(s, 0);
+        return result;
     }
 };
-
 ```

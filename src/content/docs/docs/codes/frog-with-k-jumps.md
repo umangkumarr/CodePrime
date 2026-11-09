@@ -1,60 +1,142 @@
 ---
 title: "Frog with k jumps"
-description: "There are N stones, numbered 1,2,…,N. For each i (1≤i≤N), the height of Stone i is hi. There is a frog who is initially on Stone 1. He will repeat the…"
+description: "Find the minimum total cost for a frog to reach the last stone when each jump may skip up to K stones, using a one-dimensional DP over the stones."
 source: "https://atcoder.jp/contests/dp/tasks/dp_b"
+difficulty: "Easy"
 tags: ["Dynamic Programming"]
 complexity:
-  time: "O(n \\cdot k)"
-  space: "O(n)"
+  time: "O(N \\cdot K)"
+  space: "O(N)"
 ---
 
 ## Problem
 
-There are $N$ stones, numbered $1,2,…,N$. For each $i (1≤i≤N)$, the height of Stone $i$ is $h_i$.
+There are $N$ stones, numbered $1, 2, \ldots, N$. For each $i$ ($1 \le i \le N$), the height of Stone $i$ is $h_i$.
 
 There is a frog who is initially on Stone $1$. He will repeat the following action some number of times to reach Stone $N$:
-1. If the frong is currently on stone $i$, jump to one of following: Stone $i+1,i+2,...,i+K$. Here, a cost of $|h_i-h_j|$ is incurred, where j is the stone to land on.
+
+- If the frog is currently on Stone $i$, jump to one of the following: Stone $i + 1, i + 2, \ldots, i + K$. Here, a cost of $|h_i - h_j|$ is incurred, where $j$ is the stone to land on.
 
 Find the minimum possible total cost incurred before the frog reaches Stone $N$.
+
+**Input** is given from standard input in the format
+
+```text
+N K
+h_1 h_2 ... h_N
+```
+
+**Output:** print the minimum possible total cost incurred.
+
+**Example 1:**
+
+```text
+Input:
+5 3
+10 30 40 50 20
+Output: 30
+Explanation: If we follow the path 1 → 2 → 5, the total cost incurred would be
+|10 - 30| + |30 - 20| = 30.
+```
+
+**Example 2:**
+
+```text
+Input:
+3 1
+10 20 10
+Output: 20
+Explanation: If we follow the path 1 → 2 → 3, the total cost incurred would be
+|10 - 20| + |20 - 10| = 20.
+```
+
+**Example 3:**
+
+```text
+Input:
+2 100
+10 10
+Output: 0
+Explanation: If we follow the path 1 → 2, the total cost incurred would be |10 - 10| = 0.
+```
+
+**Example 4:**
+
+```text
+Input:
+10 4
+40 10 20 70 80 10 20 70 80 60
+Output: 40
+Explanation: If we follow the path 1 → 4 → 8 → 10, the total cost incurred would be
+|40 - 70| + |70 - 70| + |70 - 60| = 40.
+```
+
+**Constraints:**
+
+- All values in input are integers.
+- $2 \le N \le 10^5$
+- $1 \le K \le 100$
+- $1 \le h_i \le 10^4$
 
 ## Solution approach
 
 ### Intuition
 
-To reach stone `i`, the frog's last jump came from one of the previous `k` stones. If we already know the cheapest cost to reach each of those stones, the cheapest cost for stone `i` is the best of `cost to reach j + |a[i] - a[j]|` over those `j`. This is a one-dimensional DP filled from left to right.
+Think about the **last** jump of an optimal route to stone `i`. It started on one of the `K` stones before it, say stone `j`. Whatever the frog did before reaching `j`, it should have done it as cheaply as possible — any cheaper way to reach `j` would make the whole route cheaper. So, with `dp[j]` the minimum cost to reach stone `j`,
+
+$$
+dp[i] = \min_{\max(0,\, i-K) \le j < i} \big( dp[j] + |h_i - h_j| \big), \qquad dp[0] = 0.
+$$
+
+Every `dp[j]` on the right refers to a stone to the left of `i`, so filling the array from left to right always has the needed values ready. The answer is `dp[N-1]` (stones are 0-indexed in the code).
+
+With $K = 2$ this is the classic "Frog 1" problem; here the window of predecessors is simply wider.
 
 ### Algorithm
 
-1. Read `n`, `k` and the heights `a`.
-2. Set `ans[0] = 0` and every other `ans[i]` to `INT_MAX`.
-3. For each `i` from `1` to `n - 1`, try every `j` from `i - 1` down to `max(0, i - k)` and update `ans[i] = min(ans[i], abs(a[i] - a[j]) + ans[j])`.
-4. Print `ans[n - 1]`.
+1. Read `n`, `k` and the heights `h`.
+2. Set `dp[0] = 0` and every other entry to `INT_MAX`.
+3. For each `i` from `1` to `n - 1`, for each `j` from `max(0, i - k)` to `i - 1`, set `dp[i] = min(dp[i], dp[j] + abs(h[i] - h[j]))`.
+4. Print `dp[n - 1]`.
+
+### Walkthrough
+
+Example 1 (`K = 3`, heights `10 30 40 50 20`). Blue is the stone being filled, orange its window of possible predecessors, and green the predecessor that gives the minimum:
+
+![DP for Frog with K jumps on heights 10 30 40 50 20 with K = 3](/img/codes/frog-with-k-jumps/frog-dp.gif)
 
 ### Complexity
 
-- **Time:** $O(n \cdot k)$ — for each stone, up to `k` previous stones are checked.
-- **Space:** $O(n)$ — the arrays `a` and `ans`.
+- **Time:** $O(N \cdot K)$ — each stone looks at up to `K` predecessors; at most $10^5 \cdot 100 = 10^7$ steps.
+- **Space:** $O(N)$ — the arrays `h` and `dp`.
+
+The largest possible answer is about $(N - 1) \cdot 10^4 \le 10^9$, which fits in an `int`.
 
 ### Edge cases
 
-- **`k >= n`:** the inner loop is stopped by `j >= 0`, so every earlier stone is tried.
-- The snippet relies on `n`, `k` and the `vl` (vector of `long long`) alias from the author's template.
+- **`K >= N`** (Example 3): `max(0, i - k)` clamps the window to the stones that exist, so the frog may jump straight to the end.
+- **`K = 1`** (Example 2): the window holds a single stone and the frog must visit every stone.
 
 ## Code
 
 ```cpp title="C++"
-void solve() {
-    cin >> n >> k;
-    vl a(n);
-    for (int i = 0; i < n; i++) cin >> a[i];
+#include <bits/stdc++.h>
+using namespace std;
 
-    vl ans(n, INT_MAX);
-    ans[0] = 0;
+int main() {
+    int n, k;
+    cin >> n >> k;
+    vector<int> h(n);
+    for (int& x : h) cin >> x;
+
+    vector<int> dp(n, INT_MAX);
+    dp[0] = 0;
     for (int i = 1; i < n; i++) {
-        for (int j = i - 1; j >= 0 && j >= i - k; j--) {
-            ans[i] = min(ans[i], abs(a[i] - a[j]) + ans[j]);
+        for (int j = max(0, i - k); j < i; j++) {
+            dp[i] = min(dp[i], dp[j] + abs(h[i] - h[j]));
         }
     }
-    cout << ans[n - 1];
+    cout << dp[n - 1] << '\n';
+    return 0;
 }
 ```

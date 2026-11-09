@@ -1,7 +1,8 @@
 ---
 title: "Serialize and Deserialize Binary Tree"
-description: "Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or…"
+description: "Encode a binary tree as a string and rebuild it exactly, using a level-order (BFS) walk that writes a marker for every missing child."
 source: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/"
+difficulty: "Hard"
 tags: ["String", "Tree", "Depth-First Search", "Breadth-First Search", "Design", "Binary Tree"]
 complexity:
   time: "O(n)"
@@ -10,89 +11,134 @@ complexity:
 
 ## Problem
 
-<p>Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.</p>
+Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.
 
-<p>Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.</p>
+Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.
 
-<p><strong>Clarification:</strong> The input/output format is the same as <a href= "" target="_blank">how LeetCode serializes a binary tree</a>. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.</p>
+**Clarification:** The input/output format is the same as [how LeetCode serializes a binary tree](https://support.leetcode.com/hc/en-us/articles/32442719377939-How-to-create-test-cases-on-LeetCode#h_01J5EGREAW3NAEJ14XC07GRW1A). You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.
+
+**Example 1:**
+
+![Tree 1 with children 2 and 3; 3 has children 4 and 5](https://assets.leetcode.com/uploads/2020/09/15/serdeser.jpg)
+
+```text
+Input:  root = [1,2,3,null,null,4,5]
+Output: [1,2,3,null,null,4,5]
+```
+
+**Example 2:**
+
+```text
+Input:  root = []
+Output: []
+```
+
+**Constraints:**
+
+- The number of nodes in the tree is in the range $[0, 10^4]$.
+- $-1000 \le$ `Node.val` $\le 1000$
+
+The judge calls `deser.deserialize(ser.serialize(root))` on two `Codec` objects and checks that the result equals `root`.
 
 ## Solution approach
 
 ### Intuition
 
-A tree can be written as a nested string, where each node is its value followed by its children wrapped in markers: `L(...)` for the left child and `R(...)` for the right child, with each marker present only if that child exists. For example, a root `1` with children `2` and `3` becomes `1L(2)R(3)`. The parentheses mark exactly where each subtree ends, so a recursive parser can rebuild the same shape.
+Listing the values alone is not enough — `[1,2]` could be `2` as a left or as a right child of `1`. What makes a tree unique is its values **plus the positions of its missing children**. If we write a marker (`#`) for every null child, the string pins down the shape exactly.
+
+A level-order (BFS) walk is a natural fit: visit nodes with a queue, and for each node visited write its value, or `#` if it is null; real nodes push both children, including null ones, so every gap is recorded. Deserialisation replays the same BFS: the first token is the root, and every real node taken from the queue claims the **next two tokens** as its left and right child. Because both sides consume nodes in the same order, each token is matched to the parent that wrote it.
+
+BFS is also iterative, so a degenerate tree with $10^4$ levels needs no deep recursion.
 
 ### Algorithm
 
-1. `serialize` returns `""` for an empty tree. Otherwise `serial` appends `to_string(root->val)`, then `L(` + left subtree + `)` and `R(` + right subtree + `)` for whichever children exist. It also prints the string with `cout`.
-2. `deserialize` returns `NULL` for an empty string. Otherwise it stores the string in `d` and calls `deserial(j)` with the shared index `j = 0`.
-3. `deserial(i)` reads the number (digits and an optional `-`) starting at `i`, and creates a node from it.
-4. If the next character is `'L'`, skip `"L("`, build the left child recursively, then skip `')'`. Do the same for `'R'`. Return the node.
+**`serialize(root)`**
+
+1. Push `root` into a queue.
+2. Pop `node`. If it is null, append `#,`. Otherwise append `node->val` followed by `,`, and push `node->left` and `node->right`.
+3. Repeat until the queue is empty and return the string. An empty tree gives `"#,"`.
+
+**`deserialize(data)`**
+
+1. Split `data` on `,` with `getline`. Read the first token; if it is `#`, return `nullptr`. Otherwise create `root` and push it into a queue.
+2. While the queue is not empty, pop `node`, then read two tokens. For each, if it is not `#`, create a child with `stoi(token)`, attach it as `node->left` (first token) or `node->right` (second), and push it.
+3. Return `root`.
+
+### Walkthrough
+
+Example 1. The numbers in brackets are the BFS order in which each slot is written and read; `#` slots are the null children:
+
+```mermaid
+flowchart TD
+    A["1 (1)"] --> B["2 (2)"]
+    A --> C["3 (3)"]
+    B --> N1["# (4)"]
+    B --> N2["# (5)"]
+    C --> D["4 (6)"]
+    C --> E["5 (7)"]
+    D --> N3["# (8)"]
+    D --> N4["# (9)"]
+    E --> N5["# (10)"]
+    E --> N6["# (11)"]
+    classDef nil fill:#e9eaed,stroke:#b4b8bf,color:#5b6270
+    class N1,N2,N3,N4,N5,N6 nil
+```
+
+`serialize` produces `"1,2,3,#,#,4,5,#,#,#,#,"`. During `deserialize`, node `1` takes tokens `2` and `3`, node `2` takes `#,#`, node `3` takes `4,5`, and nodes `4` and `5` each take `#,#`.
 
 ### Complexity
 
-- **Time:** $O(n)$ — each node is written and parsed once, and node values have a bounded number of digits.
-- **Space:** $O(n)$ — the serialized string, plus an $O(h)$ recursion stack in both directions.
+- **Time:** $O(n)$ for both — every node and every null child (there are $n + 1$ of them) is pushed, written and read once.
+- **Space:** $O(n)$ — the queue and the output string. The string has $2n + 1$ tokens.
 
 ### Edge cases
 
-- **Negative values:** the parser accepts `'-'` as part of a number, so `-5L(3)` parses correctly.
+- **Empty tree** (Example 2): serialised as `"#,"`; the first token is `#`, so `deserialize` returns `nullptr`.
+- **Negative values:** written with `to_string` and read with `stoi`, so the sign survives; `#` never collides with a number.
+- **Very deep (list-shaped) tree:** both directions are iterative, so there is no recursion-depth risk.
 
 ## Code
 
 ```cpp title="C++"
 class Codec {
    public:
-    string s = "";
-    void serial(TreeNode* root) {
-        string a = to_string(root->val);
-        s += a;
-        if (root->left) {
-            s += "L(";
-            serial(root->left);
-            s.push_back(')');
-        }
-        if (root->right) {
-            s += "R(";
-            serial(root->right);
-            s.push_back(')');
-        }
-    }
-
     string serialize(TreeNode* root) {
-        if (!root) return "";
-        serial(root);
-        cout << s << "\n";
-        return s;
-    }
-
-    string d;
-    TreeNode* deserial(int& i) {
-        int j = i;
-        while ((d[j] >= '0' && d[j] <= '9') || d[j] == '-') j++;
-        string num(d.begin() + i, d.begin() + j);
-        int val = stoi(num);
-        TreeNode* root = new TreeNode(val);
-        i = j;
-        if (d[i] == 'L') {
-            i += 2;
-            root->left = deserial(i);
-            i++;
+        string out;
+        queue<TreeNode*> q;
+        q.push(root);
+        while (!q.empty()) {
+            TreeNode* node = q.front();
+            q.pop();
+            if (!node) {
+                out += "#,";
+                continue;
+            }
+            out += to_string(node->val) + ',';
+            q.push(node->left);
+            q.push(node->right);
         }
-        if (d[i] == 'R') {
-            i += 2;
-            root->right = deserial(i);
-            i++;
-        }
-        return root;
+        return out;
     }
 
     TreeNode* deserialize(string data) {
-        if (data.length() == 0) return NULL;
-        this->d = data;
-        int j = 0;
-        return deserial(j);
+        istringstream in(data);
+        string tok;
+        getline(in, tok, ',');
+        if (tok == "#") return nullptr;
+        TreeNode* root = new TreeNode(stoi(tok));
+        queue<TreeNode*> q;
+        q.push(root);
+        while (!q.empty()) {
+            TreeNode* node = q.front();
+            q.pop();
+            for (TreeNode** child : {&node->left, &node->right}) {
+                getline(in, tok, ',');
+                if (tok == "#") continue;
+                *child = new TreeNode(stoi(tok));
+                q.push(*child);
+            }
+        }
+        return root;
     }
 };
-
 ```

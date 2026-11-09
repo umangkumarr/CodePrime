@@ -1,79 +1,138 @@
 ---
 title: "Sudoku Solver"
-description: "Write a program to solve a Sudoku puzzle by filling the empty cells. A sudoku solution must satisfy all of the following rules: Each of the digits 1-9…"
+description: "Fill a 9 x 9 Sudoku grid by backtracking with bitmasks for rows, columns and boxes, always branching on the empty cell with the fewest candidates."
 source: "https://leetcode.com/problems/sudoku-solver/"
-tags: ["Array", "Backtracking", "Matrix"]
+difficulty: "Hard"
+tags: ["Array", "Hash Table", "Backtracking", "Matrix"]
 complexity:
   time: "O(9^m)"
-  space: "O(1)"
+  space: "O(m)"
 ---
 
 ## Problem
 
-<p>Write a program to solve a Sudoku puzzle by filling the empty cells.</p>
+Write a program to solve a Sudoku puzzle by filling the empty cells.
 
-<p>A sudoku solution must satisfy <strong>all of the following rules</strong>:</p>
+A sudoku solution must satisfy **all of the following rules**:
 
-<ol>
-	<li>Each of the digits <code>1-9</code> must occur exactly once in each row.</li>
-	<li>Each of the digits <code>1-9</code> must occur exactly once in each column.</li>
-	<li>Each of the digits <code>1-9</code> must occur exactly once in each of the 9 <code>3x3</code> sub-boxes of the grid.</li>
-</ol>
+1. Each of the digits `1-9` must occur exactly once in each row.
+2. Each of the digits `1-9` must occur exactly once in each column.
+3. Each of the digits `1-9` must occur exactly once in each of the 9 `3x3` sub-boxes of the grid.
 
-<p>The <code>&#39;.&#39;</code> character indicates empty cells.</p>
+The `'.'` character indicates empty cells.
+
+**Example 1:**
+
+![Sudoku puzzle with 30 given digits](https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Sudoku-by-L2G-20050714.svg/250px-Sudoku-by-L2G-20050714.svg.png)
+
+```text
+Input:  board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]
+Output: [["5","3","4","6","7","8","9","1","2"],["6","7","2","1","9","5","3","4","8"],["1","9","8","3","4","2","5","6","7"],["8","5","9","7","6","1","4","2","3"],["4","2","6","8","5","3","7","9","1"],["7","1","3","9","2","4","8","5","6"],["9","6","1","5","3","7","2","8","4"],["2","8","7","4","1","9","6","3","5"],["3","4","5","2","8","6","1","7","9"]]
+Explanation: The input board is shown above and the only valid solution is shown below.
+```
+
+![The solved Sudoku grid, with the filled-in digits in red](https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Sudoku-by-L2G-20050714_solution.svg/250px-Sudoku-by-L2G-20050714_solution.svg.png)
+
+**Constraints:**
+
+- `board.length == 9`
+- `board[i].length == 9`
+- `board[i][j]` is a digit or `'.'`.
+- It is **guaranteed** that the input board has only one solution.
 
 ## Solution approach
 
 ### Intuition
 
-Use backtracking: try every possible digit in each empty cell, and keep a choice only if the rest of the board can still be completed. A digit is allowed in a cell only if it does not already appear in the same row, column or 3x3 box, which prunes most branches early. The first complete assignment found is a valid solution.
+Sudoku is a constraint-satisfaction problem, and the standard exact method is **backtracking**: put a legal digit in an empty cell, recurse, and undo the choice if the recursion gets stuck. Two refinements make it fast:
+
+1. **Constant-time legality checks with bitmasks.** Keep `rows[r]`, `cols[c]` and `boxes[b]`, where bit `d` is set if digit `d + 1` is already used in that row, column or `3x3` box (`b = r / 3 * 3 + c / 3`). The digits still allowed in a cell are then the zero bits of `rows[r] | cols[c] | boxes[b]` — one expression instead of scanning 27 cells.
+2. **Most-constrained cell first.** Instead of filling cells in reading order, always branch on the empty cell with the **fewest** candidates. A cell with one candidate is forced (no branching at all), and a cell with zero candidates proves the current partial grid is dead, so we backtrack immediately. On typical puzzles, including the example, almost every step is forced and the search barely branches.
+
+The search is exhaustive over legal choices, so it is guaranteed to find the (unique) solution.
 
 ### Algorithm
 
-1. `solveSudoku(board, i, j)` walks the cells in row-major order. If `i == 9`, every row is filled, so return `true`. If `j == 9`, move on to row `i + 1`.
-2. If `board[i][j]` is already filled, recurse on the next cell.
-3. Otherwise try each character `c` from `'1'` to `'9'`. If `check(board, i, j, c)` passes, place `c` and recurse on the next cell; return `true` if that succeeds.
-4. If the recursion fails, reset the cell to `'.'` (backtrack) and try the next digit. Return `false` if no digit works.
-5. `check` scans column `j`, row `i`, and the 3x3 box starting at `(i - i % 3, j - j % 3)` for `val`.
+1. Scan the board: for each digit, set its bit in `rows`, `cols`, `boxes`; collect every `'.'` cell into `empties`.
+2. `solve(board, k)` fills `empties[k..]`:
+   - If `k == empties.size()`, every cell is filled: return `true`.
+   - Among `empties[k..]`, find the cell with the fewest candidates (`__builtin_popcount` of the candidate mask) and swap it into position `k`. If it has none, return `false`.
+   - For each candidate bit in its mask: place the digit (set the three bits, write the character), recurse with `k + 1`, and return `true` if that succeeds; otherwise clear the three bits and try the next candidate.
+   - If no candidate works, reset the cell to `'.'` and return `false`.
+
+### Walkthrough
+
+The first steps on Example 1. Blue is the cell chosen by the "fewest candidates" rule, green cells have been filled so far; every one of these steps has a single candidate, so nothing is guessed:
+
+![Most-constrained-cell backtracking on the example Sudoku](/img/codes/sudoku-solver/mrv.gif)
 
 ### Complexity
 
-- **Time:** $O(9^m)$ — where $m$ is the number of empty cells; each may try up to 9 digits, and each `check` costs $O(27)$, a constant.
-- **Space:** $O(1)$ — the recursion stack is at most 81 frames deep for a fixed 9x9 board.
+Let `m` be the number of empty cells (at most 81).
+
+- **Time:** $O(9^m)$ in the worst case — each empty cell has at most 9 choices. Each search node costs $O(m)$ to pick the most constrained cell. Because the grid is fixed at `9 x 9`, this is a constant bound in theory, and the pruning makes real puzzles finish in microseconds to milliseconds.
+- **Space:** $O(m)$ — the recursion depth and the `empties` list; the masks are 27 integers.
+
+### Edge cases
+
+- **Contradiction found early:** a cell with an empty candidate mask makes `solve` return `false` immediately, which cuts that whole branch.
+- **Board with no empty cells:** `empties` is empty and `solve` returns `true` at once.
 
 ## Code
 
 ```cpp title="C++"
 class Solution {
-   public:
-    bool check(vector<vector<char>>& board, int i, int j, char val) {
-        int row = i - i % 3, col = j - j % 3;
-        for (int k = 0; k < 9; k++)
-            if (board[k][j] == val) return false;
-        for (int k = 0; k < 9; k++)
-            if (board[i][k] == val) return false;
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 3; y++) {
-                if (board[x + row][y + col] == val) return false;
-            }
-        }
-        return true;
+    int rows[9] = {}, cols[9] = {}, boxes[9] = {};  // bit d set => digit d + 1 is used
+    vector<pair<int, int>> empties;
+
+    static int box(int r, int c) { return r / 3 * 3 + c / 3; }
+    int candidates(int r, int c) const { return ~(rows[r] | cols[c] | boxes[box(r, c)]) & 0x1FF; }
+
+    void toggle(int r, int c, int bit) {
+        rows[r] ^= bit;
+        cols[c] ^= bit;
+        boxes[box(r, c)] ^= bit;
     }
 
-    bool solveSudoku(vector<vector<char>>& board, int i = 0, int j = 0) {
-        if (i == 9) return true;
-        if (j == 9) return solveSudoku(board, i + 1, 0);
-        if (board[i][j] != '.') return solveSudoku(board, i, j + 1);
+    bool solve(vector<vector<char>>& board, int k) {
+        if (k == (int)empties.size()) return true;
 
-        for (char c = '1'; c <= '9'; c++) {
-            if (check(board, i, j, c)) {
-                board[i][j] = c;
-                if (solveSudoku(board, i, j + 1)) return true;
-                board[i][j] = '.';
+        // Branch on the empty cell with the fewest legal digits.
+        int best = k, bestCount = 10;
+        for (int t = k; t < (int)empties.size(); t++) {
+            int cnt = __builtin_popcount(candidates(empties[t].first, empties[t].second));
+            if (cnt < bestCount) {
+                bestCount = cnt;
+                best = t;
             }
         }
+        if (bestCount == 0) return false;
+        swap(empties[k], empties[best]);
+
+        auto [r, c] = empties[k];
+        for (int mask = candidates(r, c); mask; mask &= mask - 1) {
+            int bit = mask & -mask;
+            toggle(r, c, bit);
+            board[r][c] = '1' + __builtin_ctz(bit);
+            if (solve(board, k + 1)) return true;
+            toggle(r, c, bit);
+        }
+        board[r][c] = '.';
         return false;
     }
-};
 
+   public:
+    void solveSudoku(vector<vector<char>>& board) {
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (board[r][c] == '.') {
+                    empties.push_back({r, c});
+                } else {
+                    toggle(r, c, 1 << (board[r][c] - '1'));
+                }
+            }
+        }
+        solve(board, 0);
+    }
+};
 ```

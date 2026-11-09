@@ -1,45 +1,84 @@
 ---
 title: "Maximum Product Subarray"
-description: "Given an integer array nums, find a contiguous non-empty subarray within the array that has the largest product, and return the product. The test cases…"
+description: "Find the largest product of a non-empty subarray in one pass by tracking both the maximum and the minimum product of subarrays ending at each index."
 source: "https://leetcode.com/problems/maximum-product-subarray/"
+difficulty: "Medium"
 tags: ["Array", "Dynamic Programming"]
 complexity:
   time: "O(n)"
-  space: "O(n)"
+  space: "O(1)"
 ---
 
 ## Problem
 
-<p>Given an integer array <code>nums</code>, find a contiguous non-empty subarray within the array that has the largest product, and return <em>the product</em>.</p>
+Given an integer array `nums`, find a subarray that has the largest product, and return _the product_.
 
-<p>The test cases are generated so that the answer will fit in a <strong>32-bit</strong> integer.</p>
+The test cases are generated so that the answer will fit in a **32-bit** integer.
 
-<p>A <strong>subarray</strong> is a contiguous subsequence of the array.</p>
+**Note** that the product of an array with a single element is the value of that element.
+
+**Example 1:**
+
+```text
+Input:  nums = [2,3,-2,4]
+Output: 6
+Explanation: [2,3] has the largest product 6.
+```
+
+**Example 2:**
+
+```text
+Input:  nums = [-2,0,-1]
+Output: 0
+Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+```
+
+**Constraints:**
+
+- $1 \le$ `nums.length` $\le 2 \times 10^4$
+- $-10 \le$ `nums[i]` $\le 10$
+- The product of any subarray of `nums` is **guaranteed** to fit in a **32-bit** integer.
 
 ## Solution approach
 
 ### Intuition
 
-Zeros split the array into independent segments, because any subarray that crosses a zero has product `0`. Inside a zero-free segment every value has absolute value at least `1`, so the product of the prefix ending at `i` has the largest absolute value among all subarrays ending at `i`.
+For maximum **sum** (Kadane's algorithm) it is enough to remember the best sum ending at the previous index. For products that is not enough, because multiplying by a negative number turns the largest product into the smallest and the smallest (most negative) into the largest. A very negative product is therefore valuable: one more negative factor can make it the new maximum.
 
-If that prefix product is positive, it is the best subarray ending at `i`. If it is negative, remove the shortest prefix that contains exactly one negative number: dividing by the prefix product up to the first negative of the segment flips the sign and keeps as many elements as possible.
+So for every index `i` keep two values:
+
+- `hi` — the largest product of a subarray ending at `i`,
+- `lo` — the smallest product of a subarray ending at `i`.
+
+A subarray ending at `i` is either `nums[i]` alone or a subarray ending at `i - 1` extended by `nums[i]`. Multiplying by `x` is monotonic: increasing when `x > 0`, decreasing when `x < 0`. So the extremes of the extended products come from the previous extremes — from `hi` and `lo` respectively when `x >= 0`, and swapped when `x < 0`.
 
 ### Algorithm
 
-1. Walk the array while keeping the running product `prod` of the current zero-free segment and `p`, the index of the segment's first negative number (`INT_MIN` if none yet).
-2. On a zero, store `dp[i] = {0, INT_MIN}` and reset `prod` and `p`.
-3. Otherwise multiply `prod` by `nums[i]` and store `dp[i] = {prod, p}`. Only after that, if `nums[i]` is the first negative of the segment, set `p = i`, so `dp[i].second` always points to a negative strictly before `i`.
-4. In a second pass, update `ans` with `dp[i].first`. When it is negative and `dp[i].second` exists, also try `dp[i].first / dp[dp[i].second].first`, which is the product of the elements after that first negative.
+1. Initialise `best = hi = lo = nums[0]`.
+2. For each later element `x = nums[i]`:
+   - If `x < 0`, swap `hi` and `lo` (multiplying by a negative reverses the order).
+   - `hi = max(x, hi * x)` and `lo = min(x, lo * x)` — either start fresh at `x` or extend.
+   - `best = max(best, hi)`.
+3. Return `best`.
+
+A zero needs no special handling: it makes `hi = lo = 0`, and the next element then starts a fresh subarray through the `max(x, ...)` / `min(x, ...)` choice.
+
+### Walkthrough
+
+On `[2,-5,-2,-4,3]` the answer is `24` from `[-2,-4,3]`. Notice how the most negative product `lo` becomes the maximum after the next negative factor:
+
+![hi and lo tracked over [2,-5,-2,-4,3]](/img/codes/maximum-product-subarray/max-min.gif)
 
 ### Complexity
 
-- **Time:** $O(n)$ — two linear passes.
-- **Space:** $O(n)$ — the `dp` array of pairs.
+- **Time:** $O(n)$ — one pass with constant work per element.
+- **Space:** $O(1)$ — three integers.
 
 ### Edge cases
 
-- **A single negative number** such as `[-2]`: no earlier negative exists, so the answer is `-2` itself.
-- **Zeros**: their `dp` entry is `0`, so `ans` is at least `0` whenever the array contains a zero.
+- **Single element**, e.g. `[-2]`: the loop does not run and `best = -2`.
+- **Zeros**, e.g. `[-2,0,-1]`: after the `0`, `hi = 0`, so `best` is at least `0`; `-1` alone cannot beat it.
+- **Overflow:** every value of `hi`, `lo` and `hi * x`, `lo * x` is the product of some subarray, which the constraints guarantee fits in an `int`.
 
 ## Code
 
@@ -47,34 +86,15 @@ If that prefix product is positive, it is the best subarray ending at `i`. If it
 class Solution {
    public:
     int maxProduct(vector<int>& nums) {
-        int prod = 1;
-        int n = nums.size(), p = INT_MIN;
-        vector<pair<int, int>> dp(n);
-
-        for (int i = 0; i < n; i++) {
-            if (nums[i] == 0) {
-                p = INT_MIN;
-                dp[i] = {0, p};
-                prod = 1;
-                continue;
-            }
-            prod *= nums[i];
-            dp[i] = {prod, p};
-            if (nums[i] < 0 && p == INT_MIN) p = i;
+        int best = nums[0], hi = nums[0], lo = nums[0];
+        for (int i = 1; i < (int)nums.size(); ++i) {
+            int x = nums[i];
+            if (x < 0) swap(hi, lo);
+            hi = max(x, hi * x);
+            lo = min(x, lo * x);
+            best = max(best, hi);
         }
-        int ans = INT_MIN;
-        for (int i = 0; i < n; i++) {
-            if (dp[i].first < 0) {
-                if (dp[i].second != INT_MIN) {
-                    ans = max(ans, dp[i].first / dp[dp[i].second].first);
-                }
-                ans = max(ans, dp[i].first);
-            } else {
-                ans = max(ans, dp[i].first);
-            }
-        }
-        return ans;
+        return best;
     }
 };
-
 ```
