@@ -9,6 +9,7 @@ import rehypeKatex from 'rehype-katex';
 
 import rehypeProblemLayout from './src/plugins/rehype-problem-layout.mjs';
 import rehypeBaseLinks from './src/plugins/rehype-base-links.mjs';
+import remarkCodeTabs from './src/plugins/remark-code-tabs.mjs';
 import {withGroupOverviews} from './src/lib/tracks.mjs';
 import sidebar from './src/data/sidebar.json' with {type: 'json'};
 import redirects from './src/data/redirects.json' with {type: 'json'};
@@ -27,7 +28,7 @@ export default defineConfig({
 
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath],
+      remarkPlugins: [remarkMath, remarkCodeTabs],
       rehypePlugins: [rehypeKatex, rehypeProblemLayout, [rehypeBaseLinks, {base: BASE}]],
     }),
   },
