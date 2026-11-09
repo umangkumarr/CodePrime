@@ -72,7 +72,7 @@ Looping one position past the end (`i <= paragraph.size()`) treats the end of th
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string mostCommonWord(string paragraph, vector<string>& banned) {
@@ -94,4 +94,47 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public String mostCommonWord(String paragraph, String[] banned) {
+        Set<String> ban = new HashSet<>(Arrays.asList(banned));
+        Map<String, Integer> count = new HashMap<>();
+        StringBuilder word = new StringBuilder();
+        String best = "";
+        int bestCount = 0;
+        for (int i = 0; i <= paragraph.length(); i++) {
+            char c = i < paragraph.length() ? paragraph.charAt(i) : ' ';
+            if (Character.isLetter(c)) {
+                word.append(Character.toLowerCase(c));
+                continue;
+            }
+            if (word.length() > 0) {
+                String w = word.toString();
+                if (!ban.contains(w)) {
+                    int cnt = count.merge(w, 1, Integer::sum);
+                    if (cnt > bestCount) {
+                        bestCount = cnt;
+                        best = w;
+                    }
+                }
+                word.setLength(0);
+            }
+        }
+        return best;
+    }
+}
+```
+
+```python
+import re
+from collections import Counter
+
+
+class Solution:
+    def mostCommonWord(self, paragraph: str, banned: list[str]) -> str:
+        ban = set(banned)
+        count = Counter(w for w in re.findall(r"[a-z]+", paragraph.lower()) if w not in ban)
+        return count.most_common(1)[0][0]
 ```

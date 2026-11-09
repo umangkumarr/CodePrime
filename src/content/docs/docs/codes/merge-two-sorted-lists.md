@@ -84,7 +84,7 @@ Orange cells are the two heads being compared, grey cells have already been spli
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
@@ -104,4 +104,41 @@ class Solution {
         return dummy.next;
     }
 };
+```
+
+```java
+class Solution {
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode();
+        ListNode tail = dummy;
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                tail.next = list1;
+                list1 = list1.next;
+            } else {
+                tail.next = list2;
+                list2 = list2.next;
+            }
+            tail = tail.next;
+        }
+        tail.next = list1 != null ? list1 : list2;
+        return dummy.next;
+    }
+}
+```
+
+```python
+class Solution:
+    def mergeTwoLists(self, list1: ListNode | None, list2: ListNode | None) -> ListNode | None:
+        dummy = tail = ListNode()
+        while list1 and list2:
+            if list1.val <= list2.val:
+                tail.next = list1
+                list1 = list1.next
+            else:
+                tail.next = list2
+                list2 = list2.next
+            tail = tail.next
+        tail.next = list1 or list2
+        return dummy.next
 ```

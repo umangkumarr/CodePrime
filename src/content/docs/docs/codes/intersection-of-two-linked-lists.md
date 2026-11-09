@@ -127,7 +127,7 @@ Each pointer switches lists at most once, so the loop takes at most `m + n + 1` 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
@@ -139,4 +139,27 @@ class Solution {
         return p;
     }
 };
+```
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode p = headA, q = headB;
+        while (p != q) {
+            p = p != null ? p.next : headB;
+            q = q != null ? q.next : headA;
+        }
+        return p;
+    }
+}
+```
+
+```python
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        p, q = headA, headB
+        while p is not q:
+            p = p.next if p else headB
+            q = q.next if q else headA
+        return p
 ```

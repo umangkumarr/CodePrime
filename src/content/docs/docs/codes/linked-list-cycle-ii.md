@@ -106,7 +106,7 @@ Read it as a statement about walking: **`a` steps from `head` reach the entry, a
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode *detectCycle(ListNode *head) {
@@ -126,4 +126,41 @@ class Solution {
         return nullptr;
     }
 };
+```
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                slow = head;
+                while (slow != fast) {
+                    slow = slow.next;
+                    fast = fast.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
+}
+```
+
+```python
+class Solution:
+    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow = fast = head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow is fast:
+                slow = head
+                while slow is not fast:
+                    slow = slow.next
+                    fast = fast.next
+                return slow
+        return None
 ```

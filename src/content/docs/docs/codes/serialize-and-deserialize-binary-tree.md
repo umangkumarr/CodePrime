@@ -60,8 +60,8 @@ BFS is also iterative, so a degenerate tree with $10^4$ levels needs no deep rec
 
 **`deserialize(data)`**
 
-1. Split `data` on `,` with `getline`. Read the first token; if it is `#`, return `nullptr`. Otherwise create `root` and push it into a queue.
-2. While the queue is not empty, pop `node`, then read two tokens. For each, if it is not `#`, create a child with `stoi(token)`, attach it as `node->left` (first token) or `node->right` (second), and push it.
+1. Split `data` on `,`. Read the first token; if it is `#`, return `nullptr`. Otherwise create `root` and push it into a queue.
+2. While the queue is not empty, pop `node`, then read two tokens. For each, if it is not `#`, create a child from the token's integer value, attach it as `node->left` (first token) or `node->right` (second), and push it.
 3. Return `root`.
 
 ### Walkthrough
@@ -93,13 +93,13 @@ flowchart TD
 
 ### Edge cases
 
-- **Empty tree** (Example 2): serialised as `"#,"`; the first token is `#`, so `deserialize` returns `nullptr`.
-- **Negative values:** written with `to_string` and read with `stoi`, so the sign survives; `#` never collides with a number.
+- **Empty tree** (Example 2): serialised as `"#,"` (the Python version joins tokens with commas, so it writes `"#"`); the first token is `#`, so `deserialize` returns an empty tree.
+- **Negative values:** written and parsed as signed integers, so the sign survives; `#` never collides with a number.
 - **Very deep (list-shaped) tree:** both directions are iterative, so there is no recursion-depth risk.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Codec {
    public:
     string serialize(TreeNode* root) {
@@ -141,4 +141,96 @@ class Codec {
         return root;
     }
 };
+```
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder out = new StringBuilder();
+        // ArrayDeque rejects nulls, so a missing child is written as "#" without being queued.
+        ArrayDeque<TreeNode> q = new ArrayDeque<>();
+        out.append(root == null ? "#" : root.val).append(',');
+        if (root != null) q.offer(root);
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            for (TreeNode child : new TreeNode[] {node.left, node.right}) {
+                if (child == null) {
+                    out.append("#,");
+                    continue;
+                }
+                out.append(child.val).append(',');
+                q.offer(child);
+            }
+        }
+        return out.toString();
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String[] tok = data.split(",");
+        int t = 0;
+        if (tok[t].equals("#")) return null;
+        TreeNode root = new TreeNode(Integer.parseInt(tok[t++]));
+        ArrayDeque<TreeNode> q = new ArrayDeque<>();
+        q.offer(root);
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            String l = tok[t++], r = tok[t++];
+            if (!l.equals("#")) q.offer(node.left = new TreeNode(Integer.parseInt(l)));
+            if (!r.equals("#")) q.offer(node.right = new TreeNode(Integer.parseInt(r)));
+        }
+        return root;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Codec:
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+
+        :type root: TreeNode
+        :rtype: str
+        """
+        out = []
+        q = deque([root])
+        while q:
+            node = q.popleft()
+            if not node:
+                out.append('#')
+                continue
+            out.append(str(node.val))
+            q.append(node.left)
+            q.append(node.right)
+        return ','.join(out)
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+
+        :type data: str
+        :rtype: TreeNode
+        """
+        tokens = iter(data.split(','))
+        tok = next(tokens)
+        if tok == '#':
+            return None
+        root = TreeNode(int(tok))
+        q = deque([root])
+        while q:
+            node = q.popleft()
+            tok = next(tokens)
+            if tok != '#':
+                node.left = TreeNode(int(tok))
+                q.append(node.left)
+            tok = next(tokens)
+            if tok != '#':
+                node.right = TreeNode(int(tok))
+                q.append(node.right)
+        return root
 ```

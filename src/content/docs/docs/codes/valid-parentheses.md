@@ -99,7 +99,7 @@ Example 4, `"([])"`, pushes `(` and `[`, then `]` pops `[` and `)` pops `(`, lea
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool isValid(string s) {
@@ -116,4 +116,34 @@ class Solution {
         return st.empty();
     }
 };
+```
+
+```java
+class Solution {
+    public boolean isValid(String s) {
+        ArrayDeque<Character> st = new ArrayDeque<>();
+        for (char c : s.toCharArray()) {
+            if (c == '(' || c == '[' || c == '{') {
+                st.push(c);
+            } else {
+                char open = c == ')' ? '(' : c == ']' ? '[' : '{';
+                if (st.isEmpty() || st.pop() != open) return false;
+            }
+        }
+        return st.isEmpty();
+    }
+}
+```
+
+```python
+class Solution:
+    def isValid(self, s: str) -> bool:
+        match = {')': '(', ']': '[', '}': '{'}
+        stack = []
+        for c in s:
+            if c in '([{':
+                stack.append(c)
+            elif not stack or stack.pop() != match[c]:
+                return False
+        return not stack
 ```

@@ -75,7 +75,7 @@ An alternative that also works for streaming input is a max-heap of size `k` key
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
@@ -87,4 +87,83 @@ class Solution {
         return vector<vector<int>>(points.begin(), points.begin() + k);
     }
 };
+```
+
+```java
+class Solution {
+    private final Random rng = new Random();
+
+    public int[][] kClosest(int[][] points, int k) {
+        // Quickselect: afterwards points[0..k) are the k closest, in some order.
+        int lo = 0, hi = points.length - 1;
+        while (lo < hi) {
+            int pivot = dist(points[lo + rng.nextInt(hi - lo + 1)]);
+            // [lo, lt) < pivot, [lt, i) == pivot, (gt, hi] > pivot
+            int lt = lo, i = lo, gt = hi;
+            while (i <= gt) {
+                int d = dist(points[i]);
+                if (d < pivot) {
+                    swap(points, lt++, i++);
+                } else if (d > pivot) {
+                    swap(points, i, gt--);
+                } else {
+                    i++;
+                }
+            }
+            if (k < lt) {
+                hi = lt - 1;
+            } else if (k > gt + 1) {
+                lo = gt + 1;
+            } else {
+                break;
+            }
+        }
+        return Arrays.copyOf(points, k);
+    }
+
+    private static int dist(int[] p) {
+        return p[0] * p[0] + p[1] * p[1];
+    }
+
+    private static void swap(int[][] a, int i, int j) {
+        int[] t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
+}
+```
+
+```python
+import random
+
+
+class Solution:
+    def kClosest(self, points: list[list[int]], k: int) -> list[list[int]]:
+        def dist(p):
+            return p[0] * p[0] + p[1] * p[1]
+
+        # Quickselect: afterwards points[:k] are the k closest, in some order.
+        lo, hi = 0, len(points) - 1
+        while lo < hi:
+            pivot = dist(points[random.randint(lo, hi)])
+            # [lo, lt) < pivot, [lt, i) == pivot, (gt, hi] > pivot
+            lt, i, gt = lo, lo, hi
+            while i <= gt:
+                d = dist(points[i])
+                if d < pivot:
+                    points[lt], points[i] = points[i], points[lt]
+                    lt += 1
+                    i += 1
+                elif d > pivot:
+                    points[i], points[gt] = points[gt], points[i]
+                    gt -= 1
+                else:
+                    i += 1
+            if k < lt:
+                hi = lt - 1
+            elif k > gt + 1:
+                lo = gt + 1
+            else:
+                break
+        return points[:k]
 ```

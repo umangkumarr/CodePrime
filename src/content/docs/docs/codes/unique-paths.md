@@ -110,6 +110,28 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Dynamic programming"
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[] dp = new int[n];  // dp[j] = paths to column j of the current row
+        Arrays.fill(dp, 1);
+        for (int i = 1; i < m; i++)
+            for (int j = 1; j < n; j++) dp[j] += dp[j - 1];
+        return dp[n - 1];
+    }
+}
+```
+
+```python title="Approach 1: Dynamic programming"
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [1] * n  # dp[j] = paths to column j of the current row
+        for _ in range(1, m):
+            for j in range(1, n):
+                dp[j] += dp[j - 1]
+        return dp[-1]
+```
+
 ```cpp title="Approach 2: Combinatorics"
 class Solution {
    public:
@@ -122,4 +144,28 @@ class Solution {
         return (int)ans;
     }
 };
+```
+
+```java title="Approach 2: Combinatorics"
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int total = m + n - 2;
+        int k = Math.min(m, n) - 1;
+        long ans = 1;
+        for (int i = 1; i <= k; i++)
+            ans = ans * (total - k + i) / i;  // now ans == C(total - k + i, i)
+        return (int) ans;
+    }
+}
+```
+
+```python title="Approach 2: Combinatorics"
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        total = m + n - 2
+        k = min(m, n) - 1
+        ans = 1
+        for i in range(1, k + 1):
+            ans = ans * (total - k + i) // i  # now ans == C(total - k + i, i)
+        return ans
 ```

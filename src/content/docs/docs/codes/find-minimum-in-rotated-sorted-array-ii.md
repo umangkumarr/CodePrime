@@ -85,7 +85,7 @@ Use the same binary search as in the version without duplicates: compare `nums[m
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findMin(vector<int>& nums) {
@@ -102,4 +102,37 @@ class Solution {
         return nums[lo];
     }
 };
+```
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] > nums[hi])
+                lo = mid + 1;
+            else if (nums[mid] < nums[hi])
+                hi = mid;
+            else
+                hi--;  // nums[hi] has a copy at mid, so dropping hi is safe
+        }
+        return nums[lo];
+    }
+}
+```
+
+```python
+class Solution:
+    def findMin(self, nums: list[int]) -> int:
+        lo, hi = 0, len(nums) - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if nums[mid] > nums[hi]:
+                lo = mid + 1
+            elif nums[mid] < nums[hi]:
+                hi = mid
+            else:
+                hi -= 1  # nums[hi] has a copy at mid, so dropping hi is safe
+        return nums[lo]
 ```

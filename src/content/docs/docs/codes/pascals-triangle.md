@@ -66,7 +66,7 @@ Row `i - 1` is complete before row `i` starts, so building the rows top to botto
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> generate(int numRows) {
@@ -80,4 +80,37 @@ class Solution {
         return triangle;
     }
 };
+```
+
+```java
+class Solution {
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> triangle = new ArrayList<>(numRows);
+        for (int i = 0; i < numRows; i++) {
+            List<Integer> row = new ArrayList<>(i + 1);
+            for (int j = 0; j <= i; j++) {
+                if (j == 0 || j == i) {
+                    row.add(1);
+                } else {
+                    List<Integer> above = triangle.get(i - 1);
+                    row.add(above.get(j - 1) + above.get(j));
+                }
+            }
+            triangle.add(row);
+        }
+        return triangle;
+    }
+}
+```
+
+```python
+class Solution:
+    def generate(self, numRows: int) -> list[list[int]]:
+        triangle = []
+        for i in range(numRows):
+            row = [1] * (i + 1)
+            for j in range(1, i):
+                row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j]
+            triangle.append(row)
+        return triangle
 ```

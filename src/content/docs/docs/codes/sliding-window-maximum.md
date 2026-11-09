@@ -86,7 +86,7 @@ Example 1. The blue cell is the new element `i`, orange cells are the indices st
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> maxSlidingWindow(vector<int>& nums, int k) {
@@ -101,4 +101,39 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        ArrayDeque<Integer> dq = new ArrayDeque<>();  // indices; their values are strictly decreasing
+        int[] ans = new int[nums.length - k + 1];
+        for (int i = 0; i < nums.length; i++) {
+            if (!dq.isEmpty() && dq.peekFirst() == i - k) dq.pollFirst();
+            while (!dq.isEmpty() && nums[dq.peekLast()] <= nums[i]) dq.pollLast();
+            dq.offerLast(i);
+            if (i >= k - 1) ans[i - k + 1] = nums[dq.peekFirst()];
+        }
+        return ans;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def maxSlidingWindow(self, nums: list[int], k: int) -> list[int]:
+        dq = deque()  # indices; their values are strictly decreasing
+        ans = []
+        for i, x in enumerate(nums):
+            if dq and dq[0] == i - k:
+                dq.popleft()
+            while dq and nums[dq[-1]] <= x:
+                dq.pop()
+            dq.append(i)
+            if i >= k - 1:
+                ans.append(nums[dq[0]])
+        return ans
 ```

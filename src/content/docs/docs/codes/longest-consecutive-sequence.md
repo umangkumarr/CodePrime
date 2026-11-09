@@ -84,7 +84,7 @@ The answer is `4`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int longestConsecutive(vector<int>& nums) {
@@ -99,4 +99,36 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> seen = new HashSet<>();
+        for (int x : nums) seen.add(x);
+        int best = 0;
+        for (int x : seen) {
+            if (seen.contains(x - 1)) continue;  // not the start of a run
+            int end = x + 1;  // |x| <= 10^9, so x - 1 and x + 1 fit in an int
+            while (seen.contains(end)) end++;
+            best = Math.max(best, end - x);
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def longestConsecutive(self, nums: list[int]) -> int:
+        seen = set(nums)
+        best = 0
+        for x in seen:
+            if x - 1 in seen:
+                continue  # not the start of a run
+            end = x + 1
+            while end in seen:
+                end += 1
+            best = max(best, end - x)
+        return best
 ```

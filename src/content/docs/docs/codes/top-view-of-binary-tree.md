@@ -51,7 +51,7 @@ Give every node a **horizontal distance** (column): the root is column `0`, a le
 
 A level-order traversal (BFS) visits nodes in increasing depth, and within one depth from left to right. So the **first** node BFS reaches in a column is the topmost one (and among equally deep nodes, the leftmost, which is the convention the judge uses). We just record a column's value the first time we see it and ignore later nodes.
 
-Columns are contiguous and lie in `[-(n - 1), n - 1]`, so instead of an ordered map we can store them in a vector `top` indexed by `col + n` and remember the smallest and largest column seen; reading `top[minCol + n .. maxCol + n]` gives the answer in left-to-right order without sorting.
+Columns are contiguous and lie in `[-(n - 1), n - 1]`, so instead of an ordered map we can store them in an array `top` indexed by `col + n` and remember the smallest and largest column seen; reading `top[minCol + n .. maxCol + n]` gives the answer in left-to-right order without sorting.
 
 A depth-first version needs a depth comparison per column to be correct, and on a skewed tree of $10^5$ nodes its recursion can overflow the stack; BFS has neither problem.
 
@@ -96,7 +96,7 @@ Reading columns `-2 .. 2` gives `[40, 20, 10, 30, 100]`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> topView(Node *root) {
@@ -132,4 +132,87 @@ class Solution {
         return vector<int>(top.begin() + minCol + n, top.begin() + maxCol + n + 1);
     }
 };
+```
+
+```java
+class Solution {
+    public ArrayList<Integer> topView(Node root) {
+        ArrayList<Integer> ans = new ArrayList<>();
+        if (root == null) return ans;
+
+        int n = 0;  // number of nodes: columns lie in [-(n - 1), n - 1]
+        ArrayDeque<Node> nodes = new ArrayDeque<>();
+        nodes.offer(root);
+        while (!nodes.isEmpty()) {
+            Node cur = nodes.poll();
+            n++;
+            if (cur.left != null) nodes.offer(cur.left);
+            if (cur.right != null) nodes.offer(cur.right);
+        }
+
+        int[] top = new int[2 * n + 1];  // top[col + n] = first value seen in that column
+        Arrays.fill(top, -1);
+        int minCol = 0, maxCol = 0;
+        ArrayDeque<Node> q = new ArrayDeque<>();
+        ArrayDeque<Integer> cols = new ArrayDeque<>();  // column of the matching node in q
+        q.offer(root);
+        cols.offer(0);
+        while (!q.isEmpty()) {
+            Node cur = q.poll();
+            int col = cols.poll();
+            if (top[col + n] == -1) {
+                top[col + n] = cur.data;
+                minCol = Math.min(minCol, col);
+                maxCol = Math.max(maxCol, col);
+            }
+            if (cur.left != null) {
+                q.offer(cur.left);
+                cols.offer(col - 1);
+            }
+            if (cur.right != null) {
+                q.offer(cur.right);
+                cols.offer(col + 1);
+            }
+        }
+
+        for (int c = minCol; c <= maxCol; c++) ans.add(top[c + n]);
+        return ans;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def topView(self, root):
+        if not root:
+            return []
+
+        n = 0  # number of nodes: columns lie in [-(n - 1), n - 1]
+        nodes = deque([root])
+        while nodes:
+            cur = nodes.popleft()
+            n += 1
+            if cur.left:
+                nodes.append(cur.left)
+            if cur.right:
+                nodes.append(cur.right)
+
+        top = [-1] * (2 * n + 1)  # top[col + n] = first value seen in that column
+        min_col = max_col = 0
+        q = deque([(root, 0)])
+        while q:
+            cur, col = q.popleft()
+            if top[col + n] == -1:
+                top[col + n] = cur.data
+                min_col = min(min_col, col)
+                max_col = max(max_col, col)
+            if cur.left:
+                q.append((cur.left, col - 1))
+            if cur.right:
+                q.append((cur.right, col + 1))
+
+        return top[min_col + n:max_col + n + 1]
 ```

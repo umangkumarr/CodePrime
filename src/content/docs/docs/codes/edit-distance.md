@@ -89,7 +89,7 @@ The full table for Example 1 (`word1` down the side, `word2` across the top), fi
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int minDistance(string word1, string word2) {
@@ -112,4 +112,47 @@ class Solution {
         return dp[n];
     }
 };
+```
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+        int m = word1.length(), n = word2.length();
+        int[] dp = new int[n + 1];
+        for (int j = 0; j <= n; j++) dp[j] = j;  // row 0: insert j characters
+
+        for (int i = 1; i <= m; i++) {
+            int diag = dp[0];  // dp[i-1][j-1]
+            dp[0] = i;         // delete i characters
+            for (int j = 1; j <= n; j++) {
+                int up = dp[j];  // dp[i-1][j]
+                if (word1.charAt(i - 1) == word2.charAt(j - 1))
+                    dp[j] = diag;
+                else
+                    dp[j] = 1 + Math.min(diag, Math.min(up, dp[j - 1]));
+                diag = up;
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+```python
+class Solution:
+    def minDistance(self, word1: str, word2: str) -> int:
+        n = len(word2)
+        dp = list(range(n + 1))  # row 0: insert j characters
+
+        for i, a in enumerate(word1, 1):
+            diag = dp[0]  # dp[i-1][j-1]
+            dp[0] = i     # delete i characters
+            for j in range(1, n + 1):
+                up = dp[j]  # dp[i-1][j]
+                if a == word2[j - 1]:
+                    dp[j] = diag
+                else:
+                    dp[j] = 1 + min(diag, up, dp[j - 1])
+                diag = up
+        return dp[n]
 ```

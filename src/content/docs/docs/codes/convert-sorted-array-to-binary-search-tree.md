@@ -57,7 +57,7 @@ When the range has even length there are two middle elements and either works. T
 
 1. Call `build(nums, 0, n - 1)`.
 2. In `build(nums, start, end)`:
-   - If `start > end`, the range is empty: return `nullptr`.
+   - If `start > end`, the range is empty: return null.
    - Let `mid = start + (end - start + 1) / 2` and create `root` from `nums[mid]`.
    - `root->left = build(nums, start, mid - 1)` and `root->right = build(nums, mid + 1, end)`.
    - Return `root`.
@@ -91,7 +91,7 @@ This is `[0,-3,9,-10,null,5]`, the expected output.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     TreeNode* build(const vector<int>& nums, int start, int end) {
         if (start > end) return nullptr;
@@ -107,4 +107,36 @@ class Solution {
         return build(nums, 0, (int)nums.size() - 1);
     }
 };
+```
+
+```java
+class Solution {
+    private TreeNode build(int[] nums, int start, int end) {
+        if (start > end) return null;
+        int mid = start + (end - start + 1) / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = build(nums, start, mid - 1);
+        root.right = build(nums, mid + 1, end);
+        return root;
+    }
+
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return build(nums, 0, nums.length - 1);
+    }
+}
+```
+
+```python
+class Solution:
+    def sortedArrayToBST(self, nums: list[int]) -> TreeNode | None:
+        def build(start, end):
+            if start > end:
+                return None
+            mid = (start + end + 1) // 2
+            root = TreeNode(nums[mid])
+            root.left = build(start, mid - 1)
+            root.right = build(mid + 1, end)
+            return root
+
+        return build(0, len(nums) - 1)
 ```

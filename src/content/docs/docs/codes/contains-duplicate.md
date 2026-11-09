@@ -51,7 +51,7 @@ Comparing every pair is $O(n^2)$. Instead, scan the array once and remember ever
 
 ### Algorithm
 
-1. Create an empty `unordered_set<int> seen`, reserving room for `nums.size()` values to avoid rehashing.
+1. Create an empty hash set `seen`, reserving room for all `n` values to avoid rehashing.
 2. For each `x` in `nums`: try to insert it. `insert` returns `false` in `.second` when `x` was already present — return `true`.
 3. If the loop finishes, all values were distinct: return `false`.
 
@@ -70,7 +70,7 @@ For Example 1, `1`, `2`, `3` are inserted, then inserting the second `1` fails a
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool containsDuplicate(vector<int>& nums) {
@@ -82,4 +82,27 @@ class Solution {
         return false;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean containsDuplicate(int[] nums) {
+        Set<Integer> seen = new HashSet<>(nums.length * 2);
+        for (int x : nums) {
+            if (!seen.add(x)) return true;
+        }
+        return false;
+    }
+}
+```
+
+```python
+class Solution:
+    def containsDuplicate(self, nums: list[int]) -> bool:
+        seen = set()
+        for x in nums:
+            if x in seen:
+                return True
+            seen.add(x)
+        return False
 ```

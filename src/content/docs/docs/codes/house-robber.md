@@ -78,7 +78,7 @@ Example 2, `nums = [2,7,9,3,1]`. The second row is `best(i)`; blue is the house 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     int rob(vector<int>& nums) {
@@ -91,4 +91,27 @@ class Solution {
         return prev1;
     }
 };
+```
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int prev2 = 0, prev1 = 0;  // best totals up to house i - 2 and up to house i - 1
+        for (int x : nums) {
+            int cur = Math.max(prev1, prev2 + x);
+            prev2 = prev1;
+            prev1 = cur;
+        }
+        return prev1;
+    }
+}
+```
+
+```python
+class Solution:
+    def rob(self, nums: list[int]) -> int:
+        prev2 = prev1 = 0  # best totals up to house i - 2 and up to house i - 1
+        for x in nums:
+            prev2, prev1 = prev1, max(prev1, prev2 + x)
+        return prev1
 ```

@@ -92,7 +92,7 @@ The table for Example 2 after each coin is processed (green cells changed in tha
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int minCoins(vector<int>& coins, int sum) {
@@ -107,4 +107,34 @@ class Solution {
         return dp[sum] == INF ? -1 : dp[sum];
     }
 };
+```
+
+```java
+class Solution {
+    public int minCoins(int coins[], int sum) {
+        final int INF = sum + 1;
+        int[] dp = new int[sum + 1];
+        Arrays.fill(dp, INF);
+        dp[0] = 0;
+        for (int c : coins) {
+            for (int x = c; x <= sum; x++) {
+                dp[x] = Math.min(dp[x], dp[x - c] + 1);
+            }
+        }
+        return dp[sum] == INF ? -1 : dp[sum];
+    }
+}
+```
+
+```python
+class Solution:
+    def minCoins(self, coins: list[int], sum: int) -> int:
+        INF = sum + 1
+        dp = [INF] * (sum + 1)
+        dp[0] = 0
+        for c in coins:
+            for x in range(c, sum + 1):
+                if dp[x - c] + 1 < dp[x]:
+                    dp[x] = dp[x - c] + 1
+        return -1 if dp[sum] == INF else dp[sum]
 ```

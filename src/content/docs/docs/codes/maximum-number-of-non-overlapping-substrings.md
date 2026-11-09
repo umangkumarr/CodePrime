@@ -90,7 +90,7 @@ For `s = "adefaddaccc"` the candidates are `a → [0, 7]`, `d` has none (its ran
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<string> maxNumOfSubstrings(string s) {
@@ -130,4 +130,82 @@ class Solution {
         return result;
     }
 };
+```
+
+```java
+class Solution {
+    public List<String> maxNumOfSubstrings(String s) {
+        int n = s.length();
+        int[] first = new int[26], last = new int[26];
+        Arrays.fill(first, n);
+        Arrays.fill(last, -1);
+        for (int i = 0; i < n; i++) {
+            int c = s.charAt(i) - 'a';
+            first[c] = Math.min(first[c], i);
+            last[c] = i;
+        }
+
+        // right[c]: end of the smallest closed substring starting at first[c], or -1 if none.
+        int[] right = new int[26];
+        Arrays.fill(right, -1);
+        for (int c = 0; c < 26; c++) {
+            if (last[c] == -1) continue;
+            int r = last[c];
+            boolean valid = true;
+            for (int j = first[c]; j <= r && valid; j++) {
+                int d = s.charAt(j) - 'a';
+                if (first[d] < first[c]) valid = false;
+                else r = Math.max(r, last[d]);
+            }
+            if (valid) right[c] = r;
+        }
+
+        List<String> result = new ArrayList<>();
+        int cut = n;  // start of the most recently chosen substring
+        for (int i = n - 1; i >= 0; i--) {
+            int c = s.charAt(i) - 'a';
+            if (i == first[c] && right[c] != -1 && right[c] < cut) {
+                result.add(s.substring(i, right[c] + 1));
+                cut = i;
+            }
+        }
+        return result;
+    }
+}
+```
+
+```python
+class Solution:
+    def maxNumOfSubstrings(self, s: str) -> list[str]:
+        n = len(s)
+        first, last = [n] * 26, [-1] * 26
+        for i, ch in enumerate(s):
+            c = ord(ch) - 97
+            first[c] = min(first[c], i)
+            last[c] = i
+
+        # right[c]: end of the smallest closed substring starting at first[c], or -1 if none.
+        right = [-1] * 26
+        for c in range(26):
+            if last[c] == -1:
+                continue
+            r, j, valid = last[c], first[c], True
+            while j <= r:
+                d = ord(s[j]) - 97
+                if first[d] < first[c]:
+                    valid = False
+                    break
+                r = max(r, last[d])
+                j += 1
+            if valid:
+                right[c] = r
+
+        result = []
+        cut = n  # start of the most recently chosen substring
+        for i in range(n - 1, -1, -1):
+            c = ord(s[i]) - 97
+            if i == first[c] and right[c] != -1 and right[c] < cut:
+                result.append(s[i:right[c] + 1])
+                cut = i
+        return result
 ```

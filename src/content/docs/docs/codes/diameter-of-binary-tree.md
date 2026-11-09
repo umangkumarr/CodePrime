@@ -86,7 +86,7 @@ The answer is `3` (for example the path `4 → 2 → 1 → 3`).
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     int height(TreeNode* node, int& best) {
         if (!node) return 0;
@@ -103,4 +103,46 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    private int best;
+
+    public int diameterOfBinaryTree(TreeNode root) {
+        best = 0;
+        height(root);
+        return best;
+    }
+
+    private int height(TreeNode node) {
+        if (node == null) return 0;
+        int l = height(node.left);
+        int r = height(node.right);
+        best = Math.max(best, l + r);  // longest path whose highest node is `node`
+        return 1 + Math.max(l, r);
+    }
+}
+```
+
+```python
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        best = 0
+        height = {}  # heights of finished subtrees whose parent is not finished yet
+        stack = [(root, False)]
+        while stack:  # post-order: children's heights before the parent's
+            node, children_done = stack.pop()
+            if node is None:
+                continue
+            if children_done:
+                l = height.pop(node.left, 0)
+                r = height.pop(node.right, 0)
+                best = max(best, l + r)  # longest path whose highest node is `node`
+                height[node] = 1 + max(l, r)
+            else:
+                stack.append((node, True))
+                stack.append((node.left, False))
+                stack.append((node.right, False))
+        return best
 ```

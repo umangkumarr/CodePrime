@@ -83,7 +83,7 @@ Green cells are final, blue is the element being examined:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void sortColors(vector<int>& nums) {
@@ -99,4 +99,43 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public void sortColors(int[] nums) {
+        int lo = 0, mid = 0, hi = nums.length - 1;
+        while (mid <= hi) {
+            if (nums[mid] == 0) {
+                swap(nums, lo++, mid++);
+            } else if (nums[mid] == 1) {
+                mid++;
+            } else {
+                swap(nums, mid, hi--);
+            }
+        }
+    }
+
+    private void swap(int[] a, int i, int j) {
+        int t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+    }
+}
+```
+
+```python
+class Solution:
+    def sortColors(self, nums: list[int]) -> None:
+        lo, mid, hi = 0, 0, len(nums) - 1
+        while mid <= hi:
+            if nums[mid] == 0:
+                nums[lo], nums[mid] = nums[mid], nums[lo]
+                lo += 1
+                mid += 1
+            elif nums[mid] == 1:
+                mid += 1
+            else:
+                nums[mid], nums[hi] = nums[hi], nums[mid]
+                hi -= 1
 ```

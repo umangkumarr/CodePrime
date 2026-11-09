@@ -83,7 +83,7 @@ Blue is the current index; green is the zero-sum subarray found, from just after
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int maxLength(vector<int>& arr) {
@@ -101,4 +101,34 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    int maxLength(int[] arr) {
+        Map<Integer, Integer> firstIdx = new HashMap<>();  // prefix sum -> first index where it occurred
+        firstIdx.put(0, -1);
+        int sum = 0, best = 0;
+        for (int i = 0; i < arr.length; i++) {
+            sum += arr[i];
+            Integer first = firstIdx.putIfAbsent(sum, i);
+            if (first != null) best = Math.max(best, i - first);
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def maxLength(self, arr):
+        first_idx = {0: -1}  # prefix sum -> first index where it occurred
+        total = best = 0
+        for i, x in enumerate(arr):
+            total += x
+            if total in first_idx:
+                best = max(best, i - first_idx[total])
+            else:
+                first_idx[total] = i
+        return best
 ```

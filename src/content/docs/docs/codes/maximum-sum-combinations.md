@@ -84,7 +84,7 @@ Example 2 after sorting: `A = [4,3,2,1]` (rows), `B = [6,5,2,1]` (columns). Gree
 
 ## Code
 
-```cpp title="C++"
+```cpp
 vector<int> Solution::solve(vector<int> &A, vector<int> &B, int C) {
     int n = A.size();
     sort(A.begin(), A.end(), greater<int>());
@@ -105,4 +105,58 @@ vector<int> Solution::solve(vector<int> &A, vector<int> &B, int C) {
     }
     return ans;
 }
+```
+
+```java
+public class Solution {
+    public ArrayList<Integer> solve(ArrayList<Integer> A, ArrayList<Integer> B, int C) {
+        int n = A.size();
+        A.sort(Collections.reverseOrder());
+        B.sort(Collections.reverseOrder());
+
+        // Max-heap of {A[i] + B[j], i, j}; seen holds pairs (i, j) encoded as i * n + j.
+        PriorityQueue<int[]> pq = new PriorityQueue<>((x, y) -> Integer.compare(y[0], x[0]));
+        Set<Long> seen = new HashSet<>();
+        pq.add(new int[] {A.get(0) + B.get(0), 0, 0});
+        seen.add(0L);
+
+        ArrayList<Integer> ans = new ArrayList<>();
+        while (ans.size() < C) {
+            int[] top = pq.poll();
+            int i = top[1], j = top[2];
+            ans.add(top[0]);
+            if (i + 1 < n && seen.add((long) (i + 1) * n + j))
+                pq.add(new int[] {A.get(i + 1) + B.get(j), i + 1, j});
+            if (j + 1 < n && seen.add((long) i * n + j + 1))
+                pq.add(new int[] {A.get(i) + B.get(j + 1), i, j + 1});
+        }
+        return ans;
+    }
+}
+```
+
+```python
+import heapq
+
+
+class Solution:
+    def solve(self, A, B, C):
+        n = len(A)
+        A.sort(reverse=True)
+        B.sort(reverse=True)
+
+        heap = [(-(A[0] + B[0]), 0, 0)]  # max-heap via negated sums: (-(A[i] + B[j]), i, j)
+        seen = {(0, 0)}
+
+        ans = []
+        while len(ans) < C:
+            neg, i, j = heapq.heappop(heap)
+            ans.append(-neg)
+            if i + 1 < n and (i + 1, j) not in seen:
+                seen.add((i + 1, j))
+                heapq.heappush(heap, (-(A[i + 1] + B[j]), i + 1, j))
+            if j + 1 < n and (i, j + 1) not in seen:
+                seen.add((i, j + 1))
+                heapq.heappush(heap, (-(A[i] + B[j + 1]), i, j + 1))
+        return ans
 ```

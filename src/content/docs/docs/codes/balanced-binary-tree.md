@@ -90,7 +90,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     // Height of the subtree, or -1 if it is not height-balanced.
     int height(TreeNode* node) {
@@ -108,4 +108,47 @@ class Solution {
         return height(root) != -1;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean isBalanced(TreeNode root) {
+        return height(root) != -1;
+    }
+
+    // Height of the subtree, or -1 if it is not height-balanced.
+    private int height(TreeNode node) {
+        if (node == null) return 0;
+        int lh = height(node.left);
+        if (lh == -1) return -1;
+        int rh = height(node.right);
+        if (rh == -1) return -1;
+        if (Math.abs(lh - rh) > 1) return -1;
+        return 1 + Math.max(lh, rh);
+    }
+}
+```
+
+```python
+class Solution:
+    def isBalanced(self, root: TreeNode | None) -> bool:
+        # Post-order with an explicit stack: a node is finished after both children.
+        # height holds finished subtrees whose parent is not finished yet.
+        height = {}
+        stack = [(root, False)]
+        while stack:
+            node, children_done = stack.pop()
+            if not node:
+                continue
+            if children_done:
+                lh = height.pop(node.left, 0)
+                rh = height.pop(node.right, 0)
+                if abs(lh - rh) > 1:
+                    return False
+                height[node] = 1 + max(lh, rh)
+            else:
+                stack.append((node, True))
+                stack.append((node.right, False))
+                stack.append((node.left, False))
+        return True
 ```

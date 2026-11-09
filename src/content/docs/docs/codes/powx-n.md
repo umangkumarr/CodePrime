@@ -53,11 +53,11 @@ $$x^{13} = x^{8} \cdot x^{4} \cdot x^{1}.$$
 
 The powers $x, x^2, x^4, x^8, \dots$ are produced by repeated squaring, one per bit. Walking the bits of the exponent from lowest to highest, we multiply the current power into the result exactly when that bit is `1`. That is one squaring and at most one multiplication per bit: $O(\log n)$ work.
 
-A negative exponent means $x^{n} = (1/x)^{-n}$, so we invert the base and make the exponent positive. The exponent is copied to a `long long` `e` first: $-(-2^{31}) = 2^{31}$ does not fit in an `int`.
+A negative exponent means $x^{n} = (1/x)^{-n}$, so we invert the base and make the exponent positive. The exponent is copied to a 64-bit integer `e` first: $-(-2^{31}) = 2^{31}$ does not fit in an `int`.
 
 ### Algorithm
 
-1. Let `e = n` as `long long`. If `e < 0`, set `x = 1 / x` and `e = -e`.
+1. Let `e = n` as a 64-bit integer. If `e < 0`, set `x = 1 / x` and `e = -e`.
 2. Start with `result = 1`. While `e > 0`:
    - If the lowest bit of `e` is set, `result *= x`.
    - Square the base: `x *= x`, and drop the lowest bit: `e >>= 1`.
@@ -86,13 +86,13 @@ The result is $2^{2} \cdot 2^{8} = 1024$.
 ### Edge cases
 
 - **Negative exponent** (Example 3): the base becomes `0.5` and the loop computes $0.5^2 = 0.25$.
-- **`n = INT_MIN`:** negating in `long long` gives $2^{31}$ without overflow.
+- **`n = INT_MIN`:** negating in 64 bits gives $2^{31}$ without overflow.
 - **`n = 0`:** the loop does not run and the result is `1`.
 - **Negative `x`:** the sign comes out right automatically: every squared power is positive, so only the $x^1$ factor can be negative, and it is used exactly when `n` is odd.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     double myPow(double x, int n) {
@@ -110,4 +110,39 @@ class Solution {
         return result;
     }
 };
+```
+
+```java
+class Solution {
+    public double myPow(double x, int n) {
+        long e = n;  // long so that -(-2^31) does not overflow
+        if (e < 0) {
+            x = 1 / x;
+            e = -e;
+        }
+        double result = 1;
+        while (e > 0) {
+            if ((e & 1) == 1) result *= x;
+            x *= x;
+            e >>= 1;
+        }
+        return result;
+    }
+}
+```
+
+```python
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        e = n
+        if e < 0:
+            x = 1 / x
+            e = -e
+        result = 1.0
+        while e > 0:
+            if e & 1:
+                result *= x
+            x *= x
+            e >>= 1
+        return result
 ```

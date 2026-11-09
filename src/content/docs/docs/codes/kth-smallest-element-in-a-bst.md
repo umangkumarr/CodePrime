@@ -90,7 +90,7 @@ Each query, insert and delete then costs $O(h)$, which is $O(\log n)$ in a balan
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int kthSmallest(TreeNode* root, int k) {
@@ -108,4 +108,38 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public int kthSmallest(TreeNode root, int k) {
+        ArrayDeque<TreeNode> st = new ArrayDeque<>();
+        TreeNode cur = root;
+        while (true) {
+            while (cur != null) {
+                st.push(cur);
+                cur = cur.left;
+            }
+            cur = st.pop();
+            if (--k == 0) return cur.val;
+            cur = cur.right;
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def kthSmallest(self, root: TreeNode | None, k: int) -> int:
+        st = []
+        cur = root
+        while True:
+            while cur:
+                st.append(cur)
+                cur = cur.left
+            cur = st.pop()
+            k -= 1
+            if k == 0:
+                return cur.val
+            cur = cur.right
 ```

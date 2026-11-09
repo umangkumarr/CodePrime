@@ -98,7 +98,7 @@ The list reads `4 → 1 → 9`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void deleteNode(ListNode* node) {
@@ -107,4 +107,20 @@ class Solution {
         delete next;
     }
 };
+```
+
+```java
+class Solution {
+    public void deleteNode(ListNode node) {
+        node.val = node.next.val;
+        node.next = node.next.next;
+    }
+}
+```
+
+```python
+class Solution:
+    def deleteNode(self, node):
+        node.val = node.next.val
+        node.next = node.next.next
 ```

@@ -88,7 +88,7 @@ On `nums1 = [2,3,5,6,17,36,39]`, `nums2 = [1,8,12,16,18,29,37]` (14 elements, `h
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
@@ -114,4 +114,59 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        if (nums1.length > nums2.length) return findMedianSortedArrays(nums2, nums1);
+        int m = nums1.length, n = nums2.length;
+        int half = (m + n + 1) / 2;  // size of the left half
+        int lo = 0, hi = m;
+        while (true) {
+            int i = lo + (hi - lo) / 2;  // elements taken from nums1
+            int j = half - i;            // elements taken from nums2
+            int L1 = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+            int R1 = (i == m) ? Integer.MAX_VALUE : nums1[i];
+            int L2 = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+            int R2 = (j == n) ? Integer.MAX_VALUE : nums2[j];
+            if (L1 > R2) {
+                hi = i - 1;
+            } else if (L2 > R1) {
+                lo = i + 1;
+            } else {
+                if ((m + n) % 2 == 1) return Math.max(L1, L2);
+                return (Math.max(L1, L2) + Math.min(R1, R2)) / 2.0;
+            }
+        }
+    }
+}
+```
+
+```python
+from math import inf
+
+
+class Solution:
+    def findMedianSortedArrays(self, nums1: list[int], nums2: list[int]) -> float:
+        if len(nums1) > len(nums2):
+            return self.findMedianSortedArrays(nums2, nums1)
+        m, n = len(nums1), len(nums2)
+        half = (m + n + 1) // 2  # size of the left half
+        lo, hi = 0, m
+        while True:
+            i = (lo + hi) // 2  # elements taken from nums1
+            j = half - i        # elements taken from nums2
+            L1 = nums1[i - 1] if i > 0 else -inf
+            R1 = nums1[i] if i < m else inf
+            L2 = nums2[j - 1] if j > 0 else -inf
+            R2 = nums2[j] if j < n else inf
+            if L1 > R2:
+                hi = i - 1
+            elif L2 > R1:
+                lo = i + 1
+            elif (m + n) % 2 == 1:
+                return float(max(L1, L2))
+            else:
+                return (max(L1, L2) + min(R1, R2)) / 2
 ```

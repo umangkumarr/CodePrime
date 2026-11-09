@@ -99,7 +99,7 @@ Example 1 (tree `[7, 3, 15, null, null, 9, 20]`), stack shown bottom to top:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class BSTIterator {
     stack<TreeNode*> st;
 
@@ -119,4 +119,49 @@ class BSTIterator {
 
     bool hasNext() { return !st.empty(); }
 };
+```
+
+```java
+class BSTIterator {
+    private final ArrayDeque<TreeNode> st = new ArrayDeque<>();
+
+    public BSTIterator(TreeNode root) {
+        pushLeft(root);
+    }
+
+    public int next() {
+        TreeNode node = st.pop();
+        pushLeft(node.right);
+        return node.val;
+    }
+
+    public boolean hasNext() {
+        return !st.isEmpty();
+    }
+
+    private void pushLeft(TreeNode node) {
+        for (; node != null; node = node.left) st.push(node);
+    }
+}
+```
+
+```python
+class BSTIterator:
+
+    def __init__(self, root: TreeNode | None):
+        self.st = []
+        self._push_left(root)
+
+    def _push_left(self, node):
+        while node:
+            self.st.append(node)
+            node = node.left
+
+    def next(self) -> int:
+        node = self.st.pop()
+        self._push_left(node.right)
+        return node.val
+
+    def hasNext(self) -> bool:
+        return bool(self.st)
 ```

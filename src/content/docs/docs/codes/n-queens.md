@@ -77,7 +77,7 @@ Backtracking on `n = 4` until the first solution. Blue is the queen just placed,
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     int n;
     vector<string> board;
@@ -111,4 +111,70 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private int n;
+    private char[][] board;
+    private boolean[] cols, diag, anti;  // diag: row - col + n - 1, anti: row + col
+    private List<List<String>> ans;
+
+    private void place(int row) {
+        if (row == n) {
+            List<String> solution = new ArrayList<>(n);
+            for (char[] r : board) solution.add(new String(r));
+            ans.add(solution);
+            return;
+        }
+        for (int col = 0; col < n; col++) {
+            int d = row - col + n - 1, a = row + col;
+            if (cols[col] || diag[d] || anti[a]) continue;
+            cols[col] = diag[d] = anti[a] = true;
+            board[row][col] = 'Q';
+            place(row + 1);
+            board[row][col] = '.';
+            cols[col] = diag[d] = anti[a] = false;
+        }
+    }
+
+    public List<List<String>> solveNQueens(int n) {
+        this.n = n;
+        board = new char[n][n];
+        for (char[] r : board) Arrays.fill(r, '.');
+        cols = new boolean[n];
+        diag = new boolean[2 * n - 1];
+        anti = new boolean[2 * n - 1];
+        ans = new ArrayList<>();
+        place(0);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def solveNQueens(self, n: int) -> list[list[str]]:
+        board = [["."] * n for _ in range(n)]
+        cols = [False] * n
+        diag = [False] * (2 * n - 1)  # row - col + n - 1
+        anti = [False] * (2 * n - 1)  # row + col
+        ans = []
+
+        def place(row):
+            if row == n:
+                ans.append(["".join(r) for r in board])
+                return
+            for col in range(n):
+                d, a = row - col + n - 1, row + col
+                if cols[col] or diag[d] or anti[a]:
+                    continue
+                cols[col] = diag[d] = anti[a] = True
+                board[row][col] = "Q"
+                place(row + 1)
+                board[row][col] = "."
+                cols[col] = diag[d] = anti[a] = False
+
+        place(0)
+        return ans
 ```

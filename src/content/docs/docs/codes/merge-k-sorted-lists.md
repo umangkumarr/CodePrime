@@ -100,7 +100,7 @@ In round `step = 1` only the pair `(0, 1)` exists (`lists[2]` has no partner), a
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     ListNode* mergeTwo(ListNode* a, ListNode* b) {
         ListNode dummy;
@@ -129,4 +129,59 @@ class Solution {
         return lists[0];
     }
 };
+```
+
+```java
+class Solution {
+    private ListNode mergeTwo(ListNode a, ListNode b) {
+        ListNode dummy = new ListNode();
+        ListNode tail = dummy;
+        while (a != null && b != null) {
+            if (a.val <= b.val) {
+                tail.next = a;
+                a = a.next;
+            } else {
+                tail.next = b;
+                b = b.next;
+            }
+            tail = tail.next;
+        }
+        tail.next = (a != null) ? a : b;
+        return dummy.next;
+    }
+
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists.length == 0) return null;
+        int k = lists.length;
+        for (int step = 1; step < k; step *= 2)
+            for (int i = 0; i + step < k; i += 2 * step)
+                lists[i] = mergeTwo(lists[i], lists[i + step]);
+        return lists[0];
+    }
+}
+```
+
+```python
+class Solution:
+    def mergeTwo(self, a: ListNode | None, b: ListNode | None) -> ListNode | None:
+        dummy = tail = ListNode()
+        while a and b:
+            if a.val <= b.val:
+                tail.next, a = a, a.next
+            else:
+                tail.next, b = b, b.next
+            tail = tail.next
+        tail.next = a or b
+        return dummy.next
+
+    def mergeKLists(self, lists: list[ListNode | None]) -> ListNode | None:
+        if not lists:
+            return None
+        k = len(lists)
+        step = 1
+        while step < k:
+            for i in range(0, k - step, 2 * step):
+                lists[i] = self.mergeTwo(lists[i], lists[i + step])
+            step *= 2
+        return lists[0]
 ```

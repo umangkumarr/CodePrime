@@ -81,7 +81,7 @@ Let `k` be the number of strings and `L` their total length.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findMaxForm(vector<string>& strs, int m, int n) {
@@ -98,4 +98,40 @@ class Solution {
         return dp[m][n];
     }
 };
+```
+
+```java
+class Solution {
+    public int findMaxForm(String[] strs, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        for (String s : strs) {
+            int ones = 0;
+            for (int k = 0; k < s.length(); k++) {
+                if (s.charAt(k) == '1') ones++;
+            }
+            int zeros = s.length() - ones;
+            for (int i = m; i >= zeros; i--) {
+                for (int j = n; j >= ones; j--) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i - zeros][j - ones] + 1);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+```
+
+```python
+class Solution:
+    def findMaxForm(self, strs: list[str], m: int, n: int) -> int:
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for s in strs:
+            ones = s.count('1')
+            zeros = len(s) - ones
+            for i in range(m, zeros - 1, -1):
+                row, prev = dp[i], dp[i - zeros]
+                for j in range(n, ones - 1, -1):
+                    if prev[j - ones] + 1 > row[j]:
+                        row[j] = prev[j - ones] + 1
+        return dp[m][n]
 ```

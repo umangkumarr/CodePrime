@@ -82,7 +82,7 @@ The blue cells are the current window; orange marks the earlier copy that forces
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int lengthOfLongestSubstring(string s) {
@@ -97,4 +97,34 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        int[] last = new int[256];  // last index of each character
+        Arrays.fill(last, -1);
+        int left = 0, best = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
+            if (last[c] >= left) left = last[c] + 1;
+            last[c] = right;
+            best = Math.max(best, right - left + 1);
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        last = {}  # last index of each character
+        left = best = 0
+        for right, c in enumerate(s):
+            if last.get(c, -1) >= left:
+                left = last[c] + 1
+            last[c] = right
+            best = max(best, right - left + 1)
+        return best
 ```

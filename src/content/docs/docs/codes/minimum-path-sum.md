@@ -82,7 +82,7 @@ Example 1. Each cell shows `grid | best`; the blue cell is being computed from i
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int minPathSum(vector<vector<int>>& grid) {
@@ -98,4 +98,39 @@ class Solution {
         return dp[n - 1];
     }
 };
+```
+
+```java
+class Solution {
+    public int minPathSum(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[] dp = new int[n];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (j > 0) dp[j] = Math.min(dp[j], dp[j - 1]);  // from above vs from the left
+                dp[j] += grid[i][j];
+            }
+        }
+        return dp[n - 1];
+    }
+}
+```
+
+```python
+from math import inf
+
+
+class Solution:
+    def minPathSum(self, grid: list[list[int]]) -> int:
+        n = len(grid[0])
+        dp = [inf] * n
+        dp[0] = 0
+        for row in grid:
+            for j, cell in enumerate(row):
+                if j > 0:
+                    dp[j] = min(dp[j], dp[j - 1])  # from above vs from the left
+                dp[j] += cell
+        return dp[n - 1]
 ```

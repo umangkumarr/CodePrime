@@ -82,7 +82,7 @@ On `[2,-5,-2,-4,3]` the answer is `24` from `[-2,-4,3]`. Notice how the most neg
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int maxProduct(vector<int>& nums) {
@@ -97,4 +97,38 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int best = nums[0], hi = nums[0], lo = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            int x = nums[i];
+            if (x < 0) {
+                int t = hi;
+                hi = lo;
+                lo = t;
+            }
+            hi = Math.max(x, hi * x);
+            lo = Math.min(x, lo * x);
+            best = Math.max(best, hi);
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def maxProduct(self, nums: list[int]) -> int:
+        best = hi = lo = nums[0]
+        for i in range(1, len(nums)):
+            x = nums[i]
+            if x < 0:
+                hi, lo = lo, hi
+            hi = max(x, hi * x)
+            lo = min(x, lo * x)
+            best = max(best, hi)
+        return best
 ```

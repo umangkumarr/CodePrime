@@ -63,9 +63,9 @@ Scan left to right and keep a map `seen` from each value to its index. When we r
 
 ### Algorithm
 
-1. Create an empty map `seen` from value to index (keyed by `long long`, see Edge cases).
+1. Create an empty map `seen` from value to index (keyed by a 64-bit integer, see Edge cases).
 2. For each index `i`:
-   - Compute `need = target - nums[i]` in `long long`.
+   - Compute `need = target - nums[i]` in 64-bit arithmetic.
    - If `need` is in `seen`, return `{seen[need], i}`.
    - Otherwise store `seen[nums[i]] = i`.
 3. The problem guarantees an answer, so the loop always returns; the final `return {}` only satisfies the compiler.
@@ -79,11 +79,11 @@ Scan left to right and keep a map `seen` from each value to its index. When we r
 
 - **Duplicate values** (`[3,3]`, `target = 6`): at `i = 1` the first `3` is already in `seen`, so `[0,1]` is returned.
 - **Using an element twice** (`[3,2,4]`, `target = 6`): at `i = 0` the map is empty, so `3 + 3` is never matched with itself.
-- **Overflow:** `target - nums[i]` lies in $[-2 \cdot 10^9, 2 \cdot 10^9]$, which overflows `int`, so it is computed in `long long`. A complement outside the `int` range simply is not found.
+- **Overflow:** `target - nums[i]` lies in $[-2 \cdot 10^9, 2 \cdot 10^9]$, which overflows `int`, so it is computed in 64 bits (`long long` / `long`; Python ints never overflow). A complement outside the `int` range simply is not found.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> twoSum(vector<int>& nums, int target) {
@@ -97,4 +97,31 @@ class Solution {
         return {};
     }
 };
+```
+
+```java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Long, Integer> seen = new HashMap<>();  // value -> index
+        for (int i = 0; i < nums.length; i++) {
+            long need = (long) target - nums[i];
+            Integer j = seen.get(need);
+            if (j != null) return new int[] {j, i};
+            seen.put((long) nums[i], i);
+        }
+        return new int[0];
+    }
+}
+```
+
+```python
+class Solution:
+    def twoSum(self, nums: list[int], target: int) -> list[int]:
+        seen = {}  # value -> index
+        for i, x in enumerate(nums):
+            j = seen.get(target - x)
+            if j is not None:
+                return [j, i]
+            seen[x] = i
+        return []
 ```

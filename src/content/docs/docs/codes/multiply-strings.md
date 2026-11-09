@@ -76,7 +76,7 @@ Example 2, `123 × 456`. The blue cell is `res[i + j + 1]` receiving the product
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string multiply(string num1, string num2) {
@@ -96,4 +96,41 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public String multiply(String num1, String num2) {
+        if (num1.equals("0") || num2.equals("0")) return "0";
+        int m = num1.length(), n = num2.length();
+        int[] res = new int[m + n];
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                int sum = (num1.charAt(i) - '0') * (num2.charAt(j) - '0') + res[i + j + 1];
+                res[i + j + 1] = sum % 10;
+                res[i + j] += sum / 10;
+            }
+        }
+        StringBuilder ans = new StringBuilder();
+        for (int d : res)
+            if (!(ans.length() == 0 && d == 0)) ans.append(d);
+        return ans.toString();
+    }
+}
+```
+
+```python
+class Solution:
+    def multiply(self, num1: str, num2: str) -> str:
+        if num1 == "0" or num2 == "0":
+            return "0"
+        m, n = len(num1), len(num2)
+        res = [0] * (m + n)
+        for i in range(m - 1, -1, -1):
+            a = int(num1[i])
+            for j in range(n - 1, -1, -1):
+                s = a * int(num2[j]) + res[i + j + 1]
+                res[i + j + 1] = s % 10
+                res[i + j] += s // 10
+        return "".join(map(str, res)).lstrip("0")
 ```

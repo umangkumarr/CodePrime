@@ -88,7 +88,7 @@ The six green nodes are exactly the six answers.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     vector<vector<int>> ans;
     vector<int> cur;
@@ -110,4 +110,46 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private final List<List<Integer>> ans = new ArrayList<>();
+    private final List<Integer> cur = new ArrayList<>();
+
+    private void backtrack(int[] nums, int start) {
+        ans.add(new ArrayList<>(cur));
+        for (int i = start; i < nums.length; i++) {
+            if (i > start && nums[i] == nums[i - 1]) continue;  // value already used at this level
+            cur.add(nums[i]);
+            backtrack(nums, i + 1);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        Arrays.sort(nums);
+        backtrack(nums, 0);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def subsetsWithDup(self, nums: list[int]) -> list[list[int]]:
+        nums.sort()
+        ans, cur = [], []
+
+        def backtrack(start):
+            ans.append(cur[:])
+            for i in range(start, len(nums)):
+                if i > start and nums[i] == nums[i - 1]:
+                    continue  # value already used at this level
+                cur.append(nums[i])
+                backtrack(i + 1)
+                cur.pop()
+
+        backtrack(0)
+        return ans
 ```

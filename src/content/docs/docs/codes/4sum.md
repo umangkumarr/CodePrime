@@ -47,7 +47,7 @@ This is [3Sum](/docs/codes/3sum/) with one more fixed element. After sorting, fi
 
 Sorting also groups equal values, which removes duplicates without a `set`: a quadruplet is identified by its values, so we skip an `i` (or a `j`) whose value equals the one before it, and after a match we move `lo` past every copy of its value.
 
-Values reach $10^9$ in magnitude, so a sum of four of them (up to $4 \times 10^9$) overflows a 32-bit `int`. All sums are computed in `long long`.
+Values reach $10^9$ in magnitude, so a sum of four of them (up to $4 \times 10^9$) overflows a 32-bit `int`. All sums are computed in 64-bit integers.
 
 ### Algorithm
 
@@ -62,17 +62,17 @@ Values reach $10^9$ in magnitude, so a sum of four of them (up to $4 \times 10^9
 ### Complexity
 
 - **Time:** $O(n^3)$ — $O(n^2)$ pairs `(i, j)`, each followed by a linear two-pointer sweep; sorting adds only $O(n \log n)$.
-- **Space:** $O(\log n)$ — the stack space of `std::sort`; the output list is not counted.
+- **Space:** $O(\log n)$ — the stack space of the sort in C++ and Java (Python's `sort` may use $O(n)$); the output list is not counted.
 
 ### Edge cases
 
 - **All values equal** such as `[2,2,2,2,2]`: `i = 0`, `j = 1` find `[2,2,2,2]` once; every other `i` and `j` is skipped as a duplicate.
-- **Overflow** such as `[1000000000,1000000000,1000000000,1000000000]` with `target = -294967296`: the true sum is $4 \times 10^9$, which wraps around to `-294967296` in 32-bit arithmetic. Computing `sum` in `long long` correctly reports no answer.
+- **Overflow** such as `[1000000000,1000000000,1000000000,1000000000]` with `target = -294967296`: the true sum is $4 \times 10^9$, which wraps around to `-294967296` in 32-bit arithmetic. Computing `sum` in 64-bit integers correctly reports no answer.
 - **Fewer than four elements:** the loops never reach a valid `lo < hi` and the result is empty.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> fourSum(vector<int>& nums, int target) {
@@ -101,4 +101,63 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            for (int j = i + 1; j < n; j++) {
+                if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+                int lo = j + 1, hi = n - 1;
+                while (lo < hi) {
+                    long sum = (long) nums[i] + nums[j] + nums[lo] + nums[hi];
+                    if (sum < target) {
+                        lo++;
+                    } else if (sum > target) {
+                        hi--;
+                    } else {
+                        ans.add(List.of(nums[i], nums[j], nums[lo], nums[hi]));
+                        lo++;
+                        hi--;
+                        while (lo < hi && nums[lo] == nums[lo - 1]) lo++;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def fourSum(self, nums: list[int], target: int) -> list[list[int]]:
+        nums.sort()
+        n = len(nums)
+        ans = []
+        for i in range(n):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            for j in range(i + 1, n):
+                if j > i + 1 and nums[j] == nums[j - 1]:
+                    continue
+                lo, hi = j + 1, n - 1
+                while lo < hi:
+                    total = nums[i] + nums[j] + nums[lo] + nums[hi]
+                    if total < target:
+                        lo += 1
+                    elif total > target:
+                        hi -= 1
+                    else:
+                        ans.append([nums[i], nums[j], nums[lo], nums[hi]])
+                        lo += 1
+                        hi -= 1
+                        while lo < hi and nums[lo] == nums[lo - 1]:
+                            lo += 1
+        return ans
 ```

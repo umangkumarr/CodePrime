@@ -114,7 +114,7 @@ A queue with 4 slots. Blue is `head` (the front); green cells hold queued elemen
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Queue {
     vector<int> buf;  // circular buffer
     int head = 0;     // index of the front element
@@ -148,4 +148,72 @@ class Queue {
 
     int front() { return isEmpty() ? -1 : buf[head]; }
 };
+```
+
+```java
+class Queue {
+    private int[] buf = new int[4];  // circular buffer
+    private int head = 0;            // index of the front element
+    private int count = 0;           // number of stored elements
+
+    private void grow() {
+        int[] bigger = new int[buf.length * 2];
+        for (int i = 0; i < count; i++) bigger[i] = buf[(head + i) % buf.length];
+        buf = bigger;
+        head = 0;
+    }
+
+    Queue() {}
+
+    boolean isEmpty() { return count == 0; }
+
+    void enqueue(int data) {
+        if (count == buf.length) grow();
+        buf[(head + count) % buf.length] = data;
+        count++;
+    }
+
+    int dequeue() {
+        if (isEmpty()) return -1;
+        int x = buf[head];
+        head = (head + 1) % buf.length;
+        count--;
+        return x;
+    }
+
+    int front() { return isEmpty() ? -1 : buf[head]; }
+}
+```
+
+```python
+class Queue:
+    def __init__(self):
+        self.buf = [0] * 4  # circular buffer
+        self.head = 0       # index of the front element
+        self.count = 0      # number of stored elements
+
+    def _grow(self):
+        size = len(self.buf)
+        self.buf = [self.buf[(self.head + i) % size] for i in range(self.count)] + [0] * size
+        self.head = 0
+
+    def isEmpty(self) -> bool:
+        return self.count == 0
+
+    def enqueue(self, data: int) -> None:
+        if self.count == len(self.buf):
+            self._grow()
+        self.buf[(self.head + self.count) % len(self.buf)] = data
+        self.count += 1
+
+    def dequeue(self) -> int:
+        if self.isEmpty():
+            return -1
+        x = self.buf[self.head]
+        self.head = (self.head + 1) % len(self.buf)
+        self.count -= 1
+        return x
+
+    def front(self) -> int:
+        return -1 if self.isEmpty() else self.buf[self.head]
 ```

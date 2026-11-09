@@ -96,7 +96,7 @@ The code produces `[0, 1, 2, 3]`, which is one of the accepted answers.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
@@ -121,4 +121,51 @@ class Solution {
         return order;
     }
 };
+```
+
+```java
+class Solution {
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int c = 0; c < numCourses; c++) adj.add(new ArrayList<>());
+        int[] indeg = new int[numCourses];
+        for (int[] pre : prerequisites) {
+            adj.get(pre[1]).add(pre[0]);
+            indeg[pre[0]]++;
+        }
+
+        int[] order = new int[numCourses];  // also used as the BFS queue
+        int tail = 0;
+        for (int c = 0; c < numCourses; c++)
+            if (indeg[c] == 0) order[tail++] = c;
+
+        for (int head = 0; head < tail; head++) {
+            for (int v : adj.get(order[head]))
+                if (--indeg[v] == 0) order[tail++] = v;
+        }
+
+        return tail < numCourses ? new int[0] : order;
+    }
+}
+```
+
+```python
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: list[list[int]]) -> list[int]:
+        adj = [[] for _ in range(numCourses)]
+        indeg = [0] * numCourses
+        for a, b in prerequisites:
+            adj[b].append(a)
+            indeg[a] += 1
+
+        order = [c for c in range(numCourses) if indeg[c] == 0]  # also used as the BFS queue
+        head = 0
+        while head < len(order):
+            for v in adj[order[head]]:
+                indeg[v] -= 1
+                if indeg[v] == 0:
+                    order.append(v)
+            head += 1
+
+        return order if len(order) == numCourses else []
 ```

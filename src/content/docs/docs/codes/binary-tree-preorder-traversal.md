@@ -110,6 +110,41 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Explicit stack"
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> order = new ArrayList<>();
+        if (root == null) return order;
+        ArrayDeque<TreeNode> st = new ArrayDeque<>();
+        st.push(root);
+        while (!st.isEmpty()) {
+            TreeNode node = st.pop();
+            order.add(node.val);
+            if (node.right != null) st.push(node.right);
+            if (node.left != null) st.push(node.left);
+        }
+        return order;
+    }
+}
+```
+
+```python title="Approach 1: Explicit stack"
+class Solution:
+    def preorderTraversal(self, root: TreeNode | None) -> list[int]:
+        order = []
+        if not root:
+            return order
+        st = [root]
+        while st:
+            node = st.pop()
+            order.append(node.val)
+            if node.right:
+                st.append(node.right)
+            if node.left:
+                st.append(node.left)
+        return order
+```
+
 ```cpp title="Approach 2: Morris traversal"
 class Solution {
    public:
@@ -136,4 +171,54 @@ class Solution {
         return order;
     }
 };
+```
+
+```java title="Approach 2: Morris traversal"
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> order = new ArrayList<>();
+        TreeNode cur = root;
+        while (cur != null) {
+            if (cur.left == null) {
+                order.add(cur.val);
+                cur = cur.right;
+                continue;
+            }
+            TreeNode prev = cur.left;
+            while (prev.right != null && prev.right != cur) prev = prev.right;
+            if (prev.right == null) {
+                order.add(cur.val);  // first visit
+                prev.right = cur;
+                cur = cur.left;
+            } else {
+                prev.right = null;  // second visit: remove the thread
+                cur = cur.right;
+            }
+        }
+        return order;
+    }
+}
+```
+
+```python title="Approach 2: Morris traversal"
+class Solution:
+    def preorderTraversal(self, root: TreeNode | None) -> list[int]:
+        order = []
+        cur = root
+        while cur:
+            if not cur.left:
+                order.append(cur.val)
+                cur = cur.right
+                continue
+            prev = cur.left
+            while prev.right and prev.right is not cur:
+                prev = prev.right
+            if not prev.right:
+                order.append(cur.val)  # first visit
+                prev.right = cur
+                cur = cur.left
+            else:
+                prev.right = None  # second visit: remove the thread
+                cur = cur.right
+        return order
 ```

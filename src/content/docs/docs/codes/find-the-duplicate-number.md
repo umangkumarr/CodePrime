@@ -96,7 +96,7 @@ Phase 1: `slow` visits `1, 3, 2, 4`, `fast` visits `3, 4, 4, 4` — they meet at
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findDuplicate(vector<int>& nums) {
@@ -115,4 +115,41 @@ class Solution {
         return slow;
     }
 };
+```
+
+```java
+class Solution {
+    public int findDuplicate(int[] nums) {
+        // Treat i -> nums[i] as a linked list; the duplicate is where the cycle starts.
+        int slow = 0, fast = 0;
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
+
+        slow = 0;
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return slow;
+    }
+}
+```
+
+```python
+class Solution:
+    def findDuplicate(self, nums: list[int]) -> int:
+        # Treat i -> nums[i] as a linked list; the duplicate is where the cycle starts.
+        slow = nums[0]
+        fast = nums[nums[0]]
+        while slow != fast:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+
+        slow = 0
+        while slow != fast:
+            slow = nums[slow]
+            fast = nums[fast]
+        return slow
 ```

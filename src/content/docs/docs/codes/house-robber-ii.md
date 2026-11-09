@@ -85,7 +85,7 @@ The answer is `3`. Robbing both `2`s would need the first and last house togethe
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     int rob(vector<int>& nums) {
@@ -107,4 +107,44 @@ class Solution {
         return prev1;
     }
 };
+```
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 1) return nums[0];
+        // House 0 and house n - 1 are neighbours: drop one of them.
+        return Math.max(robLine(nums, 0, n - 2), robLine(nums, 1, n - 1));
+    }
+
+    // Linear House Robber on nums[lo..hi].
+    private static int robLine(int[] nums, int lo, int hi) {
+        int prev2 = 0, prev1 = 0;
+        for (int i = lo; i <= hi; i++) {
+            int cur = Math.max(prev1, prev2 + nums[i]);
+            prev2 = prev1;
+            prev1 = cur;
+        }
+        return prev1;
+    }
+}
+```
+
+```python
+class Solution:
+    def rob(self, nums: list[int]) -> int:
+        n = len(nums)
+        if n == 1:
+            return nums[0]
+        # House 0 and house n - 1 are neighbours: drop one of them.
+        return max(self.robLine(nums, 0, n - 2), self.robLine(nums, 1, n - 1))
+
+    # Linear House Robber on nums[lo..hi].
+    @staticmethod
+    def robLine(nums: list[int], lo: int, hi: int) -> int:
+        prev2 = prev1 = 0
+        for i in range(lo, hi + 1):
+            prev2, prev1 = prev1, max(prev1, prev2 + nums[i])
+        return prev1
 ```

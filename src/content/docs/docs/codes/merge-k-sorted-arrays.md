@@ -74,7 +74,7 @@ Example 2, one row per array. Orange cells are in the heap, blue is the element 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 vector<int> mergeKSortedArrays(vector<vector<int>> &kArrays, int k) {
     // (value, array index, position in that array); greater<> makes it a min-heap
     priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
@@ -90,4 +90,42 @@ vector<int> mergeKSortedArrays(vector<vector<int>> &kArrays, int k) {
     }
     return res;
 }
+```
+
+```java
+public class Solution {
+    public static ArrayList<Integer> mergeKSortedArrays(ArrayList<ArrayList<Integer>> kArrays, int k) {
+        // {value, array index, position in that array}, ordered by value: a min-heap
+        PriorityQueue<int[]> pq = new PriorityQueue<>((x, y) -> Integer.compare(x[0], y[0]));
+        for (int a = 0; a < k; a++)
+            if (!kArrays.get(a).isEmpty()) pq.add(new int[] {kArrays.get(a).get(0), a, 0});
+
+        ArrayList<Integer> res = new ArrayList<>();
+        while (!pq.isEmpty()) {
+            int[] top = pq.poll();
+            int a = top[1], i = top[2];
+            res.add(top[0]);
+            if (i + 1 < kArrays.get(a).size()) pq.add(new int[] {kArrays.get(a).get(i + 1), a, i + 1});
+        }
+        return res;
+    }
+}
+```
+
+```python
+import heapq
+
+
+def mergeKSortedArrays(kArrays, k):
+    # (value, array index, position in that array); heapq is a min-heap
+    pq = [(kArrays[a][0], a, 0) for a in range(k) if kArrays[a]]
+    heapq.heapify(pq)
+
+    res = []
+    while pq:
+        value, a, i = heapq.heappop(pq)
+        res.append(value)
+        if i + 1 < len(kArrays[a]):
+            heapq.heappush(pq, (kArrays[a][i + 1], a, i + 1))
+    return res
 ```

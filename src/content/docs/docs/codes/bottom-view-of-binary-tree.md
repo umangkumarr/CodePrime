@@ -98,7 +98,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> bottomView(Node* root) {
@@ -121,4 +121,59 @@ class Solution {
         return view;
     }
 };
+```
+
+```java
+class Solution {
+    private record Item(Node node, int hd) {}
+
+    public ArrayList<Integer> bottomView(Node root) {
+        ArrayList<Integer> view = new ArrayList<>();
+        if (root == null) return view;
+        ArrayList<int[]> seen = new ArrayList<>();  // (hd, data) in level order
+        ArrayDeque<Item> q = new ArrayDeque<>();
+        q.add(new Item(root, 0));
+        int minHd = 0, maxHd = 0;
+        while (!q.isEmpty()) {
+            Item it = q.poll();
+            Node node = it.node();
+            int hd = it.hd();
+            seen.add(new int[] {hd, node.data});
+            minHd = Math.min(minHd, hd);
+            maxHd = Math.max(maxHd, hd);
+            if (node.left != null) q.add(new Item(node.left, hd - 1));
+            if (node.right != null) q.add(new Item(node.right, hd + 1));
+        }
+        int[] bottom = new int[maxHd - minHd + 1];
+        for (int[] p : seen) bottom[p[0] - minHd] = p[1];  // later in level order wins
+        for (int x : bottom) view.add(x);
+        return view;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def bottomView(self, root):
+        if not root:
+            return []
+        seen = []  # (hd, data) in level order
+        q = deque([(root, 0)])
+        min_hd = max_hd = 0
+        while q:
+            node, hd = q.popleft()
+            seen.append((hd, node.data))
+            min_hd = min(min_hd, hd)
+            max_hd = max(max_hd, hd)
+            if node.left:
+                q.append((node.left, hd - 1))
+            if node.right:
+                q.append((node.right, hd + 1))
+        view = [0] * (max_hd - min_hd + 1)
+        for hd, data in seen:
+            view[hd - min_hd] = data  # later in level order wins
+        return view
 ```

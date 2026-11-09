@@ -84,7 +84,7 @@ Example 1, already sorted:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> merge(vector<vector<int>>& intervals) {
@@ -99,4 +99,35 @@ class Solution {
         return merged;
     }
 };
+```
+
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+        List<int[]> merged = new ArrayList<>();
+        for (int[] interval : intervals) {
+            if (merged.isEmpty() || interval[0] > merged.get(merged.size() - 1)[1]) {
+                merged.add(new int[] {interval[0], interval[1]});
+            } else {
+                int[] last = merged.get(merged.size() - 1);
+                last[1] = Math.max(last[1], interval[1]);
+            }
+        }
+        return merged.toArray(new int[0][]);
+    }
+}
+```
+
+```python
+class Solution:
+    def merge(self, intervals: list[list[int]]) -> list[list[int]]:
+        intervals.sort()
+        merged = []
+        for start, end in intervals:
+            if not merged or start > merged[-1][1]:
+                merged.append([start, end])
+            else:
+                merged[-1][1] = max(merged[-1][1], end)
+        return merged
 ```

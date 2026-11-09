@@ -97,7 +97,7 @@ Next `curr = 2`: its left child `3` has no right child, so `pre = 3`; `3->right 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void flatten(TreeNode* root) {
@@ -111,4 +111,37 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public void flatten(TreeNode root) {
+        for (TreeNode curr = root; curr != null; curr = curr.right) {
+            if (curr.left == null) continue;
+            TreeNode pre = curr.left;  // last node of the left subtree in pre-order
+            while (pre.right != null) pre = pre.right;
+            pre.right = curr.right;
+            curr.right = curr.left;
+            curr.left = null;
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def flatten(self, root: TreeNode | None) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        curr = root
+        while curr:
+            if curr.left:
+                pre = curr.left  # last node of the left subtree in pre-order
+                while pre.right:
+                    pre = pre.right
+                pre.right = curr.right
+                curr.right = curr.left
+                curr.left = None
+            curr = curr.right
 ```

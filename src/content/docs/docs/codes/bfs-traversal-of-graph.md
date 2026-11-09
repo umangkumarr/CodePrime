@@ -97,7 +97,7 @@ Example 1, `adj = [[2, 3, 1], [0], [0, 4], [0], [2]]`:
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> bfs(vector<vector<int>>& adj) {
@@ -121,4 +121,48 @@ class Solution {
         return order;
     }
 };
+```
+
+```java
+class Solution {
+    public ArrayList<Integer> bfs(ArrayList<ArrayList<Integer>> adj) {
+        int V = adj.size();
+        ArrayList<Integer> order = new ArrayList<>();
+        boolean[] visited = new boolean[V];
+        ArrayDeque<Integer> q = new ArrayDeque<>();
+        visited[0] = true;
+        q.add(0);
+        while (!q.isEmpty()) {
+            int u = q.poll();
+            order.add(u);
+            for (int v : adj.get(u)) {
+                if (!visited[v]) {
+                    visited[v] = true;
+                    q.add(v);
+                }
+            }
+        }
+        return order;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def bfs(self, adj):
+        order = []
+        visited = [False] * len(adj)
+        visited[0] = True
+        q = deque([0])
+        while q:
+            u = q.popleft()
+            order.append(u)
+            for v in adj[u]:
+                if not visited[v]:
+                    visited[v] = True
+                    q.append(v)
+        return order
 ```

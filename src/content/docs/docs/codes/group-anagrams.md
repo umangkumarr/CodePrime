@@ -52,12 +52,12 @@ Output: [["a"]]
 
 Two words are anagrams exactly when they contain the same letters with the same multiplicities. Sorting a word's letters erases their order and keeps only those multiplicities, so **anagrams have the same sorted form, and non-anagrams have different ones**. The sorted form is therefore a perfect key: put every word into a hash map bucket under its key, and each bucket is one group.
 
-Sorting each word with `std::sort` costs $O(L \log L)$. Because the alphabet has only 26 letters, a **counting sort** produces the same sorted key in $O(L + 26)$: count each letter, then write `'a'` `cnt[0]` times, `'b'` `cnt[1]` times, and so on.
+Sorting each word with a comparison sort costs $O(L \log L)$. Because the alphabet has only 26 letters, a **counting sort** produces the same sorted key in $O(L + 26)$: count each letter, then write `'a'` `cnt[0]` times, `'b'` `cnt[1]` times, and so on.
 
 ### Algorithm
 
 1. For each word `s` in `strs`, build `sortedKey(s)`: count the letters into `cnt[26]`, then append each letter as many times as it occurs, in alphabetical order.
-2. Append `s` to `groups[key]`, where `groups` is an `unordered_map` from key to the list of words.
+2. Append `s` to `groups[key]`, where `groups` is a hash map from key to the list of words.
 3. Move every bucket of `groups` into `ans` and return it.
 
 ### Walkthrough
@@ -88,7 +88,7 @@ The three buckets are the three groups (in whatever order the hash map iterates 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     vector<vector<string>> groupAnagrams(vector<string>& strs) {
@@ -112,4 +112,46 @@ class Solution {
         return key;
     }
 };
+```
+
+```java
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> groups = new HashMap<>();
+        for (String s : strs) groups.computeIfAbsent(sortedKey(s), key -> new ArrayList<>()).add(s);
+        return new ArrayList<>(groups.values());
+    }
+
+    // Counting sort over 'a'..'z': the letters of s in sorted order, in O(L + 26).
+    private static String sortedKey(String s) {
+        int[] cnt = new int[26];
+        for (int i = 0; i < s.length(); i++) cnt[s.charAt(i) - 'a']++;
+        char[] key = new char[s.length()];
+        int pos = 0;
+        for (int i = 0; i < 26; i++) {
+            for (int c = 0; c < cnt[i]; c++) key[pos++] = (char) ('a' + i);
+        }
+        return new String(key);
+    }
+}
+```
+
+```python
+from collections import defaultdict
+
+
+class Solution:
+    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:
+        groups = defaultdict(list)
+        for s in strs:
+            groups[self.sortedKey(s)].append(s)
+        return list(groups.values())
+
+    # Counting sort over 'a'..'z': the letters of s in sorted order, in O(L + 26).
+    @staticmethod
+    def sortedKey(s: str) -> str:
+        cnt = [0] * 26
+        for ch in s:
+            cnt[ord(ch) - 97] += 1
+        return ''.join(chr(97 + i) * c for i, c in enumerate(cnt) if c)
 ```

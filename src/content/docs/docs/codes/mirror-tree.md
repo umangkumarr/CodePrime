@@ -73,7 +73,7 @@ So it is enough to swap the two child pointers of a node and then mirror both ch
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     void mirror(Node* root) {
@@ -83,4 +83,30 @@ class Solution {
         mirror(root->right);
     }
 };
+```
+
+```java
+class Solution {
+    void mirror(Node root) {
+        if (root == null) return;
+        Node t = root.left;
+        root.left = root.right;
+        root.right = t;
+        mirror(root.left);
+        mirror(root.right);
+    }
+}
+```
+
+```python
+class Solution:
+    def mirror(self, root):
+        stack = [root] if root else []
+        while stack:
+            node = stack.pop()
+            node.left, node.right = node.right, node.left
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
 ```

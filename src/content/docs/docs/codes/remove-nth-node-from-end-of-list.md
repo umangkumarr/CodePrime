@@ -81,7 +81,7 @@ The dummy node also removes the special case of deleting the head itself: the he
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
@@ -99,4 +99,34 @@ class Solution {
         return dummy.next;
     }
 };
+```
+
+```java
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode dummy = new ListNode(0, head);
+        ListNode fast = head, slow = dummy;
+        for (int i = 0; i < n; i++) fast = fast.next;
+        while (fast != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        slow.next = slow.next.next;
+        return dummy.next;
+    }
+}
+```
+
+```python
+class Solution:
+    def removeNthFromEnd(self, head: ListNode | None, n: int) -> ListNode | None:
+        dummy = ListNode(0, head)
+        fast, slow = head, dummy
+        for _ in range(n):
+            fast = fast.next
+        while fast:
+            fast = fast.next
+            slow = slow.next
+        slow.next = slow.next.next
+        return dummy.next
 ```

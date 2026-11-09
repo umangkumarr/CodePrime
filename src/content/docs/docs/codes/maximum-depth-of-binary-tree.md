@@ -68,7 +68,7 @@ For Example 1: the leaves `9`, `15` and `7` have depth `1`; node `20` gets `1 + 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int maxDepth(TreeNode* root) {
@@ -76,4 +76,28 @@ class Solution {
         return 1 + max(maxDepth(root->left), maxDepth(root->right));
     }
 };
+```
+
+```java
+class Solution {
+    public int maxDepth(TreeNode root) {
+        if (root == null) return 0;
+        return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+    }
+}
+```
+
+```python
+class Solution:
+    def maxDepth(self, root: TreeNode | None) -> int:
+        # The same depth-first traversal on an explicit stack (the tree can be 10^4 levels deep).
+        best = 0
+        stack = [(root, 1)] if root else []
+        while stack:
+            node, depth = stack.pop()
+            best = max(best, depth)
+            for child in (node.left, node.right):
+                if child:
+                    stack.append((child, depth + 1))
+        return best
 ```

@@ -101,7 +101,7 @@ Five people, where everyone knows person `2` and person `2` knows no one. Blue i
 
 ## Code
 
-```cpp title="C++"
+```cpp
 int findCelebrity(int n) {
     // Each call eliminates one person: whoever knows someone, or whoever is not known.
     int candidate = 0;
@@ -117,4 +117,44 @@ int findCelebrity(int n) {
     }
     return candidate;
 }
+```
+
+```java
+public class Solution {
+    // The judge provides the helper as Runner.knows(A, B).
+    public static int findCelebrity(int n) {
+        // Each call eliminates one person: whoever knows someone, or whoever is not known.
+        int candidate = 0;
+        for (int i = 1; i < n; i++) {
+            if (Runner.knows(candidate, i)) candidate = i;
+        }
+
+        // knows(candidate, i) is already known to be false for every i > candidate.
+        for (int i = 0; i < n; i++) {
+            if (i == candidate) continue;
+            if (i < candidate && Runner.knows(candidate, i)) return -1;
+            if (!Runner.knows(i, candidate)) return -1;
+        }
+        return candidate;
+    }
+}
+```
+
+```python
+def findCelebrity(n, knows):
+    # Each call eliminates one person: whoever knows someone, or whoever is not known.
+    candidate = 0
+    for i in range(1, n):
+        if knows(candidate, i):
+            candidate = i
+
+    # knows(candidate, i) is already known to be false for every i > candidate.
+    for i in range(n):
+        if i == candidate:
+            continue
+        if i < candidate and knows(candidate, i):
+            return -1
+        if not knows(i, candidate):
+            return -1
+    return candidate
 ```

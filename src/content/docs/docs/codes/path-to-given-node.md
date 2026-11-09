@@ -103,7 +103,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 bool findPath(TreeNode* node, int B, vector<int>& path) {
     if (!node) return false;
     path.push_back(node->val);
@@ -117,4 +117,57 @@ vector<int> Solution::solve(TreeNode* A, int B) {
     findPath(A, B, path);
     return path;
 }
+```
+
+```java
+public class Solution {
+    public ArrayList<Integer> solve(TreeNode A, int B) {
+        // Iterative DFS (a skewed tree can be 10^5 deep): `path` is the stack of
+        // nodes from the root to the current node, `last` the subtree just finished.
+        ArrayList<TreeNode> path = new ArrayList<>();
+        TreeNode node = A, last = null;
+        while (node != null || !path.isEmpty()) {
+            if (node != null) {
+                path.add(node);
+                if (node.val == B) break;
+                node = node.left;
+            } else {
+                TreeNode top = path.get(path.size() - 1);
+                if (top.right != null && top.right != last) {
+                    node = top.right;
+                } else {
+                    last = path.remove(path.size() - 1);  // dead end: backtrack
+                }
+            }
+        }
+        ArrayList<Integer> result = new ArrayList<>(path.size());
+        for (TreeNode t : path) result.add(t.val);
+        return result;
+    }
+}
+```
+
+```python
+class Solution:
+    # @param A : root node of tree
+    # @param B : integer
+    # @return a list of integers
+    def solve(self, A, B):
+        # Iterative DFS (a skewed tree can be 10^5 deep): `path` is the stack of
+        # nodes from the root to the current node, `last` the subtree just finished.
+        path = []
+        node, last = A, None
+        while node or path:
+            if node:
+                path.append(node)
+                if node.val == B:
+                    break
+                node = node.left
+            else:
+                top = path[-1]
+                if top.right and top.right is not last:
+                    node = top.right
+                else:
+                    last = path.pop()  # dead end: backtrack
+        return [t.val for t in path]
 ```

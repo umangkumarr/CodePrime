@@ -118,6 +118,36 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Quadratic DP"
+class Solution {
+    public int maxSumIS(int arr[]) {
+        int n = arr.length, ans = 0;
+        int[] dp = new int[n];
+        for (int i = 0; i < n; i++) {
+            dp[i] = arr[i];
+            for (int j = 0; j < i; j++)
+                if (arr[j] < arr[i]) dp[i] = Math.max(dp[i], dp[j] + arr[i]);
+            ans = Math.max(ans, dp[i]);
+        }
+        return ans;
+    }
+}
+```
+
+```python title="Approach 1: Quadratic DP"
+class Solution:
+    def maxSumIS(self, arr):
+        n, ans = len(arr), 0
+        dp = [0] * n
+        for i in range(n):
+            dp[i] = arr[i]
+            for j in range(i):
+                if arr[j] < arr[i]:
+                    dp[i] = max(dp[i], dp[j] + arr[i])
+            ans = max(ans, dp[i])
+        return ans
+```
+
 ```cpp title="Approach 2: Fenwick tree"
 class Solution {
    public:
@@ -147,4 +177,65 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java title="Approach 2: Fenwick tree"
+class Solution {
+    private int[] tree;  // tree[r]: max dp over a block of ranks ending at r
+
+    private int query(int r) {  // max dp over ranks 1..r
+        int best = 0;
+        for (; r > 0; r -= r & -r) best = Math.max(best, tree[r]);
+        return best;
+    }
+
+    private void update(int r, int v) {
+        for (; r < tree.length; r += r & -r) tree[r] = Math.max(tree[r], v);
+    }
+
+    public int maxSumIS(int arr[]) {
+        int[] vals = Arrays.stream(arr).sorted().distinct().toArray();
+        tree = new int[vals.length + 1];
+
+        int ans = 0;
+        for (int x : arr) {
+            int r = Arrays.binarySearch(vals, x) + 1;
+            int cur = x + query(r - 1);
+            update(r, cur);
+            ans = Math.max(ans, cur);
+        }
+        return ans;
+    }
+}
+```
+
+```python title="Approach 2: Fenwick tree"
+from bisect import bisect_left
+
+
+class Solution:
+    def maxSumIS(self, arr):
+        vals = sorted(set(arr))
+        m = len(vals)
+        tree = [0] * (m + 1)  # tree[r]: max dp over a block of ranks ending at r
+
+        def query(r):  # max dp over ranks 1..r
+            best = 0
+            while r > 0:
+                best = max(best, tree[r])
+                r -= r & -r
+            return best
+
+        def update(r, v):
+            while r <= m:
+                tree[r] = max(tree[r], v)
+                r += r & -r
+
+        ans = 0
+        for x in arr:
+            r = bisect_left(vals, x) + 1
+            cur = x + query(r - 1)
+            update(r, cur)
+            ans = max(ans, cur)
+        return ans
 ```

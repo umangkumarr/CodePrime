@@ -76,7 +76,7 @@ For Example 1: `2 + 5 = 7`, then `4 + 6 = 10` (write `0`, carry `1`), then `3 + 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
@@ -93,4 +93,47 @@ class Solution {
         return dummy.next;
     }
 };
+```
+
+```java
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode dummy = new ListNode(0), p = dummy;
+        int carry = 0;
+        while (l1 != null || l2 != null || carry != 0) {
+            int sum = carry;
+            if (l1 != null) {
+                sum += l1.val;
+                l1 = l1.next;
+            }
+            if (l2 != null) {
+                sum += l2.val;
+                l2 = l2.next;
+            }
+            p.next = new ListNode(sum % 10);
+            p = p.next;
+            carry = sum / 10;
+        }
+        return dummy.next;
+    }
+}
+```
+
+```python
+class Solution:
+    def addTwoNumbers(self, l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
+        dummy = p = ListNode(0)
+        carry = 0
+        while l1 or l2 or carry:
+            total = carry
+            if l1:
+                total += l1.val
+                l1 = l1.next
+            if l2:
+                total += l2.val
+                l2 = l2.next
+            p.next = ListNode(total % 10)
+            p = p.next
+            carry = total // 10
+        return dummy.next
 ```

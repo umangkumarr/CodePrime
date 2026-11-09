@@ -72,7 +72,7 @@ On Example 1 the queue is `[3]`, then `[9, 20]`, then `[15, 7]`, giving the thre
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<vector<int>> levelOrder(TreeNode* root) {
@@ -96,4 +96,50 @@ class Solution {
         return levels;
     }
 };
+```
+
+```java
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> levels = new ArrayList<>();
+        if (root == null) return levels;
+        ArrayDeque<TreeNode> q = new ArrayDeque<>();
+        q.add(root);
+        while (!q.isEmpty()) {
+            int size = q.size();
+            List<Integer> level = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                TreeNode node = q.poll();
+                level.add(node.val);
+                if (node.left != null) q.add(node.left);
+                if (node.right != null) q.add(node.right);
+            }
+            levels.add(level);
+        }
+        return levels;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def levelOrder(self, root: TreeNode | None) -> list[list[int]]:
+        levels = []
+        if not root:
+            return levels
+        q = deque([root])
+        while q:
+            level = []
+            for _ in range(len(q)):
+                node = q.popleft()
+                level.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            levels.append(level)
+        return levels
 ```

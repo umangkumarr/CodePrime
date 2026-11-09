@@ -57,7 +57,7 @@ Searching inorder linearly for the root costs $O(n)$ per node and $O(n^2)$ overa
 1. Build `pos`, mapping each `inorder[i]` to `i`.
 2. Call `build(postorder, n - 1, 0, n - 1, pos)`, where the arguments are `postEnd` (index of the block's last postorder element) and the inorder range `[inLo, inHi]`.
 3. In `build`:
-   - If `inLo > inHi`, the block is empty: return `nullptr`.
+   - If `inLo > inHi`, the block is empty: return null.
    - Create `root` from `postorder[postEnd]` and let `mid = pos[root->val]`, `rightSize = inHi - mid`.
    - `root->right = build(postorder, postEnd - 1, mid + 1, inHi, pos)` — the right block ends just before the root.
    - `root->left = build(postorder, postEnd - 1 - rightSize, inLo, mid - 1, pos)` — the left block ends just before the right block.
@@ -82,7 +82,7 @@ Example 1. Each step shows one call: blue is the root taken from the end of the 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     TreeNode* build(const vector<int>& postorder, int postEnd, int inLo, int inHi,
                     const unordered_map<int, int>& pos) {
@@ -103,4 +103,49 @@ class Solution {
         return build(postorder, n - 1, 0, n - 1, pos);
     }
 };
+```
+
+```java
+class Solution {
+    private TreeNode build(int[] postorder, int postEnd, int inLo, int inHi, Map<Integer, Integer> pos) {
+        if (inLo > inHi) return null;
+        TreeNode root = new TreeNode(postorder[postEnd]);
+        int mid = pos.get(root.val);
+        int rightSize = inHi - mid;
+        root.right = build(postorder, postEnd - 1, mid + 1, inHi, pos);
+        root.left = build(postorder, postEnd - 1 - rightSize, inLo, mid - 1, pos);
+        return root;
+    }
+
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        int n = inorder.length;
+        Map<Integer, Integer> pos = new HashMap<>();
+        for (int i = 0; i < n; i++) pos.put(inorder[i], i);
+        return build(postorder, n - 1, 0, n - 1, pos);
+    }
+}
+```
+
+```python
+class Solution:
+    def buildTree(self, inorder: list[int], postorder: list[int]) -> TreeNode | None:
+        pos = {val: i for i, val in enumerate(inorder)}
+        dummy = TreeNode()
+        # each task: build the subtree over inorder[in_lo..in_hi], whose root is
+        # postorder[post_end], and attach it as parent's left or right child
+        stack = [(dummy, True, len(postorder) - 1, 0, len(inorder) - 1)]
+        while stack:
+            parent, is_left, post_end, in_lo, in_hi = stack.pop()
+            if in_lo > in_hi:
+                continue
+            root = TreeNode(postorder[post_end])
+            if is_left:
+                parent.left = root
+            else:
+                parent.right = root
+            mid = pos[root.val]
+            right_size = in_hi - mid
+            stack.append((root, False, post_end - 1, mid + 1, in_hi))
+            stack.append((root, True, post_end - 1 - right_size, in_lo, mid - 1))
+        return dummy.left
 ```

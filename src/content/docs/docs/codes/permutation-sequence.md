@@ -84,7 +84,7 @@ The result is `"2314"`.
 
 ### Complexity
 
-- **Time:** $O(n^2)$ — `n` steps, each erasing from a vector of at most `n` digits. With $n \le 9$ this is effectively constant.
+- **Time:** $O(n^2)$ — `n` steps, each erasing from a list of at most `n` digits. With $n \le 9$ this is effectively constant.
 - **Space:** $O(n)$ — `fact`, `digits` and the result.
 
 ### Edge cases
@@ -95,7 +95,7 @@ The result is `"2314"`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string getPermutation(int n, int k) {
@@ -116,4 +116,43 @@ class Solution {
         return result;
     }
 };
+```
+
+```java
+class Solution {
+    public String getPermutation(int n, int k) {
+        int[] fact = new int[n];
+        fact[0] = 1;
+        for (int i = 1; i < n; i++) fact[i] = fact[i - 1] * i;
+
+        List<Character> digits = new ArrayList<>();
+        for (int d = 1; d <= n; d++) digits.add((char) ('0' + d));
+
+        StringBuilder result = new StringBuilder();
+        k--;
+        for (int i = n - 1; i >= 0; i--) {
+            int idx = k / fact[i];
+            result.append(digits.remove(idx));
+            k %= fact[i];
+        }
+        return result.toString();
+    }
+}
+```
+
+```python
+class Solution:
+    def getPermutation(self, n: int, k: int) -> str:
+        fact = [1] * n
+        for i in range(1, n):
+            fact[i] = fact[i - 1] * i
+
+        digits = [str(d) for d in range(1, n + 1)]
+
+        result = []
+        k -= 1
+        for i in range(n - 1, -1, -1):
+            idx, k = divmod(k, fact[i])
+            result.append(digits.pop(idx))
+        return ''.join(result)
 ```

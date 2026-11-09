@@ -3,8 +3,6 @@ title: "Inclusion–Exclusion Principle"
 description: "Count the numbers from 1 to n divisible by at least one prime below 20 by enumerating subsets of the primes with a bitmask."
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
 ## Problem
 
 *Not So Easy Math* (Coding Blocks, bitmasking).
@@ -62,9 +60,6 @@ There are only 8 primes below 20 (2, 3, 5, 7, 11, 13, 17, 19), so there are $2^8
 
 ## Code
 
-<Tabs syncKey="lang">
-<TabItem label="C++">
-
 ```cpp
 #include <iostream>
 using namespace std;
@@ -95,10 +90,37 @@ int main() {
 }
 ```
 
-</TabItem>
-<TabItem label="Python">
+```java
+import java.util.Scanner;
 
-```py
+public class Main {
+    static final long[] PRIMES = {2, 3, 5, 7, 11, 13, 17, 19};
+    static final int K = PRIMES.length;
+
+    static long countDivisible(long n) {
+        long ans = 0;
+        for (int mask = 1; mask < (1 << K); mask++) {
+            long product = 1;
+            for (int j = 0; j < K; j++)
+                if ((mask & (1 << j)) != 0) product *= PRIMES[j];
+            if (Integer.bitCount(mask) % 2 == 1) ans += n / product;  // odd-sized subset: add
+            else ans -= n / product;                                  // even-sized subset: subtract
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int t = in.nextInt();
+        while (t-- > 0) {
+            long n = in.nextLong();
+            System.out.println(countDivisible(n));
+        }
+    }
+}
+```
+
+```python
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19]
 
 
@@ -119,8 +141,5 @@ def count_divisible(n):
 for _ in range(int(input())):
     print(count_divisible(int(input())))
 ```
-
-</TabItem>
-</Tabs>
 
 **Further reading:** [Inclusion–exclusion principle on cp-algorithms](https://cp-algorithms.com/combinatorics/inclusion-exclusion.html).

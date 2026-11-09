@@ -67,7 +67,7 @@ Why "at most `B`" is enough even though every student must get a book: when `B <
 ### Algorithm
 
 1. If `B > A.size()`, return `-1`.
-2. Set `lo = max(A)` and `hi = sum(A)` (as `long long`, since the sum can reach $10^{10}$).
+2. Set `lo = max(A)` and `hi = sum(A)` (as 64-bit integers, since the sum can reach $10^{10}$).
 3. While `lo < hi`:
    - `mid = lo + (hi - lo) / 2`;
    - if `canAllocate(A, B, mid)`, the answer is at most `mid`: `hi = mid`;
@@ -91,11 +91,11 @@ Example 1 (`B = 2`). Each frame tests one `limit`; books with the same colour go
 
 - **More students than books** such as `B = 5` for 4 books: returns `-1` immediately.
 - **One student per book** (Example 2): the search settles on `max(A) = 100`.
-- **One student** (`B = 1`): every limit below `sum(A)` fails, so the answer is the total. The judge's return type is `int`, so this assumes the answer fits in an `int` (true for the judge's tests); the search itself uses `long long` and cannot overflow.
+- **One student** (`B = 1`): every limit below `sum(A)` fails, so the answer is the total. The judge's return type is `int`, so this assumes the answer fits in an `int` (true for the judge's tests); the search itself uses 64-bit integers and cannot overflow.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 static bool canAllocate(const vector<int>& A, int B, long long limit) {
     int students = 1;
     long long pages = 0;
@@ -123,4 +123,66 @@ int Solution::books(vector<int>& A, int B) {
     }
     return (int)lo;
 }
+```
+
+```java
+public class Solution {
+    public int books(ArrayList<Integer> A, int B) {
+        if (B > A.size()) return -1;
+        long lo = 0, hi = 0;
+        for (int x : A) {
+            lo = Math.max(lo, x);
+            hi += x;
+        }
+        while (lo < hi) {
+            long mid = lo + (hi - lo) / 2;
+            if (canAllocate(A, B, mid)) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return (int) lo;
+    }
+
+    private static boolean canAllocate(List<Integer> A, int B, long limit) {
+        int students = 1;
+        long pages = 0;
+        for (int x : A) {
+            if (pages + x > limit) {
+                if (++students > B) return false;
+                pages = 0;
+            }
+            pages += x;
+        }
+        return true;
+    }
+}
+```
+
+```python
+class Solution:
+    def books(self, A, B):
+        if B > len(A):
+            return -1
+
+        def can_allocate(limit):
+            students, pages = 1, 0
+            for x in A:
+                if pages + x > limit:
+                    students += 1
+                    if students > B:
+                        return False
+                    pages = 0
+                pages += x
+            return True
+
+        lo, hi = max(A), sum(A)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if can_allocate(mid):
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
 ```

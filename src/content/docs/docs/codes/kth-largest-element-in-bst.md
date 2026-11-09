@@ -97,7 +97,7 @@ Example 2 annotated with the order of visits: `11, 10, 6, 5, 4, 3, 2, ...` — t
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int kthLargest(Node* root, int k) {
@@ -115,4 +115,38 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public int kthLargest(Node root, int k) {
+        ArrayDeque<Node> st = new ArrayDeque<>();
+        Node cur = root;
+        while (true) {
+            while (cur != null) {
+                st.push(cur);
+                cur = cur.right;
+            }
+            cur = st.pop();
+            if (--k == 0) return cur.data;
+            cur = cur.left;
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def kthLargest(self, root, k):
+        st = []
+        cur = root
+        while True:
+            while cur:
+                st.append(cur)
+                cur = cur.right
+            cur = st.pop()
+            k -= 1
+            if k == 0:
+                return cur.data
+            cur = cur.left
 ```

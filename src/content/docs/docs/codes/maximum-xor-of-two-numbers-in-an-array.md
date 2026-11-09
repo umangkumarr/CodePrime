@@ -91,7 +91,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int findMaximumXOR(vector<int>& nums) {
@@ -128,4 +128,72 @@ class Solution {
         return best;
     }
 };
+```
+
+```java
+class Solution {
+    public int findMaximumXOR(int[] nums) {
+        final int HIGH = 30;  // nums[i] < 2^31
+        // Flat trie: children of node v are trie[2v] (bit 0) and trie[2v + 1] (bit 1).
+        // Node 0 is the root; child 0 means "none".
+        int[] trie = new int[2 * (nums.length * (HIGH + 1) + 1)];
+        int size = 1;
+
+        for (int x : nums) {
+            int node = 0;
+            for (int b = HIGH; b >= 0; b--) {
+                int slot = 2 * node + ((x >> b) & 1);
+                if (trie[slot] == 0) trie[slot] = size++;
+                node = trie[slot];
+            }
+        }
+
+        int best = 0;
+        for (int x : nums) {
+            int node = 0, cur = 0;
+            for (int b = HIGH; b >= 0; b--) {
+                int want = 1 - ((x >> b) & 1);
+                if (trie[2 * node + want] != 0) {
+                    cur |= 1 << b;
+                    node = trie[2 * node + want];
+                } else {
+                    node = trie[2 * node + 1 - want];
+                }
+            }
+            best = Math.max(best, cur);
+        }
+        return best;
+    }
+}
+```
+
+```python
+class Solution:
+    def findMaximumXOR(self, nums: List[int]) -> int:
+        HIGH = 30  # nums[i] < 2^31
+        # Flat trie: children of node v are trie[2v] (bit 0) and trie[2v + 1] (bit 1).
+        # Node 0 is the root; child 0 means "none".
+        trie = [0, 0]
+
+        for x in nums:
+            node = 0
+            for b in range(HIGH, -1, -1):
+                slot = 2 * node + ((x >> b) & 1)
+                if not trie[slot]:
+                    trie[slot] = len(trie) // 2
+                    trie += (0, 0)
+                node = trie[slot]
+
+        best = 0
+        for x in nums:
+            node = cur = 0
+            for b in range(HIGH, -1, -1):
+                want = 1 - ((x >> b) & 1)
+                if trie[2 * node + want]:
+                    cur |= 1 << b
+                    node = trie[2 * node + want]
+                else:
+                    node = trie[2 * node + 1 - want]
+            best = max(best, cur)
+        return best
 ```

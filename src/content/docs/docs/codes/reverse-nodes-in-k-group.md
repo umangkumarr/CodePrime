@@ -99,7 +99,7 @@ Because `prev` started at `t`, the group's old first node `3` ends up pointing a
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     ListNode* reverseKGroup(ListNode* head, int k) {
@@ -131,4 +131,55 @@ class Solution {
     }
 };
 
+```
+
+```java
+class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode root = new ListNode(0, head);
+        ListNode tail = root;
+        while (true) {
+            ListNode t = tail.next;
+            int cnt = 0;
+            while (t != null && cnt < k) {
+                cnt++;
+                t = t.next;
+            }
+            if (cnt < k) break;
+
+            ListNode first = tail.next, prev = t, cur = first;
+            for (int i = 0; i < k; i++) {
+                ListNode nxt = cur.next;
+                cur.next = prev;
+                prev = cur;
+                cur = nxt;
+            }
+            tail.next = prev;
+            tail = first;
+        }
+        return root.next;
+    }
+}
+```
+
+```python
+class Solution:
+    def reverseKGroup(self, head: ListNode | None, k: int) -> ListNode | None:
+        root = ListNode(0, head)
+        tail = root
+        while True:
+            t, cnt = tail.next, 0
+            while t and cnt < k:
+                cnt += 1
+                t = t.next
+            if cnt < k:
+                break
+
+            first = tail.next
+            prev, cur = t, first
+            for _ in range(k):
+                cur.next, prev, cur = prev, cur, cur.next
+            tail.next = prev
+            tail = first
+        return root.next
 ```

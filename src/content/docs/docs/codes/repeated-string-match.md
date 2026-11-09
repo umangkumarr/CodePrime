@@ -75,7 +75,7 @@ Example 1, `a = "abcd"`, `b = "cdabcdab"`: the scan covers `T[0..10] = "abcdabcd
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int repeatedStringMatch(string a, string b) {
@@ -96,4 +96,51 @@ class Solution {
         return -1;
     }
 };
+```
+
+```java
+class Solution {
+    public int repeatedStringMatch(String a, String b) {
+        int n = a.length(), m = b.length();
+        int[] fail = new int[m];
+        for (int i = 1, k = 0; i < m; i++) {
+            while (k > 0 && b.charAt(i) != b.charAt(k)) k = fail[k - 1];
+            if (b.charAt(i) == b.charAt(k)) k++;
+            fail[i] = k;
+        }
+        // Scan T = aaa... (T[i] = a[i % n]); the first match starts before index n.
+        for (int i = 0, k = 0; i < n + m - 1; i++) {
+            char c = a.charAt(i % n);
+            while (k > 0 && b.charAt(k) != c) k = fail[k - 1];
+            if (b.charAt(k) == c) k++;
+            if (k == m) return (i + n) / n;
+        }
+        return -1;
+    }
+}
+```
+
+```python
+class Solution:
+    def repeatedStringMatch(self, a: str, b: str) -> int:
+        n, m = len(a), len(b)
+        fail = [0] * m
+        k = 0
+        for i in range(1, m):
+            while k > 0 and b[i] != b[k]:
+                k = fail[k - 1]
+            if b[i] == b[k]:
+                k += 1
+            fail[i] = k
+        # Scan T = aaa... (T[i] = a[i % n]); the first match starts before index n.
+        k = 0
+        for i in range(n + m - 1):
+            c = a[i % n]
+            while k > 0 and b[k] != c:
+                k = fail[k - 1]
+            if b[k] == c:
+                k += 1
+            if k == m:
+                return (i + n) // n
+        return -1
 ```

@@ -74,7 +74,7 @@ A run in this sequence never contains more than three equal digits (a well-known
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     string countAndSay(int n) {
@@ -93,4 +93,41 @@ class Solution {
         return s;
     }
 };
+```
+
+```java
+class Solution {
+    public String countAndSay(int n) {
+        String s = "1";
+        for (int step = 1; step < n; step++) {
+            StringBuilder next = new StringBuilder();
+            for (int i = 0; i < s.length();) {
+                int j = i;
+                while (j < s.length() && s.charAt(j) == s.charAt(i)) j++;
+                next.append(j - i).append(s.charAt(i));
+                i = j;
+            }
+            s = next.toString();
+        }
+        return s;
+    }
+}
+```
+
+```python
+class Solution:
+    def countAndSay(self, n: int) -> str:
+        s = "1"
+        for _ in range(n - 1):
+            parts = []
+            i = 0
+            while i < len(s):
+                j = i
+                while j < len(s) and s[j] == s[i]:
+                    j += 1
+                parts.append(str(j - i))
+                parts.append(s[i])
+                i = j
+            s = "".join(parts)
+        return s
 ```

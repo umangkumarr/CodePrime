@@ -100,7 +100,7 @@ Example 2. Orange is row and column `k`, which the round reads; green marks cell
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
   public:
     void floydWarshall(vector<vector<int>> &dist) {
@@ -117,4 +117,38 @@ class Solution {
         }
     }
 };
+```
+
+```java
+class Solution {
+    public void floydWarshall(int[][] dist) {
+        final int INF = 100_000_000;
+        int V = dist.length;
+        for (int k = 0; k < V; k++) {
+            for (int i = 0; i < V; i++) {
+                if (dist[i][k] == INF) continue;
+                for (int j = 0; j < V; j++) {
+                    if (dist[k][j] == INF) continue;
+                    dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def floydWarshall(self, dist):
+        INF = 10**8
+        V = len(dist)
+        for k in range(V):
+            row_k = dist[k]
+            for i in range(V):
+                row_i = dist[i]
+                if row_i[k] == INF:
+                    continue
+                for j in range(V):
+                    if row_k[j] != INF and row_i[k] + row_k[j] < row_i[j]:
+                        row_i[j] = row_i[k] + row_k[j]
 ```

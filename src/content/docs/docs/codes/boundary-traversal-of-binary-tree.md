@@ -113,7 +113,7 @@ flowchart TD
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     static bool isLeaf(Node *node) { return !node->left && !node->right; }
 
@@ -145,4 +145,82 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private static boolean isLeaf(Node node) {
+        return node.left == null && node.right == null;
+    }
+
+    // preorder DFS that keeps only the leaves, so they come out left to right
+    private static void addLeaves(Node node, ArrayList<Integer> ans) {
+        if (node == null) return;
+        ArrayDeque<Node> stack = new ArrayDeque<>();
+        stack.push(node);
+        while (!stack.isEmpty()) {
+            Node cur = stack.pop();
+            if (isLeaf(cur)) {
+                ans.add(cur.data);
+                continue;
+            }
+            if (cur.right != null) stack.push(cur.right);
+            if (cur.left != null) stack.push(cur.left);
+        }
+    }
+
+    public ArrayList<Integer> boundaryTraversal(Node root) {
+        ArrayList<Integer> ans = new ArrayList<>();
+        ans.add(root.data);
+        if (isLeaf(root)) return ans;
+
+        for (Node cur = root.left; cur != null && !isLeaf(cur); cur = cur.left != null ? cur.left : cur.right)
+            ans.add(cur.data);
+
+        addLeaves(root.left, ans);
+        addLeaves(root.right, ans);
+
+        ArrayList<Integer> right = new ArrayList<>();
+        for (Node cur = root.right; cur != null && !isLeaf(cur); cur = cur.right != null ? cur.right : cur.left)
+            right.add(cur.data);
+        for (int i = right.size() - 1; i >= 0; i--) ans.add(right.get(i));
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def boundaryTraversal(self, root):
+        def is_leaf(node):
+            return node.left is None and node.right is None
+
+        ans = [root.data]
+        if is_leaf(root):
+            return ans
+
+        cur = root.left
+        while cur and not is_leaf(cur):
+            ans.append(cur.data)
+            cur = cur.left if cur.left else cur.right
+
+        # preorder DFS that keeps only the leaves, so they come out left to right
+        stack = [child for child in (root.right, root.left) if child]
+        while stack:
+            node = stack.pop()
+            if is_leaf(node):
+                ans.append(node.data)
+                continue
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+
+        right = []
+        cur = root.right
+        while cur and not is_leaf(cur):
+            right.append(cur.data)
+            cur = cur.right if cur.right else cur.left
+        ans.extend(reversed(right))
+        return ans
 ```

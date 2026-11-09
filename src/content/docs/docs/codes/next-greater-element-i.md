@@ -85,7 +85,7 @@ Then the queries `4, 1, 2` look up `-1, 3, -1`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {
@@ -107,4 +107,32 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        Map<Integer, Integer> nge = new HashMap<>();  // value -> its next greater element in nums2
+        Deque<Integer> st = new ArrayDeque<>();       // values waiting for a greater one, decreasing
+        for (int x : nums2) {
+            while (!st.isEmpty() && st.peek() < x) nge.put(st.pop(), x);
+            st.push(x);
+        }
+        int[] ans = new int[nums1.length];
+        for (int i = 0; i < nums1.length; i++) ans[i] = nge.getOrDefault(nums1[i], -1);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def nextGreaterElement(self, nums1: list[int], nums2: list[int]) -> list[int]:
+        nge = {}  # value -> its next greater element in nums2
+        st = []  # values waiting for a greater one, decreasing
+        for x in nums2:
+            while st and st[-1] < x:
+                nge[st.pop()] = x
+            st.append(x)
+        return [nge.get(v, -1) for v in nums1]
 ```

@@ -110,6 +110,30 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Iterative"
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        ListNode prev = null, curr = head;
+        while (curr != null) {
+            ListNode next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        return prev;
+    }
+}
+```
+
+```python title="Approach 1: Iterative"
+class Solution:
+    def reverseList(self, head: ListNode | None) -> ListNode | None:
+        prev, curr = None, head
+        while curr:
+            curr.next, prev, curr = prev, curr, curr.next
+        return prev
+```
+
 ```cpp title="Approach 2: Recursive"
 class Solution {
    public:
@@ -121,4 +145,32 @@ class Solution {
         return newHead;
     }
 };
+```
+
+```java title="Approach 2: Recursive"
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        if (head == null || head.next == null) return head;
+        ListNode newHead = reverseList(head.next);
+        head.next.next = head;
+        head.next = null;
+        return newHead;
+    }
+}
+```
+
+```python title="Approach 2: Recursive"
+class Solution:
+    def reverseList(self, head: ListNode | None) -> ListNode | None:
+        # The recursion with an explicit call stack (up to 5000 frames deep).
+        stack = []
+        while head and head.next:
+            stack.append(head)
+            head = head.next
+        new_head = head
+        while stack:
+            node = stack.pop()
+            node.next.next = node
+            node.next = None
+        return new_head
 ```

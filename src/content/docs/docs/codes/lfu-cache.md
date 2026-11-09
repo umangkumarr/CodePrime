@@ -121,7 +121,7 @@ State: `capacity`, `minFreq`, `byFreq` (frequency → `list<Entry>`, most recent
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class LFUCache {
     struct Entry {
         int key, value, freq;
@@ -173,4 +173,109 @@ class LFUCache {
         minFreq = 1;
     }
 };
+```
+
+```java
+class LFUCache {
+    private final int capacity;
+    private int minFreq = 0;
+    private final HashMap<Integer, Integer> values = new HashMap<>();  // key -> value
+    private final HashMap<Integer, Integer> freqOf = new HashMap<>();  // key -> use count
+    // freq -> keys, least recent first (LinkedHashSet keeps insertion order)
+    private final HashMap<Integer, LinkedHashSet<Integer>> byFreq = new HashMap<>();
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+    }
+
+    // Count one more use: move the key to the most-recent end of the next bucket.
+    private void touch(int key) {
+        int f = freqOf.get(key);
+        LinkedHashSet<Integer> from = byFreq.get(f);
+        from.remove(key);
+        if (from.isEmpty()) {
+            byFreq.remove(f);
+            if (minFreq == f) minFreq = f + 1;
+        }
+        byFreq.computeIfAbsent(f + 1, x -> new LinkedHashSet<>()).add(key);
+        freqOf.put(key, f + 1);
+    }
+
+    public int get(int key) {
+        Integer value = values.get(key);
+        if (value == null) return -1;
+        touch(key);
+        return value;
+    }
+
+    public void put(int key, int value) {
+        if (values.containsKey(key)) {
+            values.put(key, value);
+            touch(key);
+            return;
+        }
+        if (values.size() == capacity) {
+            LinkedHashSet<Integer> bucket = byFreq.get(minFreq);
+            int victim = bucket.iterator().next();
+            bucket.remove(victim);
+            if (bucket.isEmpty()) byFreq.remove(minFreq);
+            values.remove(victim);
+            freqOf.remove(victim);
+        }
+        values.put(key, value);
+        freqOf.put(key, 1);
+        byFreq.computeIfAbsent(1, x -> new LinkedHashSet<>()).add(key);
+        minFreq = 1;
+    }
+}
+```
+
+```python
+from collections import OrderedDict, defaultdict
+
+
+class LFUCache:
+
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.min_freq = 0
+        self.values = {}  # key -> value
+        self.freq = {}    # key -> use count
+        # freq -> keys, least recent first
+        self.by_freq = defaultdict(OrderedDict)
+
+    def _touch(self, key: int) -> None:
+        # Count one more use: move the key to the most-recent end of the next bucket.
+        f = self.freq[key]
+        bucket = self.by_freq[f]
+        del bucket[key]
+        if not bucket:
+            del self.by_freq[f]
+            if self.min_freq == f:
+                self.min_freq = f + 1
+        self.by_freq[f + 1][key] = None
+        self.freq[key] = f + 1
+
+    def get(self, key: int) -> int:
+        if key not in self.values:
+            return -1
+        self._touch(key)
+        return self.values[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.values:
+            self.values[key] = value
+            self._touch(key)
+            return
+        if len(self.values) == self.capacity:
+            bucket = self.by_freq[self.min_freq]
+            victim, _ = bucket.popitem(last=False)
+            if not bucket:
+                del self.by_freq[self.min_freq]
+            del self.values[victim]
+            del self.freq[victim]
+        self.values[key] = value
+        self.freq[key] = 1
+        self.by_freq[1][key] = None
+        self.min_freq = 1
 ```

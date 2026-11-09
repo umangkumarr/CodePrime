@@ -107,7 +107,7 @@ Push writes into the free slot and increments `count`; pop decrements `count` an
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Stack {
     vector<int> arr;
     int count = 0;  // number of elements; the top is arr[count - 1]
@@ -131,4 +131,57 @@ class Stack {
 
     int isFull() { return count == (int)arr.size(); }
 };
+```
+
+```java
+class Stack {
+    private final int[] arr;
+    private int count = 0;  // number of elements; the top is arr[count - 1]
+
+    Stack(int capacity) { arr = new int[capacity]; }
+
+    void push(int num) {
+        if (isFull() == 1) return;
+        arr[count++] = num;
+    }
+
+    int pop() {
+        if (isEmpty() == 1) return -1;
+        return arr[--count];
+    }
+
+    int top() { return isEmpty() == 1 ? -1 : arr[count - 1]; }
+
+    int isEmpty() { return count == 0 ? 1 : 0; }
+
+    int isFull() { return count == arr.length ? 1 : 0; }
+}
+```
+
+```python
+class Stack:
+    def __init__(self, capacity: int):
+        self.arr = [0] * capacity
+        self.count = 0  # number of elements; the top is arr[count - 1]
+
+    def push(self, num: int) -> None:
+        if self.isFull():
+            return
+        self.arr[self.count] = num
+        self.count += 1
+
+    def pop(self) -> int:
+        if self.isEmpty():
+            return -1
+        self.count -= 1
+        return self.arr[self.count]
+
+    def top(self) -> int:
+        return -1 if self.isEmpty() else self.arr[self.count - 1]
+
+    def isEmpty(self) -> int:
+        return int(self.count == 0)
+
+    def isFull(self) -> int:
+        return int(self.count == len(self.arr))
 ```

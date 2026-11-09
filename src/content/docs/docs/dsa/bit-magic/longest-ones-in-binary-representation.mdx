@@ -3,8 +3,6 @@ title: "Longest Consecutive 1s in Binary Representation"
 description: "Find the longest run of 1s in a number's binary form by repeatedly AND-ing it with a shifted copy of itself."
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
 ## Problem
 
 Given a number `n`, find the length of the longest run of consecutive 1s in its binary representation. ([GeeksforGeeks: Longest Consecutive 1's](https://www.geeksforgeeks.org/problems/longest-consecutive-1s-1587115620/1))
@@ -53,9 +51,6 @@ Trace for `n = 222`: `11011110 → 01001110 → 00000110 → 00000010 → 0`, fo
 
 ## Code
 
-<Tabs syncKey="lang">
-<TabItem label="C++">
-
 ```cpp
 #include <iostream>
 using namespace std;
@@ -76,10 +71,25 @@ int main() {
 }
 ```
 
-</TabItem>
-<TabItem label="Python">
+```java
+public class Main {
+    static int maxConsecutiveOnes(int n) {
+        int count = 0;
+        while (n != 0) {
+            n &= n >>> 1;  // every run of 1s loses one bit
+            count++;
+        }
+        return count;
+    }
 
-```py
+    public static void main(String[] args) {
+        System.out.println(maxConsecutiveOnes(14));   // 3
+        System.out.println(maxConsecutiveOnes(222));  // 4
+    }
+}
+```
+
+```python
 def max_consecutive_ones(n):
     count = 0
     while n:
@@ -91,9 +101,6 @@ def max_consecutive_ones(n):
 print(max_consecutive_ones(14))   # 3
 print(max_consecutive_ones(222))  # 4
 ```
-
-</TabItem>
-</Tabs>
 
 ## Output
 

@@ -87,7 +87,7 @@ The comparison checks `1 = 1` and `2 = 2`, then `q` reaches null and the loop st
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     ListNode* reverse(ListNode* node) {
         ListNode* prev = nullptr;
@@ -120,4 +120,64 @@ class Solution {
         return palindrome;
     }
 };
+```
+
+```java
+class Solution {
+    private ListNode reverse(ListNode node) {
+        ListNode prev = null;
+        while (node != null) {
+            ListNode next = node.next;
+            node.next = prev;
+            prev = node;
+            node = next;
+        }
+        return prev;
+    }
+
+    public boolean isPalindrome(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        ListNode second = reverse(slow.next);
+        boolean palindrome = true;
+        for (ListNode p = head, q = second; q != null; p = p.next, q = q.next) {
+            if (p.val != q.val) {
+                palindrome = false;
+                break;
+            }
+        }
+        slow.next = reverse(second);
+        return palindrome;
+    }
+}
+```
+
+```python
+class Solution:
+    def isPalindrome(self, head: ListNode | None) -> bool:
+        def reverse(node):
+            prev = None
+            while node:
+                node.next, prev, node = prev, node, node.next
+            return prev
+
+        slow = fast = head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        second = reverse(slow.next)
+        palindrome = True
+        p, q = head, second
+        while q:
+            if p.val != q.val:
+                palindrome = False
+                break
+            p, q = p.next, q.next
+        slow.next = reverse(second)
+        return palindrome
 ```

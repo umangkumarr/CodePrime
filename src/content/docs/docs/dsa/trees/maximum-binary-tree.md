@@ -52,7 +52,7 @@ flowchart TD
 
 **Algorithm.**
 
-1. If `lo > hi`, the range is empty: return `nullptr`.
+1. If `lo > hi`, the range is empty: return an empty tree (null).
 2. Scan `nums[lo..hi]` for the index `best` of the largest value.
 3. Create a node for `nums[best]`, set its left child to `build(lo, best - 1)` and its right child to `build(best + 1, hi)`.
 4. The answer is `build(0, n - 1)`.
@@ -111,6 +111,46 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Recursion"
+class Solution {
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        return build(nums, 0, nums.length - 1);
+    }
+
+    private TreeNode build(int[] nums, int lo, int hi) {
+        if (lo > hi) return null;
+        int best = lo;
+        for (int i = lo + 1; i <= hi; i++)
+            if (nums[i] > nums[best]) best = i;
+        TreeNode root = new TreeNode(nums[best]);
+        root.left = build(nums, lo, best - 1);
+        root.right = build(nums, best + 1, hi);
+        return root;
+    }
+}
+```
+
+```python title="Approach 1: Recursion"
+class Solution:
+    def constructMaximumBinaryTree(self, nums: list[int]) -> TreeNode | None:
+        dummy = TreeNode()
+        # each entry: a range nums[lo..hi], the node its root hangs from, and on which side
+        stack = [(0, len(nums) - 1, dummy, False)]
+        while stack:
+            lo, hi, parent, is_left = stack.pop()
+            if lo > hi:
+                continue
+            best = max(range(lo, hi + 1), key=nums.__getitem__)
+            root = TreeNode(nums[best])
+            if is_left:
+                parent.left = root
+            else:
+                parent.right = root
+            stack.append((lo, best - 1, root, True))
+            stack.append((best + 1, hi, root, False))
+        return dummy.right
+```
+
 ```cpp title="Approach 2: Monotonic stack"
 class Solution {
    public:
@@ -128,6 +168,36 @@ class Solution {
         return stack.front();
     }
 };
+```
+
+```java title="Approach 2: Monotonic stack"
+class Solution {
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        Deque<TreeNode> stack = new ArrayDeque<>();  // values decrease from bottom to top
+        for (int x : nums) {
+            TreeNode node = new TreeNode(x);
+            while (!stack.isEmpty() && stack.peek().val < x)
+                node.left = stack.pop();  // the last popped is the largest smaller node
+            if (!stack.isEmpty()) stack.peek().right = node;
+            stack.push(node);
+        }
+        return stack.peekLast();
+    }
+}
+```
+
+```python title="Approach 2: Monotonic stack"
+class Solution:
+    def constructMaximumBinaryTree(self, nums: list[int]) -> TreeNode | None:
+        stack = []  # values decrease from bottom to top
+        for x in nums:
+            node = TreeNode(x)
+            while stack and stack[-1].val < x:
+                node.left = stack.pop()  # the last popped is the largest smaller node
+            if stack:
+                stack[-1].right = node
+            stack.append(node)
+        return stack[0]
 ```
 
 ## Author

@@ -86,7 +86,7 @@ The table for Example 2 (`arr = [1, 2, 3, 4, 3]`, matrices `M1..M4`), filled dia
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int matrixMultiplication(vector<int>& arr) {
@@ -103,4 +103,34 @@ class Solution {
         return dp[1][n];
     }
 };
+```
+
+```java
+class Solution {
+    static int matrixMultiplication(int[] arr) {
+        int n = arr.length - 1;  // matrix i has dimensions arr[i-1] x arr[i], i = 1..n
+        int[][] dp = new int[n + 1][n + 1];
+        for (int len = 2; len <= n; len++) {
+            for (int i = 1; i + len - 1 <= n; i++) {
+                int j = i + len - 1;
+                dp[i][j] = Integer.MAX_VALUE;
+                for (int k = i; k < j; k++)
+                    dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k + 1][j] + arr[i - 1] * arr[k] * arr[j]);
+            }
+        }
+        return dp[1][n];
+    }
+}
+```
+
+```python
+class Solution:
+    def matrixMultiplication(self, arr):
+        n = len(arr) - 1  # matrix i has dimensions arr[i-1] x arr[i], i = 1..n
+        dp = [[0] * (n + 1) for _ in range(n + 1)]
+        for length in range(2, n + 1):
+            for i in range(1, n - length + 2):
+                j = i + length - 1
+                dp[i][j] = min(dp[i][k] + dp[k + 1][j] + arr[i - 1] * arr[k] * arr[j] for k in range(i, j))
+        return dp[1][n]
 ```

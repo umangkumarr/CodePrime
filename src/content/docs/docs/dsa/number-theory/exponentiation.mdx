@@ -3,8 +3,6 @@ title: "Exponentiation"
 description: "Compute a^n with O(log n) multiplications by squaring the base and using the binary representation of the exponent."
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
 ## Problem
 
 Given integers `a` and `n` with $n \ge 0$, compute $a^n$.
@@ -55,9 +53,6 @@ The powers $a^1, a^2, a^4, a^8, \dots$ are cheap to produce, because each is the
 
 ## Code
 
-<Tabs syncKey="lang">
-<TabItem label="C++">
-
 ```cpp
 #include <iostream>
 using namespace std;
@@ -79,10 +74,27 @@ int main() {
 }
 ```
 
-</TabItem>
-<TabItem label="Python">
+```java
+public class Main {
+    // a^n for n >= 0; the result must fit in a long.
+    static long power(long a, long n) {
+        long ans = 1;
+        while (n > 0) {
+            if ((n & 1) == 1) ans *= a;  // this bit of n is set: include a^(2^i)
+            n >>= 1;
+            if (n > 0) a *= a;           // a^(2^i) -> a^(2^(i+1)), only if it is still needed
+        }
+        return ans;
+    }
 
-```py
+    public static void main(String[] args) {
+        System.out.println(power(2, 3));  // 8
+        System.out.println(power(5, 6));  // 15625
+    }
+}
+```
+
+```python
 def power(a, n):
     """a ** n for n >= 0, by binary exponentiation."""
     ans = 1
@@ -98,9 +110,6 @@ def power(a, n):
 print(power(2, 3))  # 8
 print(power(5, 6))  # 15625
 ```
-
-</TabItem>
-</Tabs>
 
 ## Output
 

@@ -82,7 +82,7 @@ Example 1, with the edges relaxed in input order. Because the edge `0 → 1` com
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<int> bellmanFord(int V, vector<vector<int>>& edges, int src) {
@@ -110,4 +110,59 @@ class Solution {
         return dist;
     }
 };
+```
+
+```java
+class Solution {
+    public ArrayList<Integer> bellmanFord(int V, int[][] edges, int src) {
+        final int INF = 100000000;
+        int[] dist = new int[V];
+        Arrays.fill(dist, INF);
+        dist[src] = 0;
+
+        for (int round = 1; round < V; round++) {
+            boolean changed = false;
+            for (int[] e : edges) {
+                int u = e[0], v = e[1], w = e[2];
+                if (dist[u] != INF && dist[u] + w < dist[v]) {
+                    dist[v] = dist[u] + w;
+                    changed = true;
+                }
+            }
+            if (!changed) break;  // distances are already final
+        }
+
+        // An edge that can still be relaxed means a reachable negative cycle.
+        for (int[] e : edges) {
+            int u = e[0], v = e[1], w = e[2];
+            if (dist[u] != INF && dist[u] + w < dist[v]) return new ArrayList<>(List.of(-1));
+        }
+        ArrayList<Integer> ans = new ArrayList<>(V);
+        for (int d : dist) ans.add(d);
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def bellmanFord(self, V: int, edges: list[list[int]], src: int) -> list[int]:
+        INF = 10**8
+        dist = [INF] * V
+        dist[src] = 0
+
+        for _ in range(V - 1):
+            changed = False
+            for u, v, w in edges:
+                if dist[u] != INF and dist[u] + w < dist[v]:
+                    dist[v] = dist[u] + w
+                    changed = True
+            if not changed:
+                break  # distances are already final
+
+        # An edge that can still be relaxed means a reachable negative cycle.
+        for u, v, w in edges:
+            if dist[u] != INF and dist[u] + w < dist[v]:
+                return [-1]
+        return dist
 ```

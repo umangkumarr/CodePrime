@@ -81,7 +81,7 @@ Example 1 with `target = 3`. Blue is `matrix[mid / n][mid % n]`; grey cells are 
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     bool searchMatrix(vector<vector<int>>& matrix, int target) {
@@ -99,4 +99,40 @@ class Solution {
         return false;
     }
 };
+```
+
+```java
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int m = matrix.length, n = matrix[0].length;
+        int lo = 0, hi = m * n - 1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            int v = matrix[mid / n][mid % n];
+            if (v == target) return true;
+            if (v < target)
+                lo = mid + 1;
+            else
+                hi = mid - 1;
+        }
+        return false;
+    }
+}
+```
+
+```python
+class Solution:
+    def searchMatrix(self, matrix: list[list[int]], target: int) -> bool:
+        m, n = len(matrix), len(matrix[0])
+        lo, hi = 0, m * n - 1
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            v = matrix[mid // n][mid % n]
+            if v == target:
+                return True
+            if v < target:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return False
 ```

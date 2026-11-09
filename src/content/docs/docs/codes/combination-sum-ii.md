@@ -111,7 +111,7 @@ Only two leaves reach `rem 0`: `[1,2,2]` and `[5]`.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
     void backtrack(const vector<int>& nums, int start, int remaining, vector<int>& path,
                    vector<vector<int>>& res) {
@@ -136,4 +136,52 @@ class Solution {
         return res;
     }
 };
+```
+
+```java
+class Solution {
+    private void backtrack(int[] nums, int start, int remaining, List<Integer> path, List<List<Integer>> res) {
+        if (remaining == 0) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = start; i < nums.length && nums[i] <= remaining; i++) {
+            if (i > start && nums[i] == nums[i - 1]) continue;  // same value already tried at this depth
+            path.add(nums[i]);
+            backtrack(nums, i + 1, remaining - nums[i], path, res);
+            path.remove(path.size() - 1);
+        }
+    }
+
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        List<List<Integer>> res = new ArrayList<>();
+        backtrack(candidates, 0, target, new ArrayList<>(), res);
+        return res;
+    }
+}
+```
+
+```python
+class Solution:
+    def combinationSum2(self, candidates: list[int], target: int) -> list[list[int]]:
+        candidates.sort()
+        res, path = [], []
+
+        def backtrack(start, remaining):
+            if remaining == 0:
+                res.append(path.copy())
+                return
+            for i in range(start, len(candidates)):
+                num = candidates[i]
+                if num > remaining:
+                    break
+                if i > start and num == candidates[i - 1]:
+                    continue  # same value already tried at this depth
+                path.append(num)
+                backtrack(i + 1, remaining - num)
+                path.pop()
+
+        backtrack(0, target)
+        return res
 ```

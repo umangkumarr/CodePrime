@@ -49,7 +49,7 @@ Count the words with a hash map. The answer order is a single ranking: word `a` 
 
 To keep only the `k` best words, use a **min-heap of size `k`** whose top is the *worst* of the words kept so far. Push each distinct word; whenever the heap grows to `k + 1`, pop its top. A popped word is beaten by `k` other words, so it can never be in the answer. After all words are processed the heap holds exactly the top `k`, and popping it yields them from worst to best — reversing that gives the required order.
 
-The comparator does the tie-breaking: with `better(a, b)` meaning "`a` beats `b`", a `priority_queue` built on `better` keeps the element that beats nobody — the worst — on top.
+The comparator does the tie-breaking: with `better(a, b)` meaning "`a` beats `b`", a heap built on `better` keeps the element that beats nobody — the worst — on top.
 
 ### Algorithm
 
@@ -77,7 +77,7 @@ Let `n` be the number of words and `m` the number of distinct words.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     vector<string> topKFrequent(vector<string>& words, int k) {
@@ -104,4 +104,61 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    public List<String> topKFrequent(String[] words, int k) {
+        HashMap<String, Integer> freq = new HashMap<>();
+        for (String w : words) freq.merge(w, 1, Integer::sum);
+
+        // Order worst-first, so the heap's head is the worst word kept.
+        PriorityQueue<Map.Entry<String, Integer>> heap = new PriorityQueue<>((a, b) ->
+                !a.getValue().equals(b.getValue()) ? Integer.compare(a.getValue(), b.getValue())
+                                                   : b.getKey().compareTo(a.getKey()));
+
+        for (var e : freq.entrySet()) {
+            heap.offer(e);
+            if (heap.size() > k) heap.poll();
+        }
+
+        LinkedList<String> ans = new LinkedList<>();
+        while (!heap.isEmpty()) ans.addFirst(heap.poll().getKey());
+        return ans;
+    }
+}
+```
+
+```python
+import heapq
+from collections import Counter
+
+
+class Entry:
+    """Heap entry; "less than" means "ranks below", so the heap's top is the worst word kept."""
+
+    __slots__ = ("count", "word")
+
+    def __init__(self, count, word):
+        self.count, self.word = count, word
+
+    def __lt__(self, other):
+        if self.count != other.count:
+            return self.count < other.count
+        return self.word > other.word
+
+
+class Solution:
+    def topKFrequent(self, words: list[str], k: int) -> list[str]:
+        heap = []
+        for word, count in Counter(words).items():
+            heapq.heappush(heap, Entry(count, word))
+            if len(heap) > k:
+                heapq.heappop(heap)
+
+        ans = []
+        while heap:
+            ans.append(heapq.heappop(heap).word)
+        ans.reverse()
+        return ans
 ```

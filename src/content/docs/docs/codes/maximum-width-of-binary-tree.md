@@ -60,7 +60,7 @@ Explanation: The maximum width exists in the second level with length 2 (3,2).
 
 Number the nodes as in an array-backed heap: if a node has position `p`, its left child gets `2 * p + 1` and its right child `2 * p + 2`. These are exactly the slots the nodes would occupy in a complete binary tree, so the missing (null) nodes between two nodes of a level are counted automatically: the width of a level is `last position - first position + 1`.
 
-The catch is size. Positions double on every level, and a chain of 3000 nodes would need positions near $2^{3000}$. But only **differences within a level** matter, so before numbering the children we subtract the level's first position, `start`. After the shift every position on a level is less than that level's width, which the problem guarantees fits in 32 bits, so the children's positions `2 * p + 2` always fit in a `long long`.
+The catch is size. Positions double on every level, and a chain of 3000 nodes would need positions near $2^{3000}$. But only **differences within a level** matter, so before numbering the children we subtract the level's first position, `start`. After the shift every position on a level is less than that level's width, which the problem guarantees fits in 32 bits, so the children's positions `2 * p + 2` always fit in a 64-bit integer.
 
 ### Algorithm
 
@@ -107,7 +107,7 @@ Level 3: `5 = 2·0 + 1` and `9 = 2·1 + 2`. Level 4: `6 = 2·0 + 1` and `7 = 2·
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int widthOfBinaryTree(TreeNode* root) {
@@ -129,4 +129,49 @@ class Solution {
         return ans;
     }
 };
+```
+
+```java
+class Solution {
+    private record Entry(TreeNode node, long pos) {}
+
+    public int widthOfBinaryTree(TreeNode root) {
+        ArrayDeque<Entry> q = new ArrayDeque<>();
+        q.add(new Entry(root, 0));
+        long ans = 0;
+        while (!q.isEmpty()) {
+            int size = q.size();
+            long start = q.peekFirst().pos(), end = q.peekLast().pos();
+            ans = Math.max(ans, end - start + 1);
+            for (int i = 0; i < size; i++) {
+                Entry e = q.poll();
+                long p = e.pos() - start;  // re-base so positions stay small
+                if (e.node().left != null) q.add(new Entry(e.node().left, 2 * p + 1));
+                if (e.node().right != null) q.add(new Entry(e.node().right, 2 * p + 2));
+            }
+        }
+        return (int) ans;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def widthOfBinaryTree(self, root: TreeNode | None) -> int:
+        q = deque([(root, 0)])
+        ans = 0
+        while q:
+            start, end = q[0][1], q[-1][1]
+            ans = max(ans, end - start + 1)
+            for _ in range(len(q)):
+                node, pos = q.popleft()
+                p = pos - start  # re-base so positions stay small
+                if node.left:
+                    q.append((node.left, 2 * p + 1))
+                if node.right:
+                    q.append((node.right, 2 * p + 2))
+        return ans
 ```

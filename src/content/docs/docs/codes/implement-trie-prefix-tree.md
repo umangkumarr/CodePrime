@@ -98,7 +98,7 @@ Before `insert("app")`, the `app` node already existed (it lies on the path of `
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Trie {
     struct Node {
         Node* next[26] = {};
@@ -140,4 +140,81 @@ class Trie {
 
     bool startsWith(string prefix) { return walk(prefix) != nullptr; }
 };
+```
+
+```java
+class Trie {
+    private static class Node {
+        Node[] next = new Node[26];
+        boolean isEnd;
+    }
+
+    private final Node root = new Node();
+
+    // Follows s from the root; returns the node it ends at, or null if the path breaks.
+    private Node walk(String s) {
+        Node cur = root;
+        for (int i = 0; i < s.length() && cur != null; i++) cur = cur.next[s.charAt(i) - 'a'];
+        return cur;
+    }
+
+    public Trie() {}
+
+    public void insert(String word) {
+        Node cur = root;
+        for (int i = 0; i < word.length(); i++) {
+            int c = word.charAt(i) - 'a';
+            if (cur.next[c] == null) cur.next[c] = new Node();
+            cur = cur.next[c];
+        }
+        cur.isEnd = true;
+    }
+
+    public boolean search(String word) {
+        Node node = walk(word);
+        return node != null && node.isEnd;
+    }
+
+    public boolean startsWith(String prefix) { return walk(prefix) != null; }
+}
+```
+
+```python
+class TrieNode:
+    __slots__ = ("next", "is_end")
+
+    def __init__(self):
+        self.next = {}  # letter -> child
+        self.is_end = False
+
+
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    # Follows s from the root; returns the node it ends at, or None if the path breaks.
+    def _walk(self, s: str):
+        cur = self.root
+        for ch in s:
+            cur = cur.next.get(ch)
+            if cur is None:
+                return None
+        return cur
+
+    def insert(self, word: str) -> None:
+        cur = self.root
+        for ch in word:
+            child = cur.next.get(ch)
+            if child is None:
+                child = cur.next[ch] = TrieNode()
+            cur = child
+        cur.is_end = True
+
+    def search(self, word: str) -> bool:
+        node = self._walk(word)
+        return node is not None and node.is_end
+
+    def startsWith(self, prefix: str) -> bool:
+        return self._walk(prefix) is not None
 ```

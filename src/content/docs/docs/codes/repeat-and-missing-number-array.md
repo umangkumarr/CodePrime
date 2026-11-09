@@ -53,7 +53,7 @@ The array is read-only, which rules out marking visited values by negating them,
 
 ### Algorithm
 
-1. In one loop over indices `i = 1..n`, accumulate `diff += a[i-1] - i` and `sqDiff += a[i-1]^2 - i^2`, both as `long long`.
+1. In one loop over indices `i = 1..n`, accumulate `diff += a[i-1] - i` and `sqDiff += a[i-1]^2 - i^2`, both as 64-bit integers (`long long` / `long`).
 2. `diff` is $A - B$ and `sqDiff` is $A^2 - B^2$, so `sum = sqDiff / diff` is $A + B$ (the division is exact).
 3. `repeated = (diff + sum) / 2`, `missing = repeated - diff`. Return `{repeated, missing}`.
 
@@ -72,12 +72,12 @@ For `[3 1 2 5 3]`, `n = 5`:
 
 ### Edge cases
 
-- **Overflow:** a plain sum of squares reaches about $n^3 / 3 \approx 3.3 \times 10^{14}$ for $n = 10^5$, far beyond `int`. Accumulating the *differences* in `long long`, with each square computed in `long long`, keeps every intermediate value small and exact.
+- **Overflow:** a plain sum of squares reaches about $n^3 / 3 \approx 3.3 \times 10^{14}$ for $n = 10^5$, far beyond `int`. Accumulating the *differences* in 64-bit integers, with each square computed in 64 bits, keeps every intermediate value small and exact.
 - **Repeated value larger or smaller than the missing one:** `diff` may be negative; integer division of `sqDiff` by `diff` is still exact, and `diff + sum = 2A` is always positive and even.
 
 ## Code
 
-```cpp title="C++"
+```cpp
 vector<int> Solution::repeatedNumber(const vector<int> &A) {
     long long diff = 0, sqDiff = 0;  // sum(a) - sum(1..n), sum(a^2) - sum(k^2)
     for (long long i = 1; i <= (long long)A.size(); i++) {
@@ -90,4 +90,34 @@ vector<int> Solution::repeatedNumber(const vector<int> &A) {
     long long missing = repeated - diff;
     return {(int)repeated, (int)missing};
 }
+```
+
+```java
+public class Solution {
+    public ArrayList<Integer> repeatedNumber(final List<Integer> A) {
+        long diff = 0, sqDiff = 0;  // sum(a) - sum(1..n), sum(a^2) - sum(k^2)
+        for (int i = 1; i <= A.size(); i++) {
+            long v = A.get(i - 1);
+            diff += v - i;
+            sqDiff += v * v - (long) i * i;
+        }
+        long sum = sqDiff / diff;  // A + B
+        long repeated = (diff + sum) / 2;
+        long missing = repeated - diff;
+        return new ArrayList<>(Arrays.asList((int) repeated, (int) missing));
+    }
+}
+```
+
+```python
+class Solution:
+    def repeatedNumber(self, A):
+        diff = sq_diff = 0  # sum(a) - sum(1..n), sum(a^2) - sum(k^2)
+        for i, v in enumerate(A, 1):
+            diff += v - i
+            sq_diff += v * v - i * i
+        total = sq_diff // diff  # A + B
+        repeated = (diff + total) // 2
+        missing = repeated - diff
+        return [repeated, missing]
 ```

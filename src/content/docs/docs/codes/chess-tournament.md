@@ -90,7 +90,7 @@ Example 3 after sorting: `[6, 7, 9, 11, 13, 15]`, `c = 4`, so `hi = (15 - 6) / 3
 
 ## Code
 
-```cpp title="C++"
+```cpp
 bool canPlace(const vector<int> &positions, int c, int dist) {
     int placed = 1, last = positions[0];
     for (int i = 1; i < (int)positions.size() && placed < c; i++) {
@@ -116,4 +116,59 @@ int chessTournament(vector<int> positions, int n, int c) {
     }
     return ans;
 }
+```
+
+```java
+public class Solution {
+    private static boolean canPlace(int[] positions, int c, int dist) {
+        int placed = 1, last = positions[0];
+        for (int i = 1; i < positions.length && placed < c; i++) {
+            if (positions[i] - last >= dist) {
+                placed++;
+                last = positions[i];
+            }
+        }
+        return placed >= c;
+    }
+
+    public static int chessTournament(int[] positions, int n, int c) {
+        Arrays.sort(positions);
+        int lo = 1, hi = (positions[n - 1] - positions[0]) / (c - 1), ans = 1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (canPlace(positions, c, mid)) {
+                ans = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+def canPlace(positions, c, dist):
+    placed, last = 1, positions[0]
+    for p in positions:
+        if placed >= c:
+            break
+        if p - last >= dist:
+            placed += 1
+            last = p
+    return placed >= c
+
+
+def chessTournament(positions, n, c):
+    positions.sort()
+    lo, hi, ans = 1, (positions[n - 1] - positions[0]) // (c - 1), 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if canPlace(positions, c, mid):
+            ans = mid
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return ans
 ```

@@ -85,7 +85,7 @@ Example 2. Blue is the island currently being flood-filled, green is land alread
 
 ## Code
 
-```cpp title="C++"
+```cpp
 class Solution {
    public:
     int numIslands(vector<vector<char>>& grid) {
@@ -116,4 +116,59 @@ class Solution {
         return islands;
     }
 };
+```
+
+```java
+class Solution {
+    public int numIslands(char[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+        int islands = 0;
+        ArrayDeque<int[]> q = new ArrayDeque<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] != '1') continue;
+                islands++;
+                grid[i][j] = '0';
+                q.add(new int[] {i, j});
+                while (!q.isEmpty()) {
+                    int[] cell = q.poll();
+                    for (int k = 0; k < 4; k++) {
+                        int nr = cell[0] + dr[k], nc = cell[1] + dc[k];
+                        if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] == '1') {
+                            grid[nr][nc] = '0';
+                            q.add(new int[] {nr, nc});
+                        }
+                    }
+                }
+            }
+        }
+        return islands;
+    }
+}
+```
+
+```python
+from collections import deque
+
+
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        m, n = len(grid), len(grid[0])
+        islands = 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] != '1':
+                    continue
+                islands += 1
+                grid[i][j] = '0'
+                q = deque([(i, j)])
+                while q:
+                    r, c = q.popleft()
+                    for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+                        if 0 <= nr < m and 0 <= nc < n and grid[nr][nc] == '1':
+                            grid[nr][nc] = '0'
+                            q.append((nr, nc))
+        return islands
 ```

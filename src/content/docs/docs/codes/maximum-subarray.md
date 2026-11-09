@@ -121,6 +121,29 @@ class Solution {
 };
 ```
 
+```java title="Approach 1: Kadane's algorithm"
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int best = nums[0], cur = 0;
+        for (int x : nums) {
+            cur = Math.max(x, cur + x);
+            best = Math.max(best, cur);
+        }
+        return best;
+    }
+}
+```
+
+```python title="Approach 1: Kadane's algorithm"
+class Solution:
+    def maxSubArray(self, nums: list[int]) -> int:
+        best, cur = nums[0], 0
+        for x in nums:
+            cur = max(x, cur + x)
+            best = max(best, cur)
+        return best
+```
+
 ```cpp title="Approach 2: Divide and conquer"
 class Solution {
     struct Info {
@@ -142,4 +165,43 @@ class Solution {
         return solve(nums, 0, (int)nums.size() - 1).best;
     }
 };
+```
+
+```java title="Approach 2: Divide and conquer"
+class Solution {
+    private record Info(int total, int prefix, int suffix, int best) {}
+
+    private Info solve(int[] a, int l, int r) {
+        if (l == r) return new Info(a[l], a[l], a[l], a[l]);
+        int m = l + (r - l) / 2;
+        Info L = solve(a, l, m), R = solve(a, m + 1, r);
+        return new Info(L.total() + R.total(),
+                Math.max(L.prefix(), L.total() + R.prefix()),
+                Math.max(R.suffix(), R.total() + L.suffix()),
+                Math.max(Math.max(L.best(), R.best()), L.suffix() + R.prefix()));
+    }
+
+    public int maxSubArray(int[] nums) {
+        return solve(nums, 0, nums.length - 1).best();
+    }
+}
+```
+
+```python title="Approach 2: Divide and conquer"
+class Solution:
+    def maxSubArray(self, nums: list[int]) -> int:
+        # Returns (total, prefix, suffix, best) for nums[l..r].
+        def solve(l: int, r: int) -> tuple[int, int, int, int]:
+            if l == r:
+                x = nums[l]
+                return x, x, x, x
+            m = (l + r) // 2
+            lt, lp, ls, lb = solve(l, m)
+            rt, rp, rs, rb = solve(m + 1, r)
+            return (lt + rt,
+                    max(lp, lt + rp),
+                    max(rs, rt + ls),
+                    max(lb, rb, ls + rp))
+
+        return solve(0, len(nums) - 1)[3]
 ```
