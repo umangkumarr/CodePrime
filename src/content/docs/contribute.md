@@ -35,7 +35,18 @@ complexity:
 
 ## Problem
 
-The problem statement (Markdown or HTML).
+The official statement in Markdown, then every example and the constraints:
+
+**Example 1:**
+
+```text
+Input:  nums = [2,7,11,15], target = 9
+Output: [0,1]
+```
+
+**Constraints:**
+
+- $2 \le$ `nums.length` $\le 10^4$
 
 ## Solution approach
 
@@ -50,12 +61,22 @@ The problem statement (Markdown or HTML).
 
 ## Code
 
-```cpp title="C++"
-// solution
+```cpp
+// C++ solution
+```
+
+```java
+// Java solution
+```
+
+```python
+# Python solution
 ```
 ````
 
-[Two Sum](/docs/codes/two-sum/) is the reference example. For several languages, rename the file to `.mdx` and wrap the code blocks in Starlight's [`<Tabs syncKey="lang">`](https://starlight.astro.build/components/tabs/).
+[Two Sum](/docs/codes/two-sum/) is the reference example. The three code blocks must follow one another with nothing in between: the site turns them into one **C++ | Java | Python** tab group, and remembers the reader's language. A page with several approaches writes one such run per approach, each fence carrying the same `title="Approach 2: …"`. Use the judge's own function signature and the same algorithm in all three languages.
+
+Before submitting, run every solution on the official examples and on random inputs against a simple brute force.
 
 Finally, add the page's slug to the right group in `src/data/sidebar.json`.
 
@@ -73,5 +94,5 @@ flowchart LR
 ## Open a pull request
 
 1. Fork the repository and create a branch.
-2. Run `npm run build` to make sure the site still builds.
-3. Open a pull request describing what you added or changed.
+2. Run `python3 .github/scripts/check_content.py`, `npm run check` and `npm run build`. CI runs the same checks on every pull request.
+3. Open a pull request into `main` describing what you added or changed and how you tested it.
