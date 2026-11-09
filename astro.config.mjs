@@ -9,6 +9,7 @@ import rehypeKatex from 'rehype-katex';
 
 import rehypeProblemLayout from './src/plugins/rehype-problem-layout.mjs';
 import rehypeBaseLinks from './src/plugins/rehype-base-links.mjs';
+import {withGroupOverviews} from './src/lib/tracks.mjs';
 import sidebar from './src/data/sidebar.json' with {type: 'json'};
 import redirects from './src/data/redirects.json' with {type: 'json'};
 
@@ -88,7 +89,7 @@ export default defineConfig({
               label: 'LeetCode',
               link: '/docs/leetcode/',
               icon: 'list-format',
-              items: [{label: 'Overview', link: '/docs/leetcode/'}, ...sidebar.leetcode],
+              items: [{label: 'Overview', link: '/docs/leetcode/'}, ...withGroupOverviews('leetcode', sidebar.leetcode)],
             },
             {
               id: 'euler',
@@ -111,7 +112,7 @@ export default defineConfig({
           ],
           {
             topics: {
-              leetcode: ['/docs/codes/**', '/docs/interviews/**'],
+              leetcode: ['/docs/codes/**', '/docs/interviews/**', '/docs/leetcode/**'],
               dsa: ['/docs/dsa/**'],
             },
             exclude: ['/', '/contribute', '/blog', '/blog/**', '/docs/tags', '/docs/tags/**', '/docs/codes/test'],

@@ -1,61 +1,96 @@
 ---
-title: "Sets bits from 1 to N"
+title: "Set Bits from a to b"
+description: "Count the total number of set bits in every integer from a to b by counting, for each bit position, how many numbers up to N have it set."
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Problem Statement
-You are gives Q queries each query containing two integers $a$ and $b$. Your task is to count the no of set-bits in for all numbers between $a$ and $b$ (both inclusive).
+## Problem
 
-## Example
+*Playing with Bits* (Coding Blocks, bitmasking).
+
+You are given `q` queries, each with two integers `a` and `b`. For each query, count the total number of set bits (1s) in the binary representations of all numbers from `a` to `b`, inclusive.
+
 ```txt
-Input: a = 1, b = 1
-Output:  1
+Input:  a = 1, b = 1
+Output: 1
 
-Input: a = 10, b = 15
+Input:  a = 10, b = 15
 Output: 17
+Explanation: 10, 11, 12, 13, 14, 15 are 1010, 1011, 1100, 1101, 1110, 1111,
+which have 2 + 3 + 2 + 3 + 3 + 4 = 17 set bits.
 ```
-## Solution
 
-Expected Time Complexity: $Log(n)$
-How much the $ith$ bit in every number from $1$ to  $N$ will contribute to the final answer?
+**Constraints (assumed):** $1 \le q \le 10^5$, $1 \le a \le b \le 10^9$. Counting each number one by one is too slow for these sizes.
 
-It is equal to the number of numbers, in binary representation, having $ith$ bit set.
-which is equal to:  $(N / 2^i ) *  2$$^i$$^-$$^1 + X$
+## Idea
 
-$X = (N$ & $(2^i - 1)) - 2^i$$^-$$^1+ 1$  
+Let $f(N)$ be the number of set bits over all numbers from 0 to $N$. Then a query is just
 
-iff     $X >= 0$
+$$\text{answer}(a, b) = f(b) - f(a - 1)$$
 
-Time Complexity: $Log(n)$
+To compute $f(N)$, count **one bit position at a time**. Write the numbers $0, 1, 2, \dots$ in binary and look at bit $i$ (worth $2^i$): it is 0 for $2^i$ numbers, then 1 for $2^i$ numbers, and repeats with period $2^{i+1}$:
+
+```txt
+bit 0:  0 1 0 1 0 1 0 1 ...     period 2
+bit 1:  0 0 1 1 0 0 1 1 ...     period 4
+bit 2:  0 0 0 0 1 1 1 1 ...     period 8
+```
+
+The numbers $0..N$ are $N + 1$ values. Split them into complete periods plus a leftover:
+
+- each **complete period** contributes $2^i$ ones, and there are $\left\lfloor \frac{N+1}{2^{i+1}} \right\rfloor$ of them;
+- the **leftover** has $r = (N + 1) \bmod 2^{i+1}$ numbers; the first $2^i$ of those have bit $i$ clear, so it contributes $\max(0,\; r - 2^i)$ ones.
+
+$$f(N) = \sum_{i \ge 0} \left( \left\lfloor \frac{N+1}{2^{i+1}} \right\rfloor \cdot 2^i + \max\!\left(0,\; (N+1) \bmod 2^{i+1} - 2^i\right) \right)$$
+
+Only bits up to the highest bit of $N$ can be set, so the sum has about $\log_2 N$ terms.
+
+## Algorithm
+
+1. To compute $f(N)$: for each `period = 2, 4, 8, …` while `period / 2 <= N`, let `half = period / 2` and add `(N + 1) / period * half + max(0, (N + 1) % period - half)`.
+2. Answer each query with `f(b) - f(a - 1)`.
+
+Check with $N = 5$ (`000, 001, 010, 011, 100, 101`, seven set bits): bit 0 gives $3 \cdot 1 + \max(0, 0 - 1) = 3$, bit 1 gives $1 \cdot 2 + \max(0, 2 - 2) = 2$, bit 2 gives $0 \cdot 4 + \max(0, 6 - 4) = 2$. Total 7.
+
+## Complexity
+
+- **Time:** $O(\log b)$ per query.
+- **Space:** $O(1)$.
+
+## Edge cases
+
+- **`a = 1`:** the query uses $f(0) = 0$; the loop does not run for $N = 0$.
+- **Large totals:** for $b = 10^9$ the count is about $1.5 \times 10^{10}$, which does not fit in a 32-bit `int`, so the C++ code uses `long long` throughout.
+
+## Code
 
 <Tabs syncKey="lang">
 <TabItem label="C++">
 
 ```cpp
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <iostream>
 using namespace std;
 
-int AllBitsOneToN(int N) {
-    int two = 2, ans = 0;
-    int n = N;
-    while (n) {
-        ans += (N / two) * (two >> 1);
-        int t = (N & (two - 1)) - (two >> 1) + 1;
-        ans += max(t, 0);
-        two <<= 1;
-        n >>= 1;
+// Total number of set bits in all integers from 0 to N.
+long long setBitsUpTo(long long N) {
+    long long total = 0;
+    for (long long period = 2; period / 2 <= N; period *= 2) {
+        long long half = period / 2;
+        total += (N + 1) / period * half;              // complete periods
+        total += max(0LL, (N + 1) % period - half);    // leftover part
     }
-    return ans;
+    return total;
 }
 
 int main() {
-    int q, a, b, res;
+    int q;
     cin >> q;
     while (q--) {
+        long long a, b;
         cin >> a >> b;
-        res = AllBitsOneToN(b) - AllBitsOneToN(a-1);
-        cout << res << "\n";
+        cout << setBitsUpTo(b) - setBitsUpTo(a - 1) << '\n';
     }
 }
 ```
@@ -64,25 +99,21 @@ int main() {
 <TabItem label="Python">
 
 ```py
-def AllbitsOneToN(N):
-    two = 2
-    ans = 0
-    n = N
-    while n:
-        ans += (N//two)*(two >> 1)
-        t = (N % two) - (two >> 1) + 1
-        ans += max(0, t)
-        two <<= 1
-        n >>= 1
-    return ans
+def set_bits_up_to(n):
+    """Total number of set bits in all integers from 0 to n."""
+    total = 0
+    period = 2
+    while period // 2 <= n:
+        half = period // 2
+        total += (n + 1) // period * half           # complete periods
+        total += max(0, (n + 1) % period - half)    # leftover part
+        period *= 2
+    return total
 
-for q in range(int(input())):
+
+for _ in range(int(input())):
     a, b = map(int, input().split())
-
-    res = AllbitsOneToN(b)
-    res -= AllbitsOneToN(a-1)
-    
-    print(res)
+    print(set_bits_up_to(b) - set_bits_up_to(a - 1))
 ```
 
 </TabItem>

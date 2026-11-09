@@ -1,89 +1,214 @@
 ---
 /**
- * Lists every section of a sidebar topic with its pages — the landing page for a track.
- * Reads the same src/data/sidebar.json that drives the sidebar, so it never drifts.
+ * Landing content for a sidebar topic, read from src/data/sidebar.json so it never drifts from the sidebar.
+ *
+ *   layout="cards"  one card per top-level group (sheet), each linking to that group's own page
+ *   layout="list"   every section with its pages; pass `group` to list a single top-level group
  */
 import {getCollection} from 'astro:content';
 import katex from 'katex';
 import sidebar from '../data/sidebar.json';
+import {countLabel, countPages, groupRoute, groupSlug, pageIds, topGroups} from '../lib/tracks.mjs';
 
 type Item = string | {label: string; items: Item[]};
 interface Props {
   topic: keyof typeof sidebar;
+  layout?: 'cards' | 'list';
+  /** Slug of one top-level group to list (list layout only). */
+  group?: string;
 }
 
-const {topic} = Astro.props;
+const {topic, layout = 'list', group} = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const docs = await getCollection('docs');
 const byId = new Map(docs.map((d) => [d.id, d]));
 
-const countPages = (items: Item[]): number =>
-  items.reduce((n, it) => n + (typeof it === 'string' ? 1 : countPages(it.items)), 0);
+const topItems = sidebar[topic] as Item[];
+const items: Item[] = group
+  ? ((topGroups(topItems) as Exclude<Item, string>[]).find((g) => groupSlug(g.label) === group)?.items ?? [])
+  : topItems;
 
+const subgroups = (list: Item[]) => list.filter((i): i is Exclude<Item, string> => typeof i !== 'string');
+
+// Cards: one per top-level group.
+const cards = subgroups(topItems).map((g) => {
+  const subs = subgroups(g.items);
+  const shown = subs.slice(0, 3).map((s) => s.label);
+  return {
+    label: g.label,
+    href: `${base}${groupRoute(topic, g.label)}`,
+    count: countLabel(g.items),
+    sections: subs.length,
+    summary: subs.length > 3 ? `${shown.join(', ')} and ${subs.length - 3} more` : shown.join(', '),
+    ids: pageIds(g.items).map((id: string) => `${base}/${id}/`),
+  };
+});
+
+// List: every run of pages becomes a section headed by its group path.
 type Section = {label: string; path: string[]; pages: string[]};
 const sections: Section[] = [];
-const collect = (items: Item[], path: string[]) => {
-  const pages = items.filter((i): i is string => typeof i === 'string');
+const collect = (list: Item[], path: string[]) => {
+  const pages = list.filter((i): i is string => typeof i === 'string');
   if (pages.length) sections.push({label: path[path.length - 1] ?? '', path, pages});
-  for (const it of items) if (typeof it !== 'string') collect(it.items, [...path, it.label]);
+  for (const it of subgroups(list)) collect(it.items, [...path, it.label]);
 };
-collect(sidebar[topic] as Item[], []);
-
-const groups = (sidebar[topic] as Item[]).filter((i): i is Exclude<Item, string> => typeof i !== 'string');
+collect(items, []);
+const jump = subgroups(items);
 ---
 
 <div class="cp-track not-content">
-  <nav class="cp-track__toc" aria-label="Sections">
-    {
-      groups.map((g) => (
-        <a href={`#${encodeURIComponent(g.label)}`}>
-          <span>{g.label}</span>
-          <span class="cp-list__meta">{countPages(g.items)}</span>
-        </a>
-      ))
-    }
-  </nav>
-
   {
-    sections.map((s) => (
-      <section class="cp-track__section" id={s.path.length === 1 ? encodeURIComponent(s.path[0]) : undefined}>
-        <h2 class="cp-track__heading">
-          {s.path.length > 1 && <span class="cp-track__parent">{s.path.slice(0, -1).join(' / ')}</span>}
-          {s.label}
-        </h2>
-        <ul class="cp-list">
-          {s.pages.map((id) => {
-            const entry = byId.get(id);
-            if (!entry) return null;
-            const time = entry.data.complexity?.time;
-            return (
-              <li>
-                <a href={`${base}/${id}/`}>
-                  <span>{entry.data.title}</span>
-                  {time && <span class="cp-list__meta" set:html={katex.renderToString(time, {throwOnError: false})} />}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-    ))
+    layout === 'cards' ? (
+      <ul class="cp-sheets">
+        {cards.map((c) => (
+          <li>
+            <a class="cp-sheet" href={c.href} data-ids={c.ids.join(' ')}>
+              <span class="cp-sheet__title">{c.label}</span>
+              {c.summary && <span class="cp-sheet__summary">{c.summary}</span>}
+              <span class="cp-sheet__meta">
+                {c.count}
+                {c.sections > 0 && ` · ${c.sections} section${c.sections === 1 ? '' : 's'}`}
+                <span class="cp-sheet__solved" />
+              </span>
+              <span class="cp-sheet__bar" aria-hidden="true"><span /></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <>
+        {jump.length > 1 && (
+          <nav class="cp-track__toc" aria-label="Sections">
+            {jump.map((g) => (
+              <a href={`#${encodeURIComponent(g.label)}`}>
+                <span>{g.label}</span>
+                <span class="cp-list__meta">{countPages(g.items)}</span>
+              </a>
+            ))}
+          </nav>
+        )}
+        {sections.map((s) => (
+          <section class="cp-track__section" id={s.path.length === 1 ? encodeURIComponent(s.path[0]) : undefined}>
+            {s.label && (
+              <h2 class="cp-track__heading">
+                {s.path.length > 1 && <span class="cp-track__parent">{s.path.slice(0, -1).join(' / ')}</span>}
+                {s.label}
+              </h2>
+            )}
+            <ul class="cp-list">
+              {s.pages.map((id) => {
+                const entry = byId.get(id);
+                if (!entry) return null;
+                const time = entry.data.complexity?.time;
+                return (
+                  <li>
+                    <a href={`${base}/${id}/`}>
+                      <span>{entry.data.title}</span>
+                      {time && <span class="cp-list__meta" set:html={katex.renderToString(time, {throwOnError: false})} />}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </>
+    )
   }
 </div>
 
 <script>
-  // Mirror solved ticks from the reader script's store.
+  // Mirror solved problems from the reader script's store: ticks in lists, progress on sheet cards.
+  let solved = new Set<string>();
   try {
-    const solved = new Set<string>(JSON.parse(localStorage.getItem('codeprime:solved') ?? '[]'));
-    document.querySelectorAll<HTMLAnchorElement>('.cp-track .cp-list a').forEach((a) => {
-      a.toggleAttribute('data-solved', solved.has(a.getAttribute('href') ?? ''));
-    });
+    solved = new Set<string>(JSON.parse(localStorage.getItem('codeprime:solved') ?? '[]'));
   } catch {
-    /* ignore */
+    /* storage unavailable */
   }
+  document.querySelectorAll<HTMLAnchorElement>('.cp-track .cp-list a').forEach((a) => {
+    a.toggleAttribute('data-solved', solved.has(a.getAttribute('href') ?? ''));
+  });
+  document.querySelectorAll<HTMLAnchorElement>('.cp-sheet[data-ids]').forEach((card) => {
+    const ids = (card.dataset.ids ?? '').split(' ').filter(Boolean);
+    const done = ids.filter((id) => solved.has(id)).length;
+    if (!done) return;
+    card.querySelector('.cp-sheet__solved')!.textContent = ` · ${done} solved`;
+    card.style.setProperty('--progress', `${(done / ids.length) * 100}%`);
+    card.toggleAttribute('data-progress', true);
+  });
 </script>
 
 <style>
+  /* Sheet cards */
+  .cp-sheets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 0.75rem;
+  }
+  .cp-sheets li {
+    margin: 0;
+  }
+  .cp-sheet {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    align-content: start;
+    height: 100%;
+    padding: 1.15rem 1.25rem 1.3rem;
+    border: 1px solid var(--cp-border);
+    border-radius: var(--cp-radius);
+    background: var(--cp-surface);
+    text-decoration: none;
+    overflow: hidden;
+    transition: border-color 140ms ease;
+  }
+  .cp-sheet:hover {
+    border-color: var(--cp-border-strong);
+  }
+  .cp-sheet:focus-visible {
+    outline: 2px solid var(--cp-accent);
+    outline-offset: 2px;
+  }
+  .cp-sheet__title {
+    font-family: var(--cp-font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--sl-color-white);
+  }
+  .cp-sheet__summary {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--cp-text-2);
+  }
+  .cp-sheet__meta {
+    margin-top: 0.5rem;
+    font-family: var(--sl-font-mono);
+    font-size: 0.78rem;
+    color: var(--cp-muted);
+  }
+  .cp-sheet__bar {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--cp-border);
+  }
+  .cp-sheet__bar span {
+    display: block;
+    height: 100%;
+    width: var(--progress, 0%);
+    background: var(--cp-teal);
+  }
+  .cp-sheet[data-progress] .cp-sheet__bar {
+    display: block;
+  }
+
+  /* Section lists */
   .cp-track__toc {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
@@ -102,11 +227,10 @@ const groups = (sidebar[topic] as Item[]).filter((i): i is Exclude<Item, string>
     color: var(--sl-color-white);
     font-weight: 600;
     text-decoration: none;
-    transition: border-color 140ms ease, transform 140ms ease;
+    transition: border-color 140ms ease;
   }
   .cp-track__toc a:hover {
-    border-color: var(--cp-accent);
-    transform: translateY(-1px);
+    border-color: var(--cp-border-strong);
   }
   .cp-track__section {
     margin-bottom: 2rem;
