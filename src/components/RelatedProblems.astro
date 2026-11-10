@@ -1,0 +1,67 @@
+---
+/**
+ * "Related problems" at the end of a problem page: the five problems whose topics overlap most with this one.
+ * Rarer topics weigh more (sharing "Monotonic Stack" says more than sharing "Array"), and the score is
+ * normalised by the candidate's own topics so a focused match beats a problem that merely has many tags.
+ * Helps readers keep practising the same pattern, and gives search engines a path to every problem.
+ */
+import {getCollection} from 'astro:content';
+
+interface Props {
+  id: string;
+  tags: string[];
+}
+
+const {id, tags} = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const problems = await getCollection('docs', (e) => e.id.startsWith('docs/codes/') && !e.data.draft);
+
+const tagCount = new Map<string, number>();
+for (const p of problems) for (const t of p.data.tags) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+const weight = (t: string) => 1 / Math.log2(1 + (tagCount.get(t) ?? 1));
+
+const mine = new Set(tags);
+const related = problems
+  .filter((p) => p.id !== id)
+  .map((p) => {
+    const shared = p.data.tags.filter((t) => mine.has(t)).reduce((s, t) => s + weight(t), 0);
+    const total = p.data.tags.reduce((s, t) => s + weight(t), 0) || 1;
+    // Cosine-style: reward shared topics, but don't let a problem with many unrelated topics win on volume.
+    return {p, score: shared / Math.sqrt(total)};
+  })
+  .filter((r) => r.score > 0)
+  .sort((a, b) => b.score - a.score || a.p.data.title.localeCompare(b.p.data.title))
+  .slice(0, 5);
+---
+
+{
+  related.length > 0 && (
+    <section class="cp-related not-content" aria-labelledby="cp-related-title">
+      <h2 id="cp-related-title">Related problems</h2>
+      <ul class="cp-list">
+        {related.map(({p}) => (
+          <li>
+            <a href={`${base}/${p.id}/`}>
+              <span>{p.data.title}</span>
+              <span class="cp-list__meta">
+                {[p.data.difficulty, ...p.data.tags.filter((t) => mine.has(t)).sort((a, b) => weight(b) - weight(a)).slice(0, 2)].filter(Boolean).join(' · ')}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .cp-related {
+    margin-top: 3rem;
+  }
+  .cp-related h2 {
+    font-family: var(--cp-font-display);
+    font-size: 1.25rem;
+    color: var(--sl-color-white);
+    margin: 0 0 0.85rem;
+  }
+</style>
