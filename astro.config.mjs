@@ -39,7 +39,7 @@ export default defineConfig({
     starlight({
       title: 'CodePrime',
       description:
-        'Data structures, algorithms, interview problems and system design — explained, solved and organised.',
+        'DSA interview problems from the Striver SDE sheet and Blind 75, explained step by step with C++, Java and Python solutions tested against brute force.',
       logo: {
         light: './src/assets/logo-light.svg',
         dark: './src/assets/logo-dark.svg',
@@ -66,6 +66,19 @@ export default defineConfig({
         SiteTitle: './src/components/overrides/SiteTitle.astro',
       },
       head: [
+        // Icons (favicon.svg is added by Starlight): PNG and ICO fallbacks, home-screen icon, web app manifest.
+        {tag: 'link', attrs: {rel: 'icon', href: `${BASE}/favicon.ico`, sizes: '48x48'}},
+        {tag: 'link', attrs: {rel: 'icon', type: 'image/png', sizes: '96x96', href: `${BASE}/favicon-96.png`}},
+        {tag: 'link', attrs: {rel: 'apple-touch-icon', sizes: '180x180', href: `${BASE}/apple-touch-icon.png`}},
+        {tag: 'link', attrs: {rel: 'manifest', href: `${BASE}/site.webmanifest`}},
+        {tag: 'meta', attrs: {name: 'theme-color', content: '#0b0d12'}},
+        {tag: 'meta', attrs: {name: 'author', content: 'Umang Kumar'}},
+        // Link previews (Open Graph / X). Starlight already sets og:title, og:description, og:url and og:site_name.
+        {tag: 'meta', attrs: {property: 'og:image', content: `${SITE}${BASE}/og.png`}},
+        {tag: 'meta', attrs: {property: 'og:image:width', content: '1200'}},
+        {tag: 'meta', attrs: {property: 'og:image:height', content: '630'}},
+        {tag: 'meta', attrs: {property: 'og:image:alt', content: 'CodePrime: learn the pattern, not the answer'}},
+        {tag: 'meta', attrs: {name: 'twitter:image', content: `${SITE}${BASE}/og.png`}},
         {
           tag: 'script',
           attrs: {async: true, src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`},
