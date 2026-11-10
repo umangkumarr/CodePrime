@@ -101,6 +101,7 @@ export default defineConfig({
         'katex/dist/katex.min.css',
         './src/styles/theme.css',
         './src/styles/content.css',
+        './src/styles/glass.css',
       ],
       components: {
         PageTitle: './src/components/overrides/PageTitle.astro',

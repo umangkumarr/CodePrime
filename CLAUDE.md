@@ -254,6 +254,14 @@ Editing an existing problem: keep its slug and front-matter keys; re-test any co
 
 Based on Apple's Human Interface Guidelines (purpose, simplicity, familiarity, accessibility, craft):
 
+- **Glass is only for the floating functional layer** (Apple's Liquid Glass rule). `src/styles/glass.css`
+  styles the top bar, sidebar, "On this page" panel, phone menu and contents bar, search dialog, spoiler
+  gates and the notes scratchpad: they float inset from the window edges over an ambient light field.
+  **Never put glass on content** (statements, prose, code, cards, lists) — content stays on calm, near-opaque
+  surfaces. Don't add new glass surfaces without a strong reason; reuse the `--glass-*` tokens if you must.
+  Reduce Transparency / Increase Contrast / no `backdrop-filter` support fall back to opaque surfaces —
+  keep that working. Beware: `backdrop-filter` makes an element the containing block of its `position: fixed`
+  children (it once unpinned the phone "On this page" bar).
 - **One job per screen**; every element earns its place. Prefer removing to adding.
 - **Use the tokens** in `src/styles/theme.css` (`--cp-*`, `--sl-*`); never hard-code new colours or fonts.
   Every colour needs light and dark values.
