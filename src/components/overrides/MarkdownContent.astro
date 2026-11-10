@@ -1,8 +1,14 @@
 ---
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import RelatedProblems from '../RelatedProblems.astro';
+
+const {entry} = Astro.locals.starlightRoute;
+const isProblem = entry.id.startsWith('docs/codes/') && Boolean(entry.data.source);
 ---
 
 <Default><slot /></Default>
+
+{isProblem && <RelatedProblems id={entry.id} tags={entry.data.tags} />}
 
 <div class="cp-reading-progress" aria-hidden="true"></div>
 
