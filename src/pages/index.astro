@@ -27,14 +27,58 @@ const tracks = [
 ];
 
 const topics = tags.slice(0, 10);
+
+const description = `${problems} DSA interview problems from the Striver SDE sheet and Blind 75, each explained step by step with C++, Java and Python solutions tested against brute force.`;
+const siteUrl = new URL(`${base}/`, Astro.site).href;
+
+// Tells search engines and AI answers exactly which "CodePrime" this is, and who makes it.
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}#website`,
+      name: 'CodePrime',
+      alternateName: ['Code Prime', 'CodePrime by Umang Kumar'],
+      url: siteUrl,
+      description,
+      inLanguage: 'en',
+      publisher: {'@id': 'https://umangkumarr.github.io/#person'},
+    },
+    {
+      '@type': 'LearningResource',
+      '@id': `${siteUrl}#resource`,
+      name: 'CodePrime',
+      url: siteUrl,
+      description,
+      learningResourceType: ['Tutorial', 'Practice problems'],
+      educationalLevel: 'Intermediate',
+      teaches: ['Data structures', 'Algorithms', 'Coding interview preparation'],
+      programmingLanguage: ['C++', 'Java', 'Python'],
+      isAccessibleForFree: true,
+      license: 'https://opensource.org/licenses/MIT',
+      image: `${siteUrl}og.png`,
+      author: {'@id': 'https://umangkumarr.github.io/#person'},
+      sameAs: ['https://github.com/umangkumarr/CodePrime'],
+    },
+    {
+      '@type': 'Person',
+      '@id': 'https://umangkumarr.github.io/#person',
+      name: 'Umang Kumar',
+      url: 'https://umangkumarr.github.io/',
+      sameAs: ['https://github.com/umangkumarr'],
+    },
+  ],
+};
 ---
 
 <StarlightPage
   frontmatter={{
-    title: 'CodePrime',
-    description: `${problems} interview problems, each with a clear approach, a visual walkthrough and tested C++.`,
+    title: 'DSA interview problems explained in C++, Java and Python',
+    description,
     template: 'splash',
     pagefind: false,
+    head: [{tag: 'script', attrs: {type: 'application/ld+json'}, content: JSON.stringify(structuredData)}],
   }}
   hasSidebar={false}
 >
@@ -42,7 +86,7 @@ const topics = tags.slice(0, 10);
     <section class="hero">
       <div class="hero__copy">
         <h1 class="hero__title">Learn the pattern,<br />not the answer.</h1>
-        <p class="hero__lead">{problems} interview problems, each with a clear approach, a visual walkthrough and tested C++.</p>
+        <p class="hero__lead">{problems} interview problems, each explained step by step with C++, Java and Python solutions tested against brute force.</p>
         <div class="actions">
           <a class="btn btn--primary" href={`${base}/docs/leetcode/`}>Start solving</a>
           <button type="button" class="btn btn--secondary" data-open-search>

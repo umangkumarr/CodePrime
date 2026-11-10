@@ -2,6 +2,7 @@
 import {defineConfig} from 'astro/config';
 import {unified} from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
+import sitemap from '@astrojs/sitemap';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import mermaid from 'astro-mermaid';
 import remarkMath from 'remark-math';
@@ -11,6 +12,8 @@ import rehypeProblemLayout from './src/plugins/rehype-problem-layout.mjs';
 import rehypeBaseLinks from './src/plugins/rehype-base-links.mjs';
 import remarkCodeTabs from './src/plugins/remark-code-tabs.mjs';
 import {withGroupOverviews} from './src/lib/tracks.mjs';
+import {execFileSync} from 'node:child_process';
+import {existsSync} from 'node:fs';
 import sidebar from './src/data/sidebar.json' with {type: 'json'};
 import redirects from './src/data/redirects.json' with {type: 'json'};
 
@@ -18,6 +21,36 @@ const SITE = 'https://umangkumarr.github.io';
 const BASE = '/CodePrime';
 const GITHUB = 'https://github.com/umangkumarr/CodePrime';
 const GA_ID = 'G-EBGEYEL112';
+
+/**
+ * Last commit date of every content file, for the sitemap's <lastmod>. Needs full git history
+ * (the deploy workflow checks out with fetch-depth: 0); without git, lastmod is simply left out.
+ */
+function contentDates() {
+  const dates = new Map();
+  try {
+    const log = execFileSync('git', ['log', '--format=@%cI', '--name-only', '--', 'src/content/docs'], {encoding: 'utf8'});
+    let date;
+    for (const line of log.split('\n')) {
+      if (line.startsWith('@')) date = line.slice(1);
+      else if (line && !dates.has(line)) dates.set(line, date);
+    }
+  } catch {
+    /* not a git checkout */
+  }
+  return dates;
+}
+const dates = contentDates();
+
+/**
+ * Source file of a built page URL, e.g. /CodePrime/docs/codes/two-sum/ -> src/content/docs/docs/codes/two-sum.md
+ * @param {string} url
+ */
+function sourceOf(url) {
+  const path = new URL(url).pathname.replace(BASE, '').replace(/^\/|\/$/g, '');
+  const stem = `src/content/docs/${path || 'index'}`;
+  return [`${stem}.md`, `${stem}.mdx`, `${stem}/index.md`, `${stem}/index.mdx`].find((f) => existsSync(f));
+}
 
 export default defineConfig({
   site: SITE,
@@ -34,17 +67,26 @@ export default defineConfig({
   },
 
   integrations: [
+    // Declared explicitly (Starlight would otherwise add a plain one) so each page gets an accurate <lastmod>.
+    sitemap({
+      serialize(item) {
+        const file = sourceOf(item.url);
+        const lastmod = file && dates.get(file);
+        return lastmod ? {...item, lastmod} : item;
+      },
+    }),
     // Must come before Starlight so ```mermaid blocks are claimed first.
     mermaid({theme: 'neutral', autoTheme: true, enableLog: false, mermaidConfig: {securityLevel: 'strict'}}),
     starlight({
       title: 'CodePrime',
       description:
-        'Data structures, algorithms, interview problems and system design — explained, solved and organised.',
+        'DSA interview problems from the Striver SDE sheet and Blind 75, explained step by step with C++, Java and Python solutions tested against brute force.',
       logo: {
         light: './src/assets/logo-light.svg',
         dark: './src/assets/logo-dark.svg',
       },
       favicon: '/favicon.svg',
+      routeMiddleware: './src/routeData.ts',
       social: [{icon: 'github', label: 'GitHub', href: GITHUB}],
       editLink: {baseUrl: `${GITHUB}/edit/main/`},
       lastUpdated: false,
@@ -66,6 +108,19 @@ export default defineConfig({
         SiteTitle: './src/components/overrides/SiteTitle.astro',
       },
       head: [
+        // Icons (favicon.svg is added by Starlight): PNG and ICO fallbacks, home-screen icon, web app manifest.
+        {tag: 'link', attrs: {rel: 'icon', href: `${BASE}/favicon.ico`, sizes: '48x48'}},
+        {tag: 'link', attrs: {rel: 'icon', type: 'image/png', sizes: '96x96', href: `${BASE}/favicon-96.png`}},
+        {tag: 'link', attrs: {rel: 'apple-touch-icon', sizes: '180x180', href: `${BASE}/apple-touch-icon.png`}},
+        {tag: 'link', attrs: {rel: 'manifest', href: `${BASE}/site.webmanifest`}},
+        {tag: 'meta', attrs: {name: 'theme-color', content: '#0b0d12'}},
+        {tag: 'meta', attrs: {name: 'author', content: 'Umang Kumar'}},
+        // Link previews (Open Graph / X). Starlight already sets og:title, og:description, og:url and og:site_name.
+        {tag: 'meta', attrs: {property: 'og:image', content: `${SITE}${BASE}/og.png`}},
+        {tag: 'meta', attrs: {property: 'og:image:width', content: '1200'}},
+        {tag: 'meta', attrs: {property: 'og:image:height', content: '630'}},
+        {tag: 'meta', attrs: {property: 'og:image:alt', content: 'CodePrime: learn the pattern, not the answer'}},
+        {tag: 'meta', attrs: {name: 'twitter:image', content: `${SITE}${BASE}/og.png`}},
         {
           tag: 'script',
           attrs: {async: true, src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`},
