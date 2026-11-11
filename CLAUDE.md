@@ -305,6 +305,9 @@ Based on Apple's Human Interface Guidelines (purpose, simplicity, familiarity, a
 
 - `main` is protected: changes go through a PR, reviewed by the owner (CODEOWNERS), **squash-merged**.
 - Branch names: `feat/…`, `fix/…`, `docs/…`. One coherent change per PR.
+- **Never delete branches**, local or remote, even after their PR is merged (the owner keeps them). GitHub's
+  "Automatically delete head branches" setting is off for this reason; don't turn it back on, and don't run
+  `git branch -d/-D`, `git push --delete` or `git push origin :<branch>`.
 - PR description: `## Summary` (what and why) and `## Test plan` (checkbox list of what you actually ran).
 - CI (`.github/workflows/ci.yml`) must pass: content check, `astro check`, build.
 - Don't commit generated or local files (`dist/`, `.astro/`, `.vscode/`, scratch notes, test harnesses).
