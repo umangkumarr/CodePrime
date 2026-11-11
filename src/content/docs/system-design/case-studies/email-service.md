@@ -36,21 +36,7 @@ Outlook, Yahoo and millions of small company mail servers, so it has to speak th
 
 Here is the journey of one message from `alice@ourmail.com` to `bob@othermail.com`:
 
-```mermaid
-flowchart TB
-  A["Alice's app<br/>(MUA)"] -->|"1. submit<br/>SMTP 587 / HTTPS"| S["Our outbound<br/>server (MTA)"]
-  S -->|"2. DNS: MX for<br/>othermail.com?"| D[("DNS")]
-  D -->|"3. mx.othermail.com"| S
-  S -->|"4. SMTP 25<br/>over TLS"| R["Their inbound<br/>server (MTA)"]
-  R -->|"5. checks + filing"| M["Bob's mailbox<br/>(MDA)"]
-  M -->|"6. IMAP / JMAP / push"| B["Bob's app<br/>(MUA)"]
-  classDef us fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-  classDef them fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-  classDef neutral fill:#f4f2ec,stroke:#8a8576,color:#1f2430
-  class A,S us
-  class R,M,B them
-  class D neutral
-```
+[![How one email travels: Alice's app submits to our outbound server, which looks up othermail.com's MX record in DNS, delivers over SMTP to their inbound server, which files it in Bob's mailbox for Bob's app to sync](/img/system-design/email-service/01-journey.png)](/img/system-design/email-service/01-journey.png)
 
 Two facts from this picture shape the whole design:
 
@@ -144,58 +130,9 @@ this timestamp and ID", which is stable and lets the database jump straight ther
 
 ## 5. High-level design
 
-```mermaid
-flowchart TB
-  subgraph Clients
-    W["Web app"]
-    P["Mobile apps"]
-    I["IMAP / SMTP clients"]
-  end
-  subgraph Internet
-    X["Other mail servers"]
-  end
+[![High-level architecture: clients reach the API and protocol gateways; mailbox, search, sync and send services sit behind them; mail flows through inbound and delivery queues, spam filters and delivery workers into the metadata DB, blob store and search index; outbound mail leaves through the outbound MTA pool](/img/system-design/email-service/02-architecture.png)](/img/system-design/email-service/02-architecture.png)
 
-  W & P --> LB["Load balancer + API gateway<br/>auth, rate limits"]
-  I --> PG["Protocol gateway<br/>IMAP / SMTP submission"]
-  X -->|"SMTP 25"| IN["Inbound SMTP edge"]
-
-  LB --> SEND["Send service"]
-  LB --> MBX["Mailbox service<br/>list, read, labels"]
-  LB --> SRCH["Search service"]
-  LB --> ATT["Attachment service"]
-  LB --> SYNC["Sync + notification service"]
-  PG --> SEND
-  PG --> MBX
-
-  IN --> Q1[["Inbound queue"]]
-  SEND --> Q2[["Delivery queue"]]
-  Q1 --> FILT["Spam + malware filtering"]
-  FILT --> DEL["Delivery workers<br/>file into mailboxes"]
-  Q2 --> DEL
-  Q2 --> OUT["Outbound MTA pool"]
-  OUT -->|"SMTP 25"| X
-
-  DEL --> META[("Metadata DB<br/>sharded by user")]
-  DEL --> BLOB[("Blob store<br/>bodies + attachments")]
-  DEL --> EV[["Change events"]]
-  ATT --> BLOB
-  MBX --> CACHE[("Cache")]
-  MBX --> META
-  MBX --> BLOB
-  EV --> IDX["Indexer"]
-  IDX --> SIDX[("Search index<br/>per-user shards")]
-  SRCH --> SIDX
-  EV --> SYNC
-
-  classDef svc fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-  classDef store fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-  classDef queue fill:#fff1d6,stroke:#c98a1a,color:#5c3d00
-  classDef edge fill:#f4f2ec,stroke:#8a8576,color:#1f2430
-  class SEND,MBX,SRCH,ATT,SYNC,FILT,DEL,IDX,OUT svc
-  class META,BLOB,SIDX,CACHE store
-  class Q1,Q2,EV queue
-  class LB,PG,IN,W,P,I,X edge
-```
+*Select the diagram to open it at full size.*
 
 What each piece does, in one line:
 
@@ -219,28 +156,9 @@ rows from the metadata DB and never touches the multi-petabyte blob store. Openi
 
 Alice sends a message to Bob (also on our service) and to Carol at `othermail.com`.
 
-```mermaid
-sequenceDiagram
-  autonumber
-  participant A as Alice's app
-  participant S as Send service
-  participant ST as Storage
-  participant Q as Queue
-  participant D as Delivery worker
-  participant O as Outbound MTA
+[![Sequence for sending: Alice's app calls the send service, which validates, stores the body once, enqueues both recipients and replies 200 OK; a delivery worker files Bob's copy, and the outbound MTA signs and delivers Carol's copy with retries](/img/system-design/email-service/03-send.png)](/img/system-design/email-service/03-send.png)
 
-  A->>S: send (Idempotency-Key k1)
-  S->>S: validate, check limits
-  S->>ST: body blob once, Sent copy
-  S->>Q: enqueue Bob and Carol
-  S-->>A: 200 OK, sending
-  Q->>D: Bob (internal)
-  D->>ST: Bob's row, same blob
-  Note over D: Bob's devices get a nudge
-  Q->>O: Carol (external)
-  O->>O: DKIM sign, MX lookup
-  O-->>O: SMTP to othermail.com, retry on failure
-```
+*Select the diagram to open it at full size.*
 
 Things worth noticing:
 
@@ -259,26 +177,9 @@ Things worth noticing:
 
 Dave at `othermail.com` writes to Bob.
 
-```mermaid
-sequenceDiagram
-  autonumber
-  participant X as othermail.com
-  participant E as Our SMTP edge
-  participant Q as Inbound queue
-  participant F as Filter + delivery
-  participant ST as Storage + sync
+[![Sequence for receiving: othermail.com connects to our SMTP edge, which checks reputation and the recipient, writes the message to a replicated queue and only then replies 250 OK; filters check it, a delivery worker files it and Bob's devices are pushed](/img/system-design/email-service/04-receive.png)](/img/system-design/email-service/04-receive.png)
 
-  X->>E: connect, STARTTLS
-  E->>E: IP reputation, rate limit
-  X->>E: MAIL FROM, RCPT TO bob
-  E->>E: bob exists? else 550
-  X->>E: DATA (headers + body)
-  E->>Q: durable, replicated write
-  E-->>X: 250 OK queued
-  Q->>F: SPF, DKIM, DMARC, spam, virus
-  F->>ST: store blob, metadata, thread
-  ST-->>ST: change event, push to devices
-```
+*Select the diagram to open it at full size.*
 
 The key rule is step 6 before step 7: **write to a replicated, durable queue, then answer `250 OK`**. If our
 edge server dies before the write, we never said OK, so the sending server simply retries later (SMTP senders
@@ -291,66 +192,7 @@ are turned away during the SMTP conversation, before we spend any storage or CPU
 
 ### What we store
 
-```mermaid
-erDiagram
-  USER ||--o{ LABEL : owns
-  USER ||--o{ THREAD : has
-  THREAD ||--|{ MESSAGE : contains
-  MESSAGE }o--|| BLOB : "body stored in"
-  MESSAGE ||--o{ ATTACHMENT_REF : has
-  ATTACHMENT_REF }o--|| BLOB : "file stored in"
-  MESSAGE ||--o{ MESSAGE_LABEL : tagged
-  LABEL ||--o{ MESSAGE_LABEL : groups
-
-  USER {
-    bigint user_id PK
-    string email
-    bigint quota_bytes
-    bigint used_bytes
-  }
-  LABEL {
-    bigint user_id PK
-    bigint label_id PK
-    string name
-    string type
-  }
-  THREAD {
-    bigint user_id PK
-    bigint thread_id PK
-    string subject
-    timestamp last_message_at
-    int unread_count
-  }
-  MESSAGE {
-    bigint user_id PK
-    bigint message_id PK
-    bigint thread_id
-    string rfc_message_id
-    string from_addr
-    string snippet
-    timestamp received_at
-    string body_blob_key
-    bigint size_bytes
-    bool is_read
-  }
-  MESSAGE_LABEL {
-    bigint user_id PK
-    bigint label_id PK
-    timestamp received_at PK
-    bigint message_id PK
-  }
-  BLOB {
-    string blob_key PK
-    bigint size_bytes
-    int ref_count
-  }
-  ATTACHMENT_REF {
-    bigint message_id PK
-    string filename
-    string mime_type
-    string blob_key
-  }
-```
+[![Data model: USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels sorted by received_at; MESSAGE and ATTACHMENT point to content-addressed BLOBs](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
 
 Five design decisions hide in this diagram.
 
@@ -404,20 +246,7 @@ for this:
 - `In-Reply-To: <abc123@othermail.com>`: "I am a reply to that message".
 - `References: <first@x> <second@y> <abc123@othermail.com>`: the chain of ancestors.
 
-```mermaid
-flowchart TD
-  M["New message arrives for Bob"] --> H{"In-Reply-To or References<br/>match a message Bob has?"}
-  H -->|yes| J["Join that message's thread"]
-  H -->|no| S{"Same normalised subject<br/>and a shared participant<br/>within the last few weeks?"}
-  S -->|yes| J
-  S -->|no| N["Start a new thread"]
-  J --> U["Update thread: last_message_at,<br/>unread_count, participants"]
-  N --> U
-  classDef q fill:#fff1d6,stroke:#c98a1a,color:#5c3d00
-  classDef act fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-  class H,S q
-  class M,J,N,U act
-```
+[![Threading decision: join an existing thread if In-Reply-To or References match, otherwise if the normalised subject and a participant match recently, otherwise start a new thread; then update the thread](/img/system-design/email-service/06-threading.png)](/img/system-design/email-service/06-threading.png)
 
 Implementation notes:
 
@@ -439,23 +268,9 @@ Every change to a mailbox (new message, flag changed, label added, message delet
 log with a **sequence number** that only ever increases: 1041, 1042, 1043… Each device remembers the last number
 it has seen, its **state**. Syncing is then just: "give me everything after 1041".
 
-```mermaid
-sequenceDiagram
-  participant P as Phone
-  participant S as Sync service
-  participant L as Bob's change log
-  participant T as Laptop
+[![Sync sequence: the phone marks a message read, the sync service appends entry 1042 to the change log and pushes a nudge to the laptop, which asks for changes since 1041 and applies just that one change](/img/system-design/email-service/07-sync.png)](/img/system-design/email-service/07-sync.png)
 
-  Note over P,T: Both devices are at state 1041
-  P->>S: PATCH message 77: remove UNREAD
-  S->>L: append entry 1042: message 77 read
-  S-->>P: OK, new state 1042
-  S-->>T: push over WebSocket: "mailbox changed"
-  T->>S: GET /changes?since=1041
-  S->>L: read entries after 1041
-  S-->>T: entry 1042: message 77 read, new state 1042
-  Note over T: Laptop updates one row, no full reload
-```
+*Select the diagram to open it at full size.*
 
 Why this works well:
 
@@ -483,26 +298,7 @@ mailboxes only to throw away all but one user's results, and a privacy bug could
 another's results. Instead, **each user gets their own logical index**, stored on the search shard for that
 user. A query touches exactly one user's index, which is small and fast.
 
-```mermaid
-flowchart TB
-  subgraph Indexing ["Indexing (asynchronous)"]
-    E[["Change events"]] --> X["Indexer"]
-    X --> T["Extract text: body, subject,<br/>sender, attachment text"]
-    T --> K["Tokenise, lower-case,<br/>stem: invoices → invoic"]
-    K --> W["Write postings to<br/>this user's index"]
-  end
-  subgraph Querying ["Querying"]
-    Q["from:alice invoice<br/>has:attachment"] --> PQ["Parse: field filters<br/>+ free text"]
-    PQ --> R["Look up 'invoic' in Bob's index<br/>intersect with from=alice<br/>and has_attachment"]
-    R --> RK["Rank: recency, relevance,<br/>who you talk to"]
-    RK --> OUT["Message IDs → fetch<br/>metadata for display"]
-  end
-  W -.-> R
-  classDef svc fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-  classDef queue fill:#fff1d6,stroke:#c98a1a,color:#5c3d00
-  class X,T,K,W,PQ,R,RK,OUT,Q svc
-  class E queue
-```
+[![Search: the indexer turns each new message into words and adds it to Bob's index; a query is parsed, each word's list is looked up and intersected, ranked, and the top results' metadata is fetched](/img/system-design/email-service/08-search.png)](/img/system-design/email-service/08-search.png)
 
 An **inverted index** is the same idea as the index at the back of a book: for each word, the list of messages
 that contain it.
@@ -530,28 +326,7 @@ Practical details:
 Close to half of all email on the internet is spam. Filtering is a funnel: cheap checks first so expensive checks
 see as little traffic as possible.
 
-```mermaid
-flowchart TD
-  C["Incoming SMTP connection"] --> L1["Layer 1: connection<br/>IP blocklist, reputation,<br/>rate per IP"]
-  L1 -->|bad| R1["Reject during SMTP"]
-  L1 -->|ok| L2["Layer 2: authentication<br/>SPF, DKIM, DMARC"]
-  L2 -->|"fails + DMARC says reject"| R1
-  L2 -->|pass or soft fail| L3["Layer 3: content<br/>ML classifier on text, links,<br/>sender history, bulk patterns"]
-  L3 --> L4["Layer 4: attachments + links<br/>virus scan, sandbox,<br/>known-bad URLs"]
-  L4 -->|malware| Q["Quarantine / drop"]
-  L4 --> V["Score"]
-  V -->|high| SP["Spam label"]
-  V -->|low| IN["Inbox<br/>(maybe Promotions or Social tab)"]
-  SP -.->|Not spam button| FB[["User feedback"]]
-  IN -.->|Report spam button| FB
-  FB -.-> L3
-  classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-  classDef ok fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-  classDef q fill:#fff1d6,stroke:#c98a1a,color:#5c3d00
-  class R1,Q,SP bad
-  class IN ok
-  class L1,L2,L3,L4,V q
-```
+[![Spam filtering funnel: connection checks, then SPF/DKIM/DMARC, then content classification, then attachment and link scanning, then a spam score that routes mail to Spam or Inbox; user reports feed back into the content classifier](/img/system-design/email-service/09-spam.png)](/img/system-design/email-service/09-spam.png)
 
 What each authentication check proves:
 

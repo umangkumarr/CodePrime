@@ -214,7 +214,10 @@ check and the build — it does **not** run solution tests, so this step is on y
   cpp/java/python order (no spoiler gates). Add new ones to `sidebar.json` under the right group.
 - **Project Euler+** (`docs/project-euler/NNN.md`): HackerRank full programs reading stdin; `sidebar.label`
   "NNN · Title", `sidebar.order` = problem number.
-- **System design** (`system-design/case-studies/<name>.md`): appears in its sidebar automatically; diagrams in Mermaid.
+- **System design** (`system-design/case-studies/<name>.md`): appears in its sidebar automatically. Diagrams are drawn in
+  Whimsical and exported as PNGs to `public/img/system-design/<name>/` (flattened onto white, ~32px padding), each
+  wrapped in a link to itself so wide ones open full size. Keep them narrow enough to read at ~800px (prefer
+  top-down, at most 6 sequence participants, labels at `l0`). Mermaid is fine for small diagrams.
 - **Company lists** (`docs/interviews/`): lists linking to problem pages.
 
 ## Adding a problem — checklist
