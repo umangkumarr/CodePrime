@@ -80,7 +80,7 @@ export default defineConfig({
     starlight({
       title: 'CodePrime',
       description:
-        'DSA interview problems from the Striver SDE sheet and Blind 75, explained step by step with C++, Java and Python solutions tested against brute force.',
+        'DSA interview problems from the Striver SDE sheet and Blind 75, explained step by step with tested C++, Java and Python solutions. For thorough prep and last-minute revision.',
       logo: {
         light: './src/assets/logo-light.svg',
         dark: './src/assets/logo-dark.svg',

@@ -1,7 +1,7 @@
 {
   "name": "CodePrime",
   "short_name": "CodePrime",
-  "description": "DSA interview problems explained step by step, with C++, Java and Python solutions.",
+  "description": "DSA interview problems explained step by step, with C++, Java and Python solutions. For interview prep and last-minute revision.",
   "start_url": "/CodePrime/",
   "scope": "/CodePrime/",
   "display": "standalone",

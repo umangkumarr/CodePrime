@@ -6,7 +6,8 @@ problem page has the full official statement, an explanation that teaches the id
 Python** solutions tested against brute force.
 
 - Live site: https://umangkumarr.github.io/CodePrime/ (GitHub Pages, base path `/CodePrime`)
-- Audience: people preparing for coding interviews. Optimise for clarity and trust, not cleverness.
+- Audience: people preparing for coding interviews, from first practice to last-minute revision the night
+  before. Optimise for clarity and trust, not cleverness; keep the header, intuition and complexity skimmable.
 - `AGENTS.md` is a symlink to this file. Edit `CLAUDE.md` only.
 
 ## Golden rules
