@@ -16,6 +16,9 @@
   --glass-blur: blur(28px) saturate(1.6);
   --glass-fill: rgba(22, 25, 34, 0.56);
   --glass-fill-strong: rgba(20, 23, 31, 0.64); /* text-heavy surfaces: sidebar, panels, sheets */
+  --glass-thick: rgba(20, 24, 33, 0.8); /* reading surfaces: statement card, lists */
+  --glass-selected: rgba(255, 255, 255, 0.13); /* selected segment in a glass control */
+  --glass-shadow-soft: 0 10px 30px -16px rgba(0, 0, 0, 0.5);
   --glass-edge: rgba(255, 255, 255, 0.09);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   --glass-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.25);
@@ -37,6 +40,9 @@
 :root[data-theme='light'] {
   --glass-fill: rgba(255, 255, 255, 0.55);
   --glass-fill-strong: rgba(255, 255, 255, 0.64);
+  --glass-thick: rgba(255, 255, 255, 0.78);
+  --glass-selected: rgba(255, 255, 255, 0.95);
+  --glass-shadow-soft: 0 10px 30px -18px rgba(31, 38, 56, 0.25);
   --glass-edge: rgba(255, 255, 255, 0.85);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(24, 22, 18, 0.06);
   --glass-shadow: 0 12px 40px -14px rgba(31, 38, 56, 0.22), 0 2px 6px rgba(31, 38, 56, 0.06);
@@ -201,7 +207,9 @@ site-search dialog::backdrop {
 
 /* Spoiler gate: a glass card floating over the blurred section. */
 .cp-solution:defined:not([data-open]) {
-  border-color: var(--cp-border);
+  border-color: var(--glass-edge);
+  border-radius: var(--glass-radius);
+  background-color: var(--glass-thick);
 }
 
 .cp-solution:defined:not([data-open]) .cp-solution__gate {
@@ -236,12 +244,120 @@ cp-notepad .cp-notepad__fab {
   }
 }
 
+/* ---------- Problem pages ----------
+ * Controls (the header with "Solve" / "Mark as solved", language tabs, chips) take the regular glass.
+ * Reading surfaces (statement, related problems, page links) take the thick material: mostly opaque, so
+ * text keeps full contrast, with just enough translucency and edge light to belong to the same family.
+ * Code blocks stay fully opaque. */
+
+.cp-problem-header {
+  margin-top: 1.25rem;
+  padding: 1.1rem 1.2rem 1.2rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius);
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+}
+
+.cp-problem-header .cp-btn--outline,
+.cp-problem-header .cp-badge,
+.cp-tags a {
+  background: var(--glass-control);
+  border-color: var(--glass-edge);
+}
+
+.cp-problem-header .cp-btn--outline:hover,
+.cp-tags a:hover {
+  background: var(--glass-control-hover);
+}
+
+.cp-problem-header .cp-badge {
+  border-radius: 999px;
+}
+
+.cp-problem-header .cp-badge__label {
+  background: none;
+  padding-inline-start: 0.85rem;
+}
+
+.cp-problem-header .cp-badge__value {
+  padding-inline-end: 0.9rem;
+}
+
+.cp-statement,
+.cp-related .cp-list,
+.pagination-links a {
+  background-color: var(--glass-thick);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-soft);
+}
+
+.cp-statement {
+  border-radius: var(--glass-radius);
+}
+
+.cp-statement__bar {
+  background: var(--glass-control);
+  border-bottom-color: var(--glass-edge);
+}
+
+.cp-statement__body pre {
+  background: var(--cp-bg-soft);
+}
+
+.cp-related .cp-list {
+  border-radius: var(--glass-radius);
+}
+
+.cp-related .cp-list li + li {
+  border-top-color: var(--glass-edge);
+}
+
+.cp-related .cp-list a:hover {
+  background: var(--glass-control-hover);
+}
+
+/* Language tabs: a glass segmented control with a raised, lighter selection. */
+.cp-code-tabs__list {
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-soft);
+}
+
+.cp-code-tabs__tab[aria-selected='true'] {
+  background: var(--glass-selected);
+  box-shadow: var(--glass-highlight), 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+/* Code frames stay opaque; they only pick up the rounder corners and a soft lift. */
+.sl-markdown-content .expressive-code .frame {
+  border-radius: 14px;
+  box-shadow: var(--glass-shadow-soft);
+}
+
+/* Open spoiler sections: the "Hide" bar sits on a small glass capsule. */
+.cp-solution[data-open] .cp-solution__bar .cp-btn {
+  padding-inline: 0.85rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--glass-control);
+  border: 1px solid var(--glass-edge);
+  text-decoration: none;
+}
+
 /* ---------- Accessibility fallbacks ---------- */
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
     --glass-fill: var(--cp-surface);
     --glass-fill-strong: var(--cp-surface);
+    --glass-thick: var(--cp-surface);
   }
 }
 
@@ -250,6 +366,7 @@ cp-notepad .cp-notepad__fab {
   :root[data-theme='light'] {
     --glass-fill: var(--cp-surface);
     --glass-fill-strong: var(--cp-surface);
+    --glass-thick: var(--cp-surface);
     --glass-blur: none;
   }
 
@@ -263,6 +380,7 @@ cp-notepad .cp-notepad__fab {
   :root[data-theme='light'] {
     --glass-fill: var(--cp-surface);
     --glass-fill-strong: var(--cp-surface);
+    --glass-thick: var(--cp-surface);
     --glass-blur: none;
     --glass-edge: var(--cp-border-strong);
   }

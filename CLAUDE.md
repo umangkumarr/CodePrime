@@ -257,8 +257,9 @@ Based on Apple's Human Interface Guidelines (purpose, simplicity, familiarity, a
 - **Glass is only for the floating functional layer** (Apple's Liquid Glass rule). `src/styles/glass.css`
   styles the top bar, sidebar, "On this page" panel, phone menu and contents bar, search dialog, spoiler
   gates and the notes scratchpad: they float inset from the window edges over an ambient light field.
-  **Never put glass on content** (statements, prose, code, cards, lists) — content stays on calm, near-opaque
-  surfaces. Don't add new glass surfaces without a strong reason; reuse the `--glass-*` tokens if you must.
+  **Never put clear glass on content.** Problem pages use two strengths: the problem header and language tabs
+  (controls) take the regular glass; reading surfaces (statement card, related problems, page links) take the
+  thick material `--glass-thick` (about 80% opaque); prose and code blocks stay fully opaque. Don't add new glass surfaces without a strong reason; reuse the `--glass-*` tokens if you must.
   Reduce Transparency / Increase Contrast / no `backdrop-filter` support fall back to opaque surfaces —
   keep that working. Beware: `backdrop-filter` makes an element the containing block of its `position: fixed`
   children (it once unpinned the phone "On this page" bar).
