@@ -38,7 +38,7 @@ Here is the journey of one message from `alice@ourmail.com` to `bob@othermail.co
 
 [![How one email travels: Alice's app submits to our outbound server, which looks up othermail.com's MX record in DNS, delivers over SMTP to their inbound server, which files it in Bob's mailbox for Bob's app to sync](/img/system-design/email-service/01-journey.png)](/img/system-design/email-service/01-journey.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 Two facts from this picture shape the whole design:
 
@@ -134,7 +134,7 @@ this timestamp and ID", which is stable and lets the database jump straight ther
 
 [![High-level architecture: clients reach the API and protocol gateways; mailbox, search, sync and send services sit behind them; mail flows through inbound and delivery queues, spam filters and delivery workers into the metadata DB, blob store and search index; outbound mail leaves through the outbound MTA pool](/img/system-design/email-service/02-architecture.png)](/img/system-design/email-service/02-architecture.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 What each piece does, in one line:
 
@@ -160,7 +160,7 @@ Alice sends a message to Bob (also on our service) and to Carol at `othermail.co
 
 [![Sequence for sending: Alice's app calls the send service, which validates, stores the body once, enqueues both recipients and replies 200 OK; a delivery worker files Bob's copy, and the outbound MTA signs and delivers Carol's copy with retries](/img/system-design/email-service/03-send.png)](/img/system-design/email-service/03-send.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 Things worth noticing:
 
@@ -181,7 +181,7 @@ Dave at `othermail.com` writes to Bob.
 
 [![Sequence for receiving: othermail.com connects to our SMTP edge, which checks reputation and the recipient, writes the message to a replicated queue and only then replies 250 OK; filters check it, a delivery worker files it and Bob's devices are pushed](/img/system-design/email-service/04-receive.png)](/img/system-design/email-service/04-receive.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 The key rule is step 6 before step 7: **write to a replicated, durable queue, then answer `250 OK`**. If our
 edge server dies before the write, we never said OK, so the sending server simply retries later (SMTP senders
@@ -196,7 +196,7 @@ are turned away during the SMTP conversation, before we spend any storage or CPU
 
 [![Data model: USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels; MESSAGE has ATTACHMENTs, and both point to content-addressed BLOBs](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 Five design decisions hide in this diagram.
 
@@ -274,7 +274,7 @@ it has seen, its **state**. Syncing is then just: "give me everything after 1041
 
 [![Sync sequence: the phone marks a message read, the sync service appends entry 1042 to the change log and pushes a nudge to the laptop, which asks for changes since 1041 and applies just that one change](/img/system-design/email-service/07-sync.png)](/img/system-design/email-service/07-sync.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 Why this works well:
 
@@ -304,7 +304,7 @@ user. A query touches exactly one user's index, which is small and fast.
 
 [![Search: the indexer turns each new message into words and adds it to Bob's index; a query is parsed, each word's list is looked up and intersected, ranked, and the top results' metadata is fetched](/img/system-design/email-service/08-search.png)](/img/system-design/email-service/08-search.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 An **inverted index** is the same idea as the index at the back of a book: for each word, the list of messages
 that contain it.
@@ -334,7 +334,7 @@ see as little traffic as possible.
 
 [![Spam filtering funnel: connection checks, then SPF/DKIM/DMARC, then content classification, then attachment and link scanning, then a spam score that routes mail to Spam or Inbox; user reports feed back into the content classifier](/img/system-design/email-service/09-spam.png)](/img/system-design/email-service/09-spam.png)
 
-*Select the diagram to open it at full size.*
+*Select the diagram to zoom in and move around.*
 
 What each authentication check proves:
 
