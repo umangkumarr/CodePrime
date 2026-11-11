@@ -388,11 +388,9 @@ cp-notepad .cp-notepad__fab {
 }
 
 /* ---------- Diagram viewer (src/scripts/lightbox.ts) ---------- */
-/* A floating glass panel inset from the window edges; the page stays visible, blurred, around it. */
-
-.cp-lightbox-open {
-  overflow: hidden;
-}
+/* A floating glass panel inset from the window edges; the page stays visible, blurred, around it.
+   Kept cheap to composite: the page is blurred once, by the static ::backdrop (the panel has no backdrop-filter
+   of its own), the panel does not clip with a rounded mask, and the open animation is opacity only. */
 
 .cp-lightbox {
   position: fixed;
@@ -409,12 +407,11 @@ cp-notepad .cp-notepad__fab {
   background:
     linear-gradient(180deg, var(--glass-sheen), transparent 40%),
     var(--glass-fill);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-edge);
   border-radius: var(--glass-radius);
   box-shadow: var(--glass-highlight), 0 30px 80px -20px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .cp-lightbox:not([open]) {
@@ -422,9 +419,9 @@ cp-notepad .cp-notepad__fab {
 }
 
 .cp-lightbox::backdrop {
-  background: rgba(8, 10, 14, 0.38);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: rgba(8, 10, 14, 0.42);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
 }
 
 :root[data-theme='light'] .cp-lightbox::backdrop {
@@ -492,7 +489,11 @@ cp-notepad .cp-notepad__fab {
 }
 
 .cp-lightbox__zoom {
-  min-width: 3.5rem;
+  display: inline-block;
+  width: 3.5rem;
+  height: 1.5em;
+  line-height: 1.5;
+  contain: strict; /* the number changes every frame while zooming; keep that layout local */
   text-align: center;
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
@@ -502,9 +503,10 @@ cp-notepad .cp-notepad__fab {
 .cp-lightbox__stage {
   position: relative;
   flex: 1;
+  min-height: 0;
   margin: 0.75rem;
-  overflow: hidden;
-  border-radius: calc(var(--glass-radius) - 8px);
+  overflow: hidden; /* a square clip: a rounded one would make the browser mask the moving layer */
+  contain: layout paint;
   cursor: zoom-in;
   touch-action: none;
   user-select: none;
@@ -523,10 +525,10 @@ cp-notepad .cp-notepad__fab {
   top: 0;
   left: 0;
   max-width: none;
+  max-height: none;
   transform-origin: 0 0;
-  border-radius: var(--cp-radius-sm);
-  box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.45);
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 @media (max-width: 49.99rem) {
@@ -542,13 +544,12 @@ cp-notepad .cp-notepad__fab {
 
 @media (prefers-reduced-motion: no-preference) {
   .cp-lightbox[open] {
-    animation: cp-lightbox-in 180ms ease-out;
+    animation: cp-lightbox-in 140ms ease-out;
   }
 
   @keyframes cp-lightbox-in {
     from {
       opacity: 0;
-      transform: scale(0.98);
     }
   }
 }
