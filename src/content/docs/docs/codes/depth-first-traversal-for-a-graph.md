@@ -70,15 +70,7 @@ Depth-first search commits to one neighbour and follows it as deep as possible b
 
 Example 1. Solid edges are the ones DFS follows (numbers show the visit order); the graph happens to be a tree, so no edge is skipped.
 
-```mermaid
-flowchart TD
-    A(("0 · 1st")) --> C(("2 · 2nd"))
-    C --> E(("4 · 3rd"))
-    A --> D(("3 · 4th"))
-    A --> B(("1 · 5th"))
-    classDef v fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class A,B,C,D,E v
-```
+[![Example 1 graph: DFS from 0 visits 0, 2, 4, 3, 1 in that order](/img/codes/depth-first-traversal-for-a-graph/dfs-order.png)](/img/codes/depth-first-traversal-for-a-graph/dfs-order.png)
 
 After `4` has no unvisited neighbours, the recursion returns to `2`, then to `0`, which continues with its next neighbours `3` and `1`.
 

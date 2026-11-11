@@ -74,22 +74,7 @@ A plain list cannot find a node in $O(1)$, and a hash map has no order, so combi
 
 State of Example 1 right after `put(3, 3)`: the map points into the list, the front is the most recent key and the back (`1`) is the next one to be evicted. Key `2` was evicted from the back by this `put`.
 
-```mermaid
-flowchart LR
-    subgraph pos ["pos: hash map"]
-        k3["key 3"]
-        k1["key 1"]
-    end
-    subgraph order ["order: most recent → least recent"]
-        a["(3, 3)"] <--> b["(1, 1)"]
-    end
-    k3 --> a
-    k1 --> b
-    classDef front fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef back fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    class a front
-    class b back
-```
+[![LRU state after put(3, 3): map keys 3 and 1 point to list nodes (3, 3) at the front and (1, 1) at the back](/img/codes/lru-cache/cache-state.png)](/img/codes/lru-cache/cache-state.png)
 
 The next call, `get(2)`, misses. Then `put(4, 4)` finds the cache full and evicts the back node `(1, 1)`.
 

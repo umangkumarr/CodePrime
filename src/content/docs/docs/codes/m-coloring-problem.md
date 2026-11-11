@@ -69,20 +69,7 @@ Because each check happens as soon as a colour is placed, an invalid prefix is c
 
 Example 2 (triangle, `m = 2`). Red leaves are rejected by the neighbour check; once both colours fail for vertex `2`, the search backtracks:
 
-```mermaid
-flowchart TD
-    s["start"] --> a1["v0 = 1"]
-    s --> a2["v0 = 2"]
-    a1 --> b1["v1 = 1: clashes with v0"]
-    a1 --> b2["v1 = 2"]
-    b2 --> c1["v2 = 1: clashes with v0"]
-    b2 --> c2["v2 = 2: clashes with v1"]
-    a2 --> d["symmetric: also fails"]
-    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    classDef ok fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class b1,c1,c2,d bad
-    class a1,a2,b2 ok
-```
+[![Backtracking tree for the triangle with m = 2: v0 = 1, then v1 = 1 clashes with v0; v1 = 2, then v2 = 1 clashes with v0 and v2 = 2 clashes with v1; v0 = 2 fails symmetrically](/img/codes/m-coloring-problem/backtracking-tree.png)](/img/codes/m-coloring-problem/backtracking-tree.png)
 
 Every branch fails, so the answer is `false`. In Example 1 the first successful path is `v0 = 1, v1 = 2, v2 = 2, v3 = 3`, exactly the colouring in the statement.
 

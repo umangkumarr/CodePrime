@@ -93,14 +93,7 @@ Write list A as `a` private nodes followed by the tail, and list B as `b` privat
 
 After `a + c + 1 + b` moves (the `+ 1` is the move onto `nullptr` at the end of a list), `p` has covered all of A and the private part of B; after `b + c + 1 + a` moves, `q` has covered all of B and the private part of A. These counts are equal, so both arrive at the first shared node **at the same moment**. If there is no shared tail (`c = 0`), both reach `nullptr` together after `m + n + 1` moves, and the loop stops there.
 
-```mermaid
-flowchart LR
-    a1([a1]) --> a2([a2]) --> c1
-    b1([b1]) --> b2([b2]) --> b3([b3]) --> c1
-    c1([c1]) --> c2([c2]) --> c3([c3])
-    classDef shared fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class c1,c2,c3 shared
-```
+[![List A (a1, a2) and list B (b1, b2, b3) both lead into the shared tail c1, c2, c3](/img/codes/intersection-of-two-linked-lists/shared-tail.png)](/img/codes/intersection-of-two-linked-lists/shared-tail.png)
 
 Here `p` visits `a1 a2 c1 c2 c3 null b1 b2 b3 c1` and `q` visits `b1 b2 b3 c1 c2 c3 null a1 a2 c1`. On the first pass they reach `c1` at different times, but after the switch both land on `c1` after exactly 9 moves, and the loop stops there.
 

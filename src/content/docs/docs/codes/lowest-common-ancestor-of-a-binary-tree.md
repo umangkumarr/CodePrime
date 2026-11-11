@@ -76,23 +76,7 @@ Combine the answers bottom-up (post-order). At a node `root`:
 
 Example 1 (`p = 5`, `q = 1`). Each edge is labelled with what the child returns to its parent:
 
-```mermaid
-flowchart TD
-    n3((3)) -- "returns 5" --- n5((5))
-    n3 -- "returns 1" --- n1((1))
-    n5 -.- n6((6))
-    n5 -.- n2((2))
-    n1 -.- n0((0))
-    n1 -.- n8((8))
-    n2 -.- n7((7))
-    n2 -.- n4((4))
-    classDef ans fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef target fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    classDef skip fill:#e9eaed,stroke:#b4b8bf,color:#5b6270
-    class n3 ans
-    class n5,n1 target
-    class n6,n2,n0,n8,n7,n4 skip
-```
+[![Example 1 tree: nodes 5 and 1 return themselves to root 3, which is the LCA; their subtrees are not searched](/img/codes/lowest-common-ancestor-of-a-binary-tree/returns.png)](/img/codes/lowest-common-ancestor-of-a-binary-tree/returns.png)
 
 The calls on `5` and `1` return immediately because those nodes are targets (grey subtrees are never explored). At `3` both sides are non-null, so `3` is the LCA. In Example 2 (`q = 4` inside the subtree of `5`), the call on `5` again returns `5` straight away and the right side returns `nullptr`, so `5` is passed up as the answer.
 

@@ -64,7 +64,7 @@ The search is exhaustive over legal choices, so it is guaranteed to find the (un
 
 The first steps on Example 1. Blue is the cell chosen by the "fewest candidates" rule, green cells have been filled so far; every one of these steps has a single candidate, so nothing is guessed:
 
-![Most-constrained-cell backtracking on the example Sudoku](/img/codes/sudoku-solver/mrv.gif)
+![Most-constrained-cell backtracking on the example Sudoku](/img/codes/sudoku-solver/mrv/01.webp)
 
 ### Complexity
 

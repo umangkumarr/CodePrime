@@ -70,7 +70,7 @@ Building all $N^2$ sums would take $O(N^2 \log N)$ time and $O(N^2)$ memory, whi
 
 Example 2 after sorting: `A = [4,3,2,1]` (rows), `B = [6,5,2,1]` (columns). Green cells are popped, orange cells are in the heap:
 
-![Heap frontier over the sorted sum matrix for Example 2](/img/codes/maximum-sum-combinations/frontier.gif)
+![Heap frontier over the sorted sum matrix for Example 2](/img/codes/maximum-sum-combinations/frontier/01.webp)
 
 ### Complexity
 

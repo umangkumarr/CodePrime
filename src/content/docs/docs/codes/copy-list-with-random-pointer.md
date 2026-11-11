@@ -78,18 +78,7 @@ The straightforward fix is a hash map from each original node to its copy (two p
 
 Example 2 (`[[1,1],[2,1]]`): after step 1 the copies sit right after their originals, so every original reaches its copy through `next`. The dashed edges are the original `random` pointers; step 2 copies them across by following one extra `next`.
 
-```mermaid
-flowchart LR
-    A["1"] --> A2["1'"] --> B["2"] --> B2["2'"] --> N["null"]
-    A -. random .-> B
-    B -. random .-> B
-    A2 -. "random = A.random.next" .-> B2
-    B2 -. "random = B.random.next" .-> B2
-    classDef orig fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef copy fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class A,B orig
-    class A2,B2 copy
-```
+[![Interleaved list 1 → 1' → 2 → 2' → null with random pointers: 1 to 2, 1' to 2', and 2 and 2' pointing to themselves](/img/codes/copy-list-with-random-pointer/interleaved-list.png)](/img/codes/copy-list-with-random-pointer/interleaved-list.png)
 
 Step 3 then unzips `1 → 1' → 2 → 2'` back into `1 → 2` and `1' → 2'`.
 

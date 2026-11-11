@@ -70,17 +70,7 @@ No index points back to `0` (no value is `0`), so `0` is not on the cycle and th
 
 Example 1, `nums = [1,3,4,2,2]`. Following `i → nums[i]` from `0` gives `0 → 1 → 3 → 2 → 4 → 2 → ...`. Index `2` is pointed to from both `3` and `4`, so it is where the path enters the cycle, and `2` is the answer:
 
-```mermaid
-flowchart LR
-    I0(("0")) --> I1(("1")) --> I3(("3")) --> I2(("2")) --> I4(("4"))
-    I4 --> I2
-    classDef entry fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef tail fill:#f4f5f7,stroke:#c5cad3,color:#1f2430
-    classDef cyc fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class I2 entry
-    class I0,I1,I3 tail
-    class I4 cyc
-```
+[![Index graph 0 → 1 → 3 → 2 → 4 → 2: the cycle is entered at index 2, the duplicate](/img/codes/find-the-duplicate-number/index-graph.png)](/img/codes/find-the-duplicate-number/index-graph.png)
 
 Phase 1: `slow` visits `1, 3, 2, 4`, `fast` visits `3, 4, 4, 4` — they meet at `4`. Phase 2: from `0` and `4`, they move to `1`/`2`, `3`/`4`, `2`/`2` and meet at `2`.
 

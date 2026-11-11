@@ -51,32 +51,7 @@ A **binary trie** over the bits of all numbers (bit 30 first) makes this a singl
 
 Example 1 using 5 bits (all values are below 32). Querying `x = 5 = 00101`, the walk wants `1, 1, 0, 1, 0` and gets `1, 1, 0, 0, 1` — it can take the opposite bit at the first three levels, then must follow the same bit — ending at `25 = 11001`, so `5 ^ 25 = 11100 = 28`:
 
-```mermaid
-flowchart TD
-    R(("root"))
-    R --> N0(("0"))
-    N0 --> N00(("0"))
-    N00 --> N000(("0"))
-    N000 --> N0001(("1"))
-    N0001 --> N00011["00011<br/>= 3"]
-    N0 --> N01(("1"))
-    N01 --> N010(("0"))
-    N010 --> N0101(("1"))
-    N0101 --> N01010["01010<br/>= 10"]
-    N00 --> N001(("1"))
-    N001 --> N0010(("0"))
-    N0010 --> N00101["00101<br/>= 5"]
-    R --> N1(("1"))
-    N1 --> N11(("1"))
-    N11 --> N110(("0"))
-    N110 --> N1100(("0"))
-    N1100 --> N11001["11001<br/>= 25"]
-    N0001 --> N00010["00010<br/>= 2"]
-    N010 --> N0100(("0"))
-    N0100 --> N01000["01000<br/>= 8"]
-    classDef path fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class R,N1,N11,N110,N1100,N11001 path
-```
+[![5-bit trie of 3, 10, 5, 25, 2, 8 with the query path for x = 5 ending at 25 = 11001](/img/codes/maximum-xor-of-two-numbers-in-an-array/trie.png)](/img/codes/maximum-xor-of-two-numbers-in-an-array/trie.png)
 
 ### Complexity
 

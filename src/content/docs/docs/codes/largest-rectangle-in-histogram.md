@@ -67,7 +67,7 @@ Popping equal heights too is safe: the earlier of two equal bars gets a too-narr
 
 Example 1. Purple cells are on the stack, the orange cell is the bar being settled, and its rectangle spans the orange and green cells; the grey cell is the virtual height-0 bar:
 
-![Monotonic stack on [2,1,5,6,2,3]](/img/codes/largest-rectangle-in-histogram/monotonic-stack.gif)
+![Monotonic stack on [2,1,5,6,2,3]](/img/codes/largest-rectangle-in-histogram/monotonic-stack/01.webp)
 
 ### Complexity
 

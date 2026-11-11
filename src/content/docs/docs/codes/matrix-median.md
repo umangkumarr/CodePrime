@@ -76,7 +76,7 @@ The answer found this way is always an element of the matrix: the smallest `x` w
 
 Example 1, `half = 5`. Green cells are the elements `<= mid` counted in that step:
 
-![Binary search on the median value of a 3x3 matrix](/img/codes/matrix-median/search.gif)
+![Binary search on the median value of a 3x3 matrix](/img/codes/matrix-median/search/01.webp)
 
 ### Complexity
 

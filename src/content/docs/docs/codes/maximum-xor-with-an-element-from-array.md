@@ -64,7 +64,7 @@ Values are at most $10^9 < 2^{30}$, so bits `29..0` are enough.
 
 Example 2: sorted `nums = [2,3,4,5,6,6]`, queries in order of `m` are `[8,1]`, `[6,3]`, `[12,4]`. Green numbers are in the trie:
 
-![Offline sweep over queries sorted by m for Example 2](/img/codes/maximum-xor-with-an-element-from-array/offline.gif)
+![Offline sweep over queries sorted by m for Example 2](/img/codes/maximum-xor-with-an-element-from-array/offline/01.webp)
 
 ### Complexity
 

@@ -80,7 +80,7 @@ Why "at most `B`" is enough even though every student must get a book: when `B <
 
 Example 1 (`B = 2`). Each frame tests one `limit`; books with the same colour go to the same student:
 
-![Binary search on the page limit for A = [12, 34, 67, 90], B = 2](/img/codes/allocate-books/binary-search.gif)
+![Binary search on the page limit for A = [12, 34, 67, 90], B = 2](/img/codes/allocate-books/binary-search/01.webp)
 
 ### Complexity
 

@@ -67,7 +67,7 @@ In row 0, `dp[j]` for `j > 0` is `INT_MAX`, so the `min` picks the left neighbou
 
 Example 1. Each cell shows `grid | best`; the blue cell is being computed from its orange neighbours (above and left); the `dp` line is the rolling row; at the end the cheapest path is traced back in green:
 
-![Minimum path sum DP on [[1,3,1],[1,5,1],[4,2,1]]](/img/codes/minimum-path-sum/dp.gif)
+![Minimum path sum DP on [[1,3,1],[1,5,1],[4,2,1]]](/img/codes/minimum-path-sum/dp/01.webp)
 
 ### Complexity
 

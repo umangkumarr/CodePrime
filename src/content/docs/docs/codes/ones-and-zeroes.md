@@ -65,7 +65,7 @@ Instead of a 3D table (strings × zeros × ones) we update one 2D table in place
 
 Example 1 (`m = 5` rows of zeros, `n = 3` columns of ones). After each string, the green cells are the capacities whose best count improved:
 
-![The dp table for Example 1 updated string by string](/img/codes/ones-and-zeroes/dp.gif)
+![The dp table for Example 1 updated string by string](/img/codes/ones-and-zeroes/dp/01.webp)
 
 ### Complexity
 

@@ -53,15 +53,7 @@ Reversing the list means every arrow `x → y` must become `y → x`, and the ol
 
 **Intuition.** Walk the list once and split it into two lists as you go: an already-reversed prefix headed by `prev`, and the untouched suffix headed by `curr`. Moving one node from the front of the suffix to the front of the reversed part is just one pointer change — `curr->next = prev`. The only danger is losing the suffix when we overwrite `curr->next`, so we save it in `next` first.
 
-```mermaid
-flowchart LR
-    B["2 (prev)"] --> A["1"] --> N0[null]
-    C["3 (curr)"] --> D["4"] --> E["5"] --> N1[null]
-    classDef rev fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef cur fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class A,B rev
-    class C cur
-```
+[![Linked list mid-reversal: reversed part 2 to 1 to null headed by prev, and untouched part 3 to 4 to 5 to null headed by curr](/img/codes/reverse-linked-list/iterative-step.png)](/img/codes/reverse-linked-list/iterative-step.png)
 
 *State after two steps on Example 1: `2 → 1 → null` is reversed (green), `3 → 4 → 5` is not yet touched. The next step saves `next = 4`, sets `3 → 2`, then moves `prev = 3`, `curr = 4`.*
 

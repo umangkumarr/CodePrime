@@ -66,7 +66,7 @@ So we can binary search that list without building it. Position `k` of the flatt
 
 Example 1 with `target = 3`. Blue is `matrix[mid / n][mid % n]`; grey cells are already ruled out:
 
-![Binary search over the flattened 3 x 4 matrix for 3](/img/codes/search-a-2d-matrix/flattened-search.gif)
+![Binary search over the flattened 3 x 4 matrix for 3](/img/codes/search-a-2d-matrix/flattened-search/01.webp)
 
 ### Complexity
 

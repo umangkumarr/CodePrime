@@ -71,7 +71,7 @@ For a sorted half, a range check tells us immediately whether `target` can be in
 
 Example 1, `target = 0`. Blue is `mid`, purple is the half that is sorted, grey is discarded:
 
-![Rotated binary search for 0 in [4,5,6,7,0,1,2]](/img/codes/search-in-rotated-sorted-array/rotated-search.gif)
+![Rotated binary search for 0 in [4,5,6,7,0,1,2]](/img/codes/search-in-rotated-sorted-array/rotated-search/01.webp)
 
 ### Complexity
 

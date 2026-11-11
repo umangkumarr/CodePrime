@@ -80,7 +80,7 @@ Keep the invariant "the minimum is inside `[lo, hi]`" and halve the range each s
 
 Example 2, `[4,5,6,7,0,1,2]`:
 
-![Binary search for the minimum of [4,5,6,7,0,1,2]](/img/codes/find-minimum-in-rotated-sorted-array/search.gif)
+![Binary search for the minimum of [4,5,6,7,0,1,2]](/img/codes/find-minimum-in-rotated-sorted-array/search/01.webp)
 
 ### Complexity
 

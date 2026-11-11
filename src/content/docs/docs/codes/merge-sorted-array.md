@@ -75,7 +75,7 @@ Merge **from the back** instead. The largest remaining element is at the end of 
 
 Example 1 (green cells are final; `i` and `j` mark the elements being compared):
 
-![Backward merge on Example 1](/img/codes/merge-sorted-array/backward-merge.gif)
+![Backward merge on Example 1](/img/codes/merge-sorted-array/backward-merge/01.webp)
 
 ### Complexity
 

@@ -77,29 +77,7 @@ Why every value only increases: a child is raised on the way down only when the 
 
 Example 1 before (left) and after (right). Pushed down: `35`'s children become `35, 35` and `10`'s children become `10, 10`; summed back up: `35 → 70`, `10 → 20`, root `→ 90`. Every value went up and every parent equals the sum of its children:
 
-```mermaid
-flowchart TD
-    subgraph before [Before]
-        a1((2)) --> a2((35))
-        a1 --> a3((10))
-        a2 --> a4((2))
-        a2 --> a5((3))
-        a3 --> a6((5))
-        a3 --> a7((2))
-    end
-    subgraph after [After changeTree]
-        b1((90)) --> b2((70))
-        b1 --> b3((20))
-        b2 --> b4((35))
-        b2 --> b5((35))
-        b3 --> b6((10))
-        b3 --> b7((10))
-    end
-    classDef pushed fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    classDef summed fill:#dcf5e3,stroke:#2e9e57,color:#1f2430
-    class b4,b5,b6,b7 pushed
-    class b1,b2,b3 summed
-```
+[![Example 1 before and after changeTree: leaves pushed down to 35, 35, 10, 10 and parents summed up to 70, 20 and 90](/img/codes/children-sum-property/before-after.png)](/img/codes/children-sum-property/before-after.png)
 
 ### Complexity
 

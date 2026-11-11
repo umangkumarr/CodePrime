@@ -73,7 +73,7 @@ The extra spaces can be removed in the same pass that reverses the words. Keep a
 
 Example 3 (`·` marks a space). Blue is the word just written, green is the finished output prefix:
 
-![In-place word reversal on "a good   example"](/img/codes/reverse-words-in-a-string/reverse-words.gif)
+![In-place word reversal on "a good   example"](/img/codes/reverse-words-in-a-string/reverse-words/01.webp)
 
 ### Complexity
 

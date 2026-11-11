@@ -71,12 +71,7 @@ Preorder, inorder and postorder differ only in **when** a node is recorded relat
 
 A recursive DFS would do this in a few lines, but with $N$ up to $10^5$ a skewed tree (a "linked list" of left children) would recurse $10^5$ levels deep and can overflow the call stack. So we simulate the recursion with an explicit stack of pairs `(node, state)`, where `state` says which of the three moments the node is at:
 
-```mermaid
-flowchart LR
-    s1["state 1<br/>record in pre<br/>push left child"] --> s2["state 2<br/>record in in<br/>push right child"] --> s3["state 3<br/>record in post<br/>pop the node"]
-    classDef st fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    class s1,s2,s3 st
-```
+[![A node moves from state 1 (record in pre, push left child) to state 2 (record in in, push right child) to state 3 (record in post, pop)](/img/codes/tree-traversals/node-states.png)](/img/codes/tree-traversals/node-states.png)
 
 The top of the stack is always the node the recursion would currently be working on. A node only advances from state 1 to 2 after its whole left subtree (pushed above it) has been popped, and from 2 to 3 after its right subtree has been popped — exactly the order the recursive version follows.
 

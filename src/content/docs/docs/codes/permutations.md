@@ -61,20 +61,7 @@ We can walk this tree **in place**. Keep the array split at index `start`: `nums
 
 The recursion tree for `[1,2,3]`. Each edge swaps a value into position `start`; the leaves are the permutations in the order they are produced:
 
-```mermaid
-flowchart TD
-    r["start=0: [1,2,3]"] -->|"1 first"| a["start=1: [1,2,3]"]
-    r -->|"2 first"| b["start=1: [2,1,3]"]
-    r -->|"3 first"| c["start=1: [3,2,1]"]
-    a --> a1["[1,2,3]"]
-    a --> a2["[1,3,2]"]
-    b --> b1["[2,1,3]"]
-    b --> b2["[2,3,1]"]
-    c --> c1["[3,2,1]"]
-    c --> c2["[3,1,2]"]
-    classDef leaf fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class a1,a2,b1,b2,c1,c2 leaf
-```
+[![Recursion tree for [1,2,3]: one branch per value placed first, leaves are the six permutations in order](/img/codes/permutations/recursion-tree.png)](/img/codes/permutations/recursion-tree.png)
 
 ### Complexity
 

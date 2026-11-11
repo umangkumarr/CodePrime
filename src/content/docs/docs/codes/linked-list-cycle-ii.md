@@ -65,16 +65,7 @@ A hash set of visited nodes finds the entry (the first node seen twice) in $O(n)
 
 **Phase 2 — locate the entry.** Name the distances:
 
-```mermaid
-flowchart LR
-    H([head]) -- "a steps" --> E([cycle entry])
-    E -- "b steps" --> M([meeting point])
-    M -- "c steps" --> E
-    classDef entry fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef meet fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    class E entry
-    class M meet
-```
+[![head reaches the cycle entry in a steps, the entry reaches the meeting point in b steps, and the meeting point returns to the entry in c steps](/img/codes/linked-list-cycle-ii/cycle-distances.png)](/img/codes/linked-list-cycle-ii/cycle-distances.png)
 
 The cycle has length `L = b + c`. When they meet, `slow` has walked `a + b` steps and `fast` has walked twice that, `2(a + b)`. The extra `a + b` steps that `fast` made are whole laps of the cycle, so `a + b = kL` for some `k >= 1`, which rearranges to
 

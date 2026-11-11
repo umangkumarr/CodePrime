@@ -65,7 +65,7 @@ Moving the **taller** line instead would be a mistake: the level stays capped by
 
 Example 1, one cell per line height. Blue cells are the current pair `l`, `r`; grey ones have been discarded:
 
-![Two pointers closing in on [1,8,6,2,5,4,8,3,7] and finding area 49](/img/codes/container-with-most-water/two-pointers.gif)
+![Two pointers closing in on [1,8,6,2,5,4,8,3,7] and finding area 49](/img/codes/container-with-most-water/two-pointers/01.webp)
 
 ### Complexity
 

@@ -76,7 +76,7 @@ Each recursive call holds one popped value in its own frame, which is how we "se
 
 The stack is drawn bottom to top (the right-most cell is the top). `sortStack` first peels every element off into its recursion frames, then inserts them back one by one; green cells form the sorted stack, blue is the element just inserted:
 
-![Recursive sort of the stack 5 -2 9 -7 3](/img/codes/sort-a-stack/recursion.gif)
+![Recursive sort of the stack 5 -2 9 -7 3](/img/codes/sort-a-stack/recursion/01.webp)
 
 ### Complexity
 

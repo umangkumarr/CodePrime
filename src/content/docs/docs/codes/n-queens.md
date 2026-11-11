@@ -63,7 +63,7 @@ So three boolean arrays — `cols`, `diag` and `anti` — tell in $O(1)$ whether
 
 Backtracking on `n = 4` until the first solution. Blue is the queen just placed, purple the queens already on the board, red the squares in later rows that they attack; a row that is entirely red forces a backtrack:
 
-![Backtracking search for the first 4-queens solution](/img/codes/n-queens/backtrack.gif)
+![Backtracking search for the first 4-queens solution](/img/codes/n-queens/backtrack/01.webp)
 
 ### Complexity
 

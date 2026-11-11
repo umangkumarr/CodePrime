@@ -68,7 +68,7 @@ Checking "equals a live candidate" **before** "slot is empty" matters: otherwise
 
 Blue is the current element; the line below shows both candidates and counts after it is processed:
 
-![Two-candidate vote on [1,1,1,3,3,2,2,2]](/img/codes/majority-element-ii/vote.gif)
+![Two-candidate vote on [1,1,1,3,3,2,2,2]](/img/codes/majority-element-ii/vote/01.webp)
 
 ### Complexity
 

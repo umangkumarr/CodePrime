@@ -73,15 +73,7 @@ To unlink a node we normally change its predecessor's `next`, but we cannot reac
 
 Example 1, `node` is the node holding `5`:
 
-```mermaid
-flowchart LR
-    A["4"] --> B["5 → becomes 1"] --> C["1 (freed)"] --> D["9"]
-    B -. "new next" .-> D
-    classDef given fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef gone fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class B given
-    class C gone
-```
+[![List 4, 5, 1, 9: the given node 5 copies the value 1 and links past the freed node to 9](/img/codes/delete-node-in-a-linked-list/delete-walkthrough.png)](/img/codes/delete-node-in-a-linked-list/delete-walkthrough.png)
 
 The list reads `4 → 1 → 9`.
 

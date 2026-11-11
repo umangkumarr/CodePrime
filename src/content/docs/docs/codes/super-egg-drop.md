@@ -88,7 +88,7 @@ $$
 
 The table `F(m, j)` for Example 3 (`k = 3`, `n = 14`), filled row by row with the recurrence (each cell = up-left + up + 1). The first row in which the `j = 3` column reaches `14` is `m = 4`:
 
-![Filling F(m, j) = F(m-1, j-1) + F(m-1, j) + 1 for k = 3](/img/codes/super-egg-drop/moves-table.gif)
+![Filling F(m, j) = F(m-1, j-1) + F(m-1, j) + 1 for k = 3](/img/codes/super-egg-drop/moves-table/01.webp)
 
 ### Complexity
 

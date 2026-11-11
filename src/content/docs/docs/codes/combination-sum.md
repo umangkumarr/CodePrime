@@ -69,22 +69,7 @@ Sorting the candidates first gives a cheap prune: once `candidates[i] > remainin
 
 Example 1 (`[2, 3, 6, 7]`, `target = 7`). Each box is a call with its `path` and remaining sum; a call only tries candidates from its own index onwards. Green calls record an answer, red ones are dead ends where even the smallest allowed candidate is too big:
 
-```mermaid
-flowchart TD
-    r["[] rem 7"] --> a["[2] rem 5"]
-    r --> b["[3] rem 4"]
-    r --> c["[6] rem 1"]
-    r --> d["[7] rem 0"]
-    a --> a1["[2,2] rem 3"]
-    a --> a2["[2,3] rem 2"]
-    a1 --> a11["[2,2,2] rem 1"]
-    a1 --> a12["[2,2,3] rem 0"]
-    b --> b1["[3,3] rem 1"]
-    classDef ok fill:#dcf5e3,stroke:#2e9e57,color:#1f2430
-    classDef dead fill:#fde0e0,stroke:#d64545,color:#1f2430
-    class a12,d ok
-    class a11,a2,b1,c dead
-```
+[![Recursion tree for candidates 2, 3, 6, 7 and target 7: [2,2,3] and [7] reach remainder 0 and are recorded; [2,2,2], [2,3], [3,3] and [6] are dead ends](/img/codes/combination-sum/recursion-tree.png)](/img/codes/combination-sum/recursion-tree.png)
 
 Note that `[3]` never tries `2` again — that would rebuild `[2,2,3]` in a different order.
 

@@ -67,7 +67,7 @@ The dummy node also removes the special case of deleting the head itself: the he
 
 `D` is the dummy node. Blue is `slow`, orange is the node `fast` points at; the gap between them never changes:
 
-![Two pointers n = 2 apart on the list 1→2→3→4→5](/img/codes/remove-nth-node-from-end-of-list/two-pointers.gif)
+![Two pointers n = 2 apart on the list 1→2→3→4→5](/img/codes/remove-nth-node-from-end-of-list/two-pointers/01.webp)
 
 ### Complexity
 

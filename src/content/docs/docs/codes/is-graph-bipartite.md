@@ -62,20 +62,7 @@ Inside one connected component there is no freedom once the first node is painte
 
 The graph may be disconnected, so a fresh BFS starts from every node that is still unpainted; each component can choose its colours independently.
 
-```mermaid
-flowchart LR
-    n0((0)) --- n1((1))
-    n0 --- n2((2))
-    n0 --- n3((3))
-    n1 --- n2
-    n2 --- n3
-    classDef a fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef b fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class n0 a
-    class n1,n3 b
-    class n2 bad
-```
+[![Example 1 graph two-coloured by BFS: node 0 colour 0, nodes 1, 2, 3 colour 1, with node 2 clashing with neighbour 1](/img/codes/is-graph-bipartite/two-colouring.png)](/img/codes/is-graph-bipartite/two-colouring.png)
 
 Example 1: node `0` gets colour 0 (blue), so `1`, `2` and `3` all get colour 1. When node `1` is processed, its neighbour `2` already has colour 1 — the same as `1` — so the edge `1-2` is a conflict (the triangle `0-1-2` is an odd cycle) and the answer is `false`.
 

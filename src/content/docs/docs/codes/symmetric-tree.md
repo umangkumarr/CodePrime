@@ -47,21 +47,7 @@ A tree is symmetric when its left subtree is the **mirror image** of its right s
 
 Both approaches below check this definition pair by pair; they differ only in whether the pending pairs are kept on the call stack or in an explicit queue.
 
-```mermaid
-flowchart TD
-    R((1)) --> L2((2))
-    R --> R2((2))
-    L2 --> L3((3))
-    L2 --> L4((4))
-    R2 --> R4((4))
-    R2 --> R3((3))
-    classDef p1 fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef p2 fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef p3 fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    class L2,R2 p1
-    class L3,R3 p2
-    class L4,R4 p3
-```
+[![Symmetric tree 1, 2, 2, 3, 4, 4, 3 with mirror pairs coloured alike: the two 2s, the outer 3s and the inner 4s](/img/codes/symmetric-tree/mirror-pairs.png)](/img/codes/symmetric-tree/mirror-pairs.png)
 
 In Example 1, nodes of the same colour are compared with each other: first the two `2`s, then the outer pair (`3`, `3`), then the inner pair (`4`, `4`).
 

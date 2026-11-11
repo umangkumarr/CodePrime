@@ -75,7 +75,7 @@ The search range is small: `d = 1` always works (positions are distinct and `c <
 
 Example 3 after sorting: `[6, 7, 9, 11, 13, 15]`, `c = 4`, so `hi = (15 - 6) / 3 = 3`. Green rooms hold seated players, blue is a room just taken, red a room skipped as too close to `last`:
 
-![Binary search on the minimum distance for rooms 6 7 9 11 13 15 with 4 players](/img/codes/chess-tournament/binary-search.gif)
+![Binary search on the minimum distance for rooms 6 7 9 11 13 15 with 4 players](/img/codes/chess-tournament/binary-search/01.webp)
 
 ### Complexity
 

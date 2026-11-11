@@ -64,7 +64,7 @@ The invariant is that the single element is always at an even index in `[lo, hi]
 
 Blue is `mid`, orange is its partner `mid + 1`, grey indices have been ruled out:
 
-![Binary search on pairs for [1,1,2,3,3,4,4,8,8]](/img/codes/single-element-in-a-sorted-array/pairs.gif)
+![Binary search on pairs for [1,1,2,3,3,4,4,8,8]](/img/codes/single-element-in-a-sorted-array/pairs/01.webp)
 
 ### Complexity
 

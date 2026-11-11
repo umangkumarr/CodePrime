@@ -66,7 +66,7 @@ The comparison is strict (`s > lastEnd`) because the note forbids a meeting star
 
 Example 1, with meetings sorted by end time. Green meetings are selected; red ones start at or before the end of the last selected meeting and are skipped:
 
-![Greedy meeting selection on Example 1](/img/codes/maximum-meetings/greedy.svg)
+[![Greedy meeting selection on Example 1](/img/codes/maximum-meetings/greedy.png)](/img/codes/maximum-meetings/greedy.png)
 
 ### Complexity
 

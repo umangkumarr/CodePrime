@@ -61,18 +61,7 @@ There is no need to collect every key: we can stop as soon as the k-th node is v
 
 The tree can have $10^5$ nodes and may be a single chain, so a recursive traversal could be $10^5$ calls deep. An explicit stack does the same thing without risking a stack overflow.
 
-```mermaid
-flowchart TD
-    n10["10 · 2nd"] --> n2["2 · 7th"]
-    n10 --> n11["11 · 1st"]
-    n2 --> n1["1 · 8th"]
-    n2 --> n5["5 · 4th"]
-    n5 --> n3["3 · 6th"]
-    n5 --> n6["6 · 3rd"]
-    n3 -->|right| n4["4 · 5th"]
-    classDef ans fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class n2 ans
-```
+[![BST of Example 2 with each node's visit order in a right-node-left walk; 2 is the 7th visit](/img/codes/kth-largest-element-in-bst/visit-order.png)](/img/codes/kth-largest-element-in-bst/visit-order.png)
 
 Example 2 annotated with the order of visits: `11, 10, 6, 5, 4, 3, 2, ...` — the 7th visit is `2`, and the traversal stops there without visiting `1`.
 

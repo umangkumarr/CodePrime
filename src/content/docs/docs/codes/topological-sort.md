@@ -72,17 +72,7 @@ Unlike the DFS-with-a-stack approach, this is iterative, so a long chain of $5 \
 
 Example 2. The initial in-degrees are `0:2, 1:1, 2:1, 3:2, 4:0, 5:0`. Green vertices start with in-degree `0`:
 
-```mermaid
-flowchart LR
-    n4((4)) --> n1((1))
-    n4 --> n0((0))
-    n5((5)) --> n0
-    n5 --> n2((2))
-    n1 --> n3((3))
-    n2 --> n3
-    classDef ready fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class n4,n5 ready
-```
+[![Example 2 graph with edges 4 to 1, 4 to 0, 5 to 0, 5 to 2, 1 to 3 and 2 to 3; vertices 4 and 5 start with in-degree 0](/img/codes/topological-sort/graph.png)](/img/codes/topological-sort/graph.png)
 
 | Step | Remove edges of | In-degrees that drop to 0 | `order` |
 | --- | --- | --- | --- |

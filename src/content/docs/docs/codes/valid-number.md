@@ -62,30 +62,9 @@ Output: false
 
 ### Intuition
 
-The grammar is a **regular language**: it can be recognised by a small finite automaton that reads the string once. Drawn out, the automaton looks like this (double circles are accepting states):
+The grammar is a **regular language**: it can be recognised by a small finite automaton that reads the string once. Drawn out, the automaton looks like this (green states are accepting states):
 
-```mermaid
-flowchart LR
-    start([start]) -- "+ / -" --> sign([sign])
-    start -- digit --> int(((int)))
-    sign -- digit --> int
-    start -- "." --> dot([dot])
-    sign -- "." --> dot
-    int -- digit --> int
-    int -- "." --> frac(((frac)))
-    dot -- digit --> frac
-    frac -- digit --> frac
-    int -- "e / E" --> exp([exp])
-    frac -- "e / E" --> exp
-    exp -- "+ / -" --> esign([exp sign])
-    exp -- digit --> eint(((exp int)))
-    esign -- digit --> eint
-    eint -- digit --> eint
-    classDef acc fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef mid fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    class int,frac,eint acc
-    class start,sign,dot,exp,esign mid
-```
+[![Finite automaton for a valid number: start, sign, dot, int, frac, exp, exp sign and exp int states with digit, sign, dot and e transitions; int, frac and exp int are accepting](/img/codes/valid-number/automaton.png)](/img/codes/valid-number/automaton.png)
 
 Any character with no outgoing arrow from the current state makes the string invalid. Rather than storing the table, we can track the same information with three flags, because the automaton only ever needs to know:
 

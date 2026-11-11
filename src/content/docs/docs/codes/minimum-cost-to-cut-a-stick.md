@@ -91,7 +91,7 @@ A piece depends only on strictly shorter pieces, so filling the table in order o
 
 Example 1, `pos = [0, 1, 3, 4, 5, 7]`. Row `i`, column `j` is `dp[i][j]`; the blue cell is being computed and the orange cells are the best split `dp[i][k]`, `dp[k][j]`:
 
-![Interval DP table for n = 7, cuts = [1,3,4,5]](/img/codes/minimum-cost-to-cut-a-stick/dp.gif)
+![Interval DP table for n = 7, cuts = [1,3,4,5]](/img/codes/minimum-cost-to-cut-a-stick/dp/01.webp)
 
 ### Complexity
 

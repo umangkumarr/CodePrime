@@ -60,19 +60,7 @@ The search then only steps to an `end` with `canEnd[end] == true`. With that gua
 
 For `"catsanddog"` the search tree is (numbers are the `start` index of each call):
 
-```mermaid
-flowchart TD
-    r(["0"]) -- cat --> a(["3"])
-    r -- cats --> b(["4"])
-    a -- sand --> c(["7"])
-    b -- and --> d(["7"])
-    c -- dog --> e(["10: cat sand dog"])
-    d -- dog --> f(["10: cats and dog"])
-    classDef done fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef mid fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    class e,f done
-    class r,a,b,c,d mid
-```
+[![Search tree for catsanddog: from start 0, cat leads to 3, sand to 7 and dog to 10 (cat sand dog); cats leads to 4, and to 7 and dog to 10 (cats and dog)](/img/codes/word-break-ii/search-tree.png)](/img/codes/word-break-ii/search-tree.png)
 
 For Example 3, `"catsandog"`, `canEnd[0]` is `false`, so the function returns `[]` without searching at all.
 

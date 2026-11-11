@@ -71,7 +71,7 @@ After discarding all such useless elements, the indices that remain have **stric
 
 Example 1. The blue cell is the new element `i`, orange cells are the indices still in `dq` (front first), grey cells are outside the window:
 
-![Monotonic deque on [1,3,-1,-3,5,3,6,7] with k = 3](/img/codes/sliding-window-maximum/deque.gif)
+![Monotonic deque on [1,3,-1,-3,5,3,6,7] with k = 3](/img/codes/sliding-window-maximum/deque/01.webp)
 
 ### Complexity
 

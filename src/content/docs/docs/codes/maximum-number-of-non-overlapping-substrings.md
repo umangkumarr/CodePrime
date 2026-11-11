@@ -65,7 +65,7 @@ Two such candidates are always either **disjoint or nested**: if they shared a l
 
 Hence the answer is exactly the set of candidates that **contain no other candidate**. Scanning start positions from right to left and keeping a `cut` (the start of the last chosen candidate) selects them: an inner candidate has a larger start, so it is seen first, and any candidate enclosing it ends at or after `cut` and is rejected.
 
-![Candidates for adefaddaccc: the chosen e, f and ccc sit inside or beside the rejected outer candidates](/img/codes/maximum-number-of-non-overlapping-substrings/candidates.svg)
+[![Candidates for adefaddaccc: the chosen e, f and ccc sit inside or beside the rejected outer candidates](/img/codes/maximum-number-of-non-overlapping-substrings/candidates.png)](/img/codes/maximum-number-of-non-overlapping-substrings/candidates.png)
 
 ### Algorithm
 

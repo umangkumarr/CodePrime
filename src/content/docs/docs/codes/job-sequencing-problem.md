@@ -77,7 +77,7 @@ All profits are positive, so the greedy schedule fits as many jobs as possible; 
 
 Example 3, slots `1..3`, each cell shows the profit of the job placed there:
 
-![Greedy job placement into the latest free slot on deadline = [3,1,2,2], profit = [50,10,20,30]](/img/codes/job-sequencing-problem/slots.gif)
+![Greedy job placement into the latest free slot on deadline = [3,1,2,2], profit = [50,10,20,30]](/img/codes/job-sequencing-problem/slots/01.webp)
 
 ### Complexity
 

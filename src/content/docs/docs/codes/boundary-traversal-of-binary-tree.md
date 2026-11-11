@@ -75,25 +75,7 @@ The only care needed is to avoid duplicates. A leaf at the bottom of either edge
 
 Example 1, coloured by group — blue is the left boundary, green the leaves, orange the right boundary (emitted bottom-up), and the root is added first on its own:
 
-```mermaid
-flowchart TD
-    n1((1)) --> n2((2))
-    n1 --> n3((3))
-    n2 --> n4((4))
-    n2 --> n5((5))
-    n3 --> n6((6))
-    n3 --> n7((7))
-    n5 --> n8((8))
-    n5 --> n9((9))
-    classDef root fill:#ece3ff,stroke:#7a4fd6,color:#1f2430
-    classDef left fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    classDef leaf fill:#dcf5e3,stroke:#2e9e57,color:#1f2430
-    classDef right fill:#ffeccc,stroke:#d9822b,color:#1f2430
-    class n1 root
-    class n2 left
-    class n4,n8,n9,n6,n7 leaf
-    class n3 right
-```
+[![Example 1 tree coloured by boundary group: root, left boundary, leaves and right boundary](/img/codes/boundary-traversal-of-binary-tree/boundary-groups.png)](/img/codes/boundary-traversal-of-binary-tree/boundary-groups.png)
 
 - Root: `[1]`.
 - Left walk from `2`: `2` is not a leaf → push it, go left to `4`; `4` is a leaf → stop. `ans = [1, 2]`.

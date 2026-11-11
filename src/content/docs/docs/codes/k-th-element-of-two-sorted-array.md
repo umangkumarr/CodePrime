@@ -68,7 +68,7 @@ If the first condition fails, we took too many from `a`, so `cutA` must shrink; 
 
 Example 2: green cells are the elements taken by the current cuts, orange cells are the first untaken elements that the cross-conditions compare against.
 
-![Binary search on the cut position for a = [1,4,8,10,12], b = [5,7,11,15,17], k = 6](/img/codes/k-th-element-of-two-sorted-array/partition.gif)
+![Binary search on the cut position for a = [1,4,8,10,12], b = [5,7,11,15,17], k = 6](/img/codes/k-th-element-of-two-sorted-array/partition/01.webp)
 
 ### Complexity
 

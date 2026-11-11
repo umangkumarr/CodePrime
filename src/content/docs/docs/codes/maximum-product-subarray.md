@@ -67,7 +67,7 @@ A zero needs no special handling: it makes `hi = lo = 0`, and the next element t
 
 On `[2,-5,-2,-4,3]` the answer is `24` from `[-2,-4,3]`. Notice how the most negative product `lo` becomes the maximum after the next negative factor:
 
-![hi and lo tracked over [2,-5,-2,-4,3]](/img/codes/maximum-product-subarray/max-min.gif)
+![hi and lo tracked over [2,-5,-2,-4,3]](/img/codes/maximum-product-subarray/max-min/01.webp)
 
 ### Complexity
 

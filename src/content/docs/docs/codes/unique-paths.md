@@ -61,7 +61,7 @@ with every cell in the first row and first column having exactly one path (all r
 2. For each row `i = 1 .. m - 1`, for each `j = 1 .. n - 1`: `dp[j] += dp[j - 1]`. (`dp[0]` stays `1`, the first column.)
 3. Return `dp[n - 1]`.
 
-![DP table for m = 3, n = 7 filled row by row; each cell is the sum of the cell above and the cell to the left](/img/codes/unique-paths/dp-grid.gif)
+![DP table for m = 3, n = 7 filled row by row; each cell is the sum of the cell above and the cell to the left](/img/codes/unique-paths/dp-grid/01.webp)
 
 **Complexity**
 

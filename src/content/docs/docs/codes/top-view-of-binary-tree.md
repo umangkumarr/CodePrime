@@ -67,19 +67,7 @@ A depth-first version needs a depth comparison per column to be correct, and on 
 
 Example 2 with each node's column. BFS reaches `10` (col 0), `20` (col -1), `30` (col 1), `40` (col -2), `60` (col 0, already taken), `90` (col 0, taken), `100` (col 2). The green nodes are the first in their column:
 
-```mermaid
-flowchart TD
-    A["10 · col 0"] --> B["20 · col -1"]
-    A --> C["30 · col 1"]
-    B --> D["40 · col -2"]
-    B --> E["60 · col 0"]
-    C --> F["90 · col 0"]
-    C --> G["100 · col 2"]
-    classDef seen fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef hidden fill:#e9eaed,stroke:#b4b8bf,color:#5b6270
-    class A,B,C,D,G seen
-    class E,F hidden
-```
+[![Example 2 tree with each node's column; 40, 20, 10, 30 and 100 form the top view, 60 and 90 are hidden](/img/codes/top-view-of-binary-tree/top-view-tree.png)](/img/codes/top-view-of-binary-tree/top-view-tree.png)
 
 Reading columns `-2 .. 2` gives `[40, 20, 10, 30, 100]`.
 

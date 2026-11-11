@@ -63,7 +63,7 @@ So the number of good subarrays **ending at `i`** is the number of earlier prefi
 
 Example 1. Blue is the current element, `xorr` is the prefix XOR up to it, and `freq` holds the prefix XORs seen before it:
 
-![Prefix XOR counting on A = [4,2,2,6,4], B = 6](/img/codes/subarray-with-given-xor/prefix-xor.gif)
+![Prefix XOR counting on A = [4,2,2,6,4], B = 6](/img/codes/subarray-with-given-xor/prefix-xor/01.webp)
 
 ### Complexity
 

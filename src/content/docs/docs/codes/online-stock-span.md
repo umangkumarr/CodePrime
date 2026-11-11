@@ -69,7 +69,7 @@ What remains is a stack of days whose prices strictly decrease from bottom to to
 
 Example 1. Orange cells are the days on the stack (prices decreasing left to right), blue is today, grey were popped earlier:
 
-![Monotonic stack processing the prices of Example 1](/img/codes/online-stock-span/mono-stack.gif)
+![Monotonic stack processing the prices of Example 1](/img/codes/online-stock-span/mono-stack/01.webp)
 
 ### Complexity
 

@@ -80,21 +80,7 @@ Every node on the child level is the left or right child of exactly one parent, 
 
 Example 1 after `connect`; dashed arrows are next pointers. Walking the root's level sets `2 → 3`. Walking the list `2 → 3` then sets `4 → 5` and `6 → 7` (siblings) and `5 → 6`, the cousin link `node->right->next = node->next->left` with `node = 2` (orange):
 
-```mermaid
-flowchart TD
-    n1((1)) --> n2((2))
-    n1 --> n3((3))
-    n2 --> n4((4))
-    n2 --> n5((5))
-    n3 --> n6((6))
-    n3 --> n7((7))
-    n2 -.->|next| n3
-    n4 -.->|next| n5
-    n5 -.->|"next (cousin)"| n6
-    n6 -.->|next| n7
-    classDef cousin fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    class n5,n6 cousin
-```
+[![Perfect tree 1 to 7 after connect, with dashed next pointers 2 to 3, 4 to 5, 5 to 6 (the cousin link, nodes 5 and 6 in orange) and 6 to 7](/img/codes/populating-next-right-pointers-in-each-node/next-pointers.png)](/img/codes/populating-next-right-pointers-in-each-node/next-pointers.png)
 
 ### Complexity
 

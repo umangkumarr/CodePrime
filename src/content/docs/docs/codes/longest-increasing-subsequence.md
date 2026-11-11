@@ -73,7 +73,7 @@ Using `lower_bound` (first `>= x`) rather than `upper_bound` is what makes the s
 
 The blue cell is the value being placed; the line below shows `tails` after placing it:
 
-![Patience-sorting LIS on [10,9,2,5,3,7,101,18]](/img/codes/longest-increasing-subsequence/tails.gif)
+![Patience-sorting LIS on [10,9,2,5,3,7,101,18]](/img/codes/longest-increasing-subsequence/tails/01.webp)
 
 ### Complexity
 

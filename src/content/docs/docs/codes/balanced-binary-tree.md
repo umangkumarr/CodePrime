@@ -64,19 +64,7 @@ Compute heights bottom-up instead (post-order): a node's height is `1 + max(left
 
 Example 2, with the value `height()` returns written under each node. Node `2` (left child of the root) still has a valid height `3`, but the root sees `3` versus `1`, a difference of `2`, and returns `-1`:
 
-```mermaid
-flowchart TD
-    A["1<br/>left 3, right 1 → -1"] --> B["2<br/>h = 3"]
-    A --> C["2<br/>h = 1"]
-    B --> D["3<br/>h = 2"]
-    B --> E["3<br/>h = 1"]
-    D --> F["4<br/>h = 1"]
-    D --> G["4<br/>h = 1"]
-    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    classDef ok fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class A bad
-    class B,C,D,E,F,G ok
-```
+[![Example 2 tree with the height each node returns: the root 1 sees left height 3 and right height 1 and returns -1; every other node is balanced](/img/codes/balanced-binary-tree/height-tree.png)](/img/codes/balanced-binary-tree/height-tree.png)
 
 ### Complexity
 

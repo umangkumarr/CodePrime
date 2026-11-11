@@ -33,7 +33,8 @@ Python** solutions tested against brute force.
 ## Stack and commands
 
 Astro 7 + Starlight, static output, deployed by GitHub Actions. Node.js **22.12+**, npm (`package-lock.json`).
-KaTeX for maths (`remark-math` + `rehype-katex`), Mermaid for diagrams (`astro-mermaid`), Pagefind search.
+KaTeX for maths (`remark-math` + `rehype-katex`), diagrams as Archify-rendered PNGs (Mermaid via `astro-mermaid`
+still works for small diagrams outside problem pages), Pagefind search.
 
 ```sh
 npm install
@@ -63,13 +64,14 @@ python3 .github/scripts/check_content.py   # content rules for every problem pag
 | `src/routeData.ts` | Starlight route middleware: search titles, `og:type`, per-page JSON-LD + breadcrumbs |
 | `src/plugins/rehype-problem-layout.mjs` | Wraps `## Problem` in the statement card; puts `## Solution approach` and `## Code` behind spoiler gates |
 | `src/plugins/remark-code-tabs.mjs` | Turns consecutive cpp/java/python fences into one `<cp-code-tabs>` group |
+| `src/plugins/rehype-step-carousel.mjs` | Turns a `…/<name>/01.webp` image into a step carousel of every frame (`src/scripts/steps.ts` adds controls) |
 | `src/plugins/rehype-base-links.mjs` | Prefixes `/CodePrime` to root-relative links and image sources |
 | `src/components/` | `ProblemHeader`, `Notepad`, `RelatedProblems`, `TrackOverview`, Starlight overrides |
 | `src/scripts/reader.ts` | Spoiler gates, language tabs, "mark as solved", ←/→ page navigation |
 | `src/scripts/notepad.ts` | Per-problem notes scratchpad |
 | `src/lib/` | `tags.ts` (tag slugs/pages), `tracks.mjs` (sidebar helpers), `platform.mjs` (judge names) |
 | `src/styles/theme.css`, `content.css` | Design tokens (light + dark) and reading styles |
-| `public/img/codes/<slug>/` | Generated walkthrough GIFs / SVGs for that problem |
+| `public/img/codes/<slug>/` | Walkthrough step frames (`<name>/NN.webp` + `frames.json`) and Archify diagram PNGs |
 | `public/` | Favicons, `og.png` (link-preview image), `site.webmanifest` |
 | `.github/` | CI (`ci.yml`), deploy (`deploy.yml`), Dependabot, CODEOWNERS, content checker, README images |
 
@@ -164,14 +166,22 @@ no "Let's dive in". British spelling (colour, optimise). Maths in KaTeX (`$O(n \
 Add one when pointer movement, windows, DP tables, recursion, or list/tree/graph structure is central to the
 idea. Skip it for trivial problems; one good visual beats three mediocre ones.
 
-- **Animated GIF** (arrays, strings, grids, DP tables): `public/img/codes/<slug>/<name>.gif`. Frames must be
-  computed by running the algorithm, never hand-typed. ≤ ~15 frames, ≤ ~300 KB, drawn on a **white rounded
-  card** (the site has a dark theme), with a caption per frame. Check a couple of frames by eye.
-- **Mermaid** (trees, graphs, lists, recursion trees): a ```` ```mermaid ```` block; light fills with dark text
-  via `classDef` so it reads in both themes. It must parse (CI builds the site; check it renders).
-- **SVG** for anything else, with a solid white background.
-- Reference images root-relative: `![What the animation shows](/img/codes/<slug>/<name>.gif)`. Alt text says
-  what the image shows.
+- **Step carousel** (arrays, strings, grids, DP tables): one image per step in
+  `public/img/codes/<slug>/<name>/01.webp`, `02.webp`, … plus `frames.json` (`{"frames": n, "width": w, "height": h}`).
+  Reference only the first frame, `![What the walkthrough shows](/img/codes/<slug>/<name>/01.webp)`, and
+  `rehype-step-carousel` turns it into a carousel of every frame (previous/next, step counter, Play, arrow keys;
+  without JavaScript a swipeable scroll-snap strip). Frames must be computed by running the algorithm, never
+  hand-typed: ≤ ~15 steps, drawn on a **white rounded card** (the site has a dark theme), with a caption per frame.
+  Save lossless WebP (Pillow `lossless=True, method=4`; `method=6` is ~90× slower for the same size). Check a couple
+  of frames by eye. (The home page hero still uses `trapping-rain-water/two-pointers.gif` as an animation.)
+- **Archify diagram** (trees, graphs, linked lists, recursion trees, state machines): author it with the Archify
+  skill (`finalize` must pass), capture the SVG on white at 1.5x, trim with ~40px padding and save
+  `public/img/codes/<slug>/<name>.png`. Reference it as a self-link,
+  `[![What it shows](/img/codes/<slug>/<name>.png)](/img/codes/<slug>/<name>.png)`, which opens the zoomable
+  viewer. Archify's `tree` type cannot colour nodes or label edges, so trees that highlight nodes are drawn with
+  `architecture` (nodes placed by in-order position and depth, corner icons off, `meta.legend` naming each
+  colour). Text that mentions colours or dashed edges must match the drawing.
+- Alt text says what the image shows. Mermaid is no longer used on problem pages.
 
 ## Solution code standards
 

@@ -57,7 +57,7 @@ The bitset has `10001` bits, enough for every possible `target`; sums beyond it 
 
 Example 1 (`target = 11`). After each element, green cells are the newly reachable sums, orange were reachable before:
 
-![Reachable subset sums for [1,5,11,5] up to 11](/img/codes/partition-equal-subset-sum/reach.gif)
+![Reachable subset sums for [1,5,11,5] up to 11](/img/codes/partition-equal-subset-sum/reach/01.webp)
 
 ### Complexity
 

@@ -65,7 +65,7 @@ Once both halves are sorted, counting cross pairs is a two-pointer sweep. For a 
 
 Each frame is one step of the counting sweep inside a merge. Purple is the sorted left half, blue is `*i`, green are the right-half values `v` with `*i > 2v`:
 
-![Merge-sort counting of reverse pairs on [2,4,3,5,1]](/img/codes/reverse-pairs/merge-count.gif)
+![Merge-sort counting of reverse pairs on [2,4,3,5,1]](/img/codes/reverse-pairs/merge-count/01.webp)
 
 ### Complexity
 

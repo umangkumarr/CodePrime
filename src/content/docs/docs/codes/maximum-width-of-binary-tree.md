@@ -73,17 +73,7 @@ The catch is size. Positions double on every level, and a chain of 3000 nodes wo
 
 Example 2, with the position each node gets when it is pushed (computed from its parent's re-based position `p`):
 
-```mermaid
-flowchart TD
-    A["1 · pos 0"] --> B["3 · pos 1"]
-    A --> C["2 · pos 2"]
-    B --> D["5 · pos 1"]
-    C --> E["9 · pos 4"]
-    D --> F["6 · pos 1"]
-    E --> G["7 · pos 7"]
-    classDef ends fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class F,G ends
-```
+[![Example 2 tree with each node's position; 6 and 7 are the ends of the widest level](/img/codes/maximum-width-of-binary-tree/positions.png)](/img/codes/maximum-width-of-binary-tree/positions.png)
 
 | Level | `start`, `end` | Width | Re-based `p` used for the children |
 | --- | --- | --- | --- |

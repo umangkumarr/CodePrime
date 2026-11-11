@@ -64,7 +64,7 @@ Recounting each window from scratch costs $O(N \cdot B)$. But two neighbouring w
 
 Example 1 with `B = 3`. Blue cells form the current window, and `freq` lists the counts inside it:
 
-![Sliding a window of size 3 over [1,2,1,3,4,3]](/img/codes/distinct-numbers-in-window/window.gif)
+![Sliding a window of size 3 over [1,2,1,3,4,3]](/img/codes/distinct-numbers-in-window/window/01.webp)
 
 ### Complexity
 

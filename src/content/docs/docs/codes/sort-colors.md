@@ -69,7 +69,7 @@ Look at `nums[mid]` and move it into the band it belongs to. The unknown region 
 
 Green cells are final, blue is the element being examined:
 
-![Dutch national flag partition on [2,0,2,1,1,0]](/img/codes/sort-colors/dutch-flag.gif)
+![Dutch national flag partition on [2,0,2,1,1,0]](/img/codes/sort-colors/dutch-flag/01.webp)
 
 ### Complexity
 

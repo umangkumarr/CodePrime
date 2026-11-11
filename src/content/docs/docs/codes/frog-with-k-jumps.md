@@ -103,7 +103,7 @@ With $K = 2$ this is the classic "Frog 1" problem; here the window of predecesso
 
 Example 1 (`K = 3`, heights `10 30 40 50 20`). Blue is the stone being filled, orange its window of possible predecessors, and green the predecessor that gives the minimum:
 
-![DP for Frog with K jumps on heights 10 30 40 50 20 with K = 3](/img/codes/frog-with-k-jumps/frog-dp.gif)
+![DP for Frog with K jumps on heights 10 30 40 50 20 with K = 3](/img/codes/frog-with-k-jumps/frog-dp/01.webp)
 
 ### Complexity
 

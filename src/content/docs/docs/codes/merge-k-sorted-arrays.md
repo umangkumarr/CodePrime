@@ -59,7 +59,7 @@ This is the merge step of merge sort generalised from 2 to `K` inputs.
 
 Example 2, one row per array. Orange cells are in the heap, blue is the element just popped, green is already in the output:
 
-![K-way merge with a min-heap on Example 2](/img/codes/merge-k-sorted-arrays/kway.gif)
+![K-way merge with a min-heap on Example 2](/img/codes/merge-k-sorted-arrays/kway/01.webp)
 
 ### Complexity
 

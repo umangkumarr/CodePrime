@@ -69,7 +69,7 @@ Invariant: after each step, `dummy.next … tail` is a sorted list containing ex
 
 Orange cells are the two heads being compared, grey cells have already been spliced out, and in the `out` row (the list hanging off `dummy`) blue marks `tail`:
 
-![Merging [1,2,4] and [1,3,4] with a tail pointer](/img/codes/merge-two-sorted-lists/merge.gif)
+![Merging [1,2,4] and [1,3,4] with a tail pointer](/img/codes/merge-two-sorted-lists/merge/01.webp)
 
 ### Complexity
 

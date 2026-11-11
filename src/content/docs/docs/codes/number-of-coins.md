@@ -77,7 +77,7 @@ where `dp[x]` is the fewest coins summing to exactly `x`. Because every `dp[x - 
 
 The table for Example 2 after each coin is processed (green cells changed in that round):
 
-![dp table for coins [9,6,5,1] and sum 19, filled coin by coin](/img/codes/number-of-coins/dp.gif)
+![dp table for coins [9,6,5,1] and sum 19, filled coin by coin](/img/codes/number-of-coins/dp/01.webp)
 
 ### Complexity
 

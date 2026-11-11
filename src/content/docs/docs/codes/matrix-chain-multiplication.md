@@ -72,7 +72,7 @@ Every `dp[i][j]` depends only on shorter chains, so filling the table by increas
 
 The table for Example 2 (`arr = [1, 2, 3, 4, 3]`, matrices `M1..M4`), filled diagonal by diagonal. Row `i`, column `j` holds `dp[i][j]`; blue is the cell being computed, orange are the two sub-results of its best split:
 
-![Filling the matrix chain DP table for [1,2,3,4,3]](/img/codes/matrix-chain-multiplication/dp.gif)
+![Filling the matrix chain DP table for [1,2,3,4,3]](/img/codes/matrix-chain-multiplication/dp/01.webp)
 
 ### Complexity
 

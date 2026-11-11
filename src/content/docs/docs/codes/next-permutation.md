@@ -75,7 +75,7 @@ If no pivot exists, the whole array is non-increasing — it is the last permuta
 
 On `[1,3,5,4,2]` (not an official example, but it shows every step). Orange is the non-increasing suffix, blue the pivot, purple its swap partner:
 
-![Next permutation of [1,3,5,4,2]](/img/codes/next-permutation/steps.gif)
+![Next permutation of [1,3,5,4,2]](/img/codes/next-permutation/steps/01.webp)
 
 ### Complexity
 
