@@ -38,7 +38,6 @@ let lastLabel = '';
 
 const pointers = new Map<number, { x: number; y: number }>();
 let pinchDistance = 0;
-let dragged = false;
 
 function button(label: string, text: string, onClick: () => void): HTMLButtonElement {
 	const b = document.createElement('button');
@@ -79,13 +78,20 @@ function build(): HTMLDialogElement {
 	openLink.rel = 'noopener noreferrer';
 	openLink.textContent = 'Open image';
 
+	// Mouse and touch close on press, not on release, like native windows: a click only fires when the
+	// button comes back up, which made closing feel ~100 ms late. Keyboard activation still uses click.
+	const closeButton = button('Close', '✕', () => d.close());
+	closeButton.addEventListener('pointerdown', (e) => {
+		if (e.button === 0) closeOnPress(e);
+	});
+
 	controls.append(
 		button('Zoom out', '−', () => zoomBy(1 / STEP)),
 		zoomLabel,
 		button('Zoom in', '+', () => zoomBy(STEP)),
 		button('Fit to window', 'Fit', fit),
 		openLink,
-		button('Close', '✕', () => d.close()),
+		closeButton,
 	);
 	bar.append(titleEl, hint, controls);
 
@@ -113,9 +119,9 @@ function build(): HTMLDialogElement {
 		else zoomAt(fitScale * 2.5, e.clientX - stageLeft, e.clientY - stageTop);
 	});
 	d.addEventListener('keydown', onKey);
-	// A click on the dim area outside the panel closes it.
-	d.addEventListener('click', (e) => {
-		if (e.target === d) d.close();
+	// Pressing on the dim area outside the panel closes it (the backdrop belongs to the dialog element).
+	d.addEventListener('pointerdown', (e) => {
+		if (e.target === d && e.button === 0) closeOnPress(e);
 	});
 	d.addEventListener('close', () => {
 		cancelAnimationFrame(frame);
@@ -134,6 +140,18 @@ function build(): HTMLDialogElement {
 		}
 	}).observe(stage);
 	return d;
+}
+
+/** Close now, and swallow the click that the release would otherwise deliver to the page underneath. */
+function closeOnPress(e: PointerEvent): void {
+	e.preventDefault();
+	const swallow = (c: MouseEvent) => {
+		c.preventDefault();
+		c.stopPropagation();
+	};
+	document.addEventListener('click', swallow, { capture: true, once: true });
+	setTimeout(() => document.removeEventListener('click', swallow, { capture: true }), 600);
+	dialog?.close();
 }
 
 function measure(): void {
@@ -201,7 +219,6 @@ function onPointerDown(e: PointerEvent): void {
 	if (e.button !== 0) return;
 	stage.setPointerCapture(e.pointerId);
 	pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-	dragged = false;
 	if (pointers.size === 2) {
 		const [a, b] = [...pointers.values()];
 		pinchDistance = Math.hypot(a.x - b.x, a.y - b.y);
@@ -225,7 +242,6 @@ function onPointerMove(e: PointerEvent): void {
 	}
 	x += now.x - prev.x;
 	y += now.y - prev.y;
-	if (now.x !== prev.x || now.y !== prev.y) dragged = true;
 	clamp();
 	schedule();
 }
@@ -297,17 +313,5 @@ document.addEventListener('click', (e) => {
 	e.preventDefault();
 	open(link, img);
 });
-
-// Ignore the click that ends a drag, so releasing over the backdrop does not close the viewer.
-document.addEventListener(
-	'click',
-	(e) => {
-		if (dragged && dialog?.open && e.target === dialog) {
-			e.stopImmediatePropagation();
-			dragged = false;
-		}
-	},
-	true,
-);
 
 export {};
