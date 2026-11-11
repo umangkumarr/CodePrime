@@ -75,7 +75,7 @@ Ties go to the arrival (`<=`): the statement says a platform cannot be used for 
 
 Example 1 after sorting. The top row is `arr`, the bottom row is `dep`; blue marks the next arrival and orange the next departure, grey events have been processed:
 
-![Two-pointer sweep over sorted arrivals and departures](/img/codes/minimum-platforms/sweep.gif)
+![Two-pointer sweep over sorted arrivals and departures](/img/codes/minimum-platforms/sweep/01.webp)
 
 ### Complexity
 

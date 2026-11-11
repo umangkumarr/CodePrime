@@ -79,7 +79,7 @@ Since every job in the prefix ends before job `i` ends, `j < i`, so `dp[j]` is c
 
 Example 2 sorted by end time is `[1,3] 20`, `[2,5] 20`, `[4,6] 70`, `[6,9] 60`, `[3,10] 100`. Orange marks the prefix `dp[j]` that job `i` can extend:
 
-![DP over jobs sorted by end time for Example 2](/img/codes/maximum-profit-in-job-scheduling/dp.gif)
+![DP over jobs sorted by end time for Example 2](/img/codes/maximum-profit-in-job-scheduling/dp/01.webp)
 
 ### Complexity
 

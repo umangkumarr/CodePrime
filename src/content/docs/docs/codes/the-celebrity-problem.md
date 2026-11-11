@@ -87,7 +87,7 @@ Verification can reuse what the elimination already proved. The final `candidate
 
 Five people, where everyone knows person `2` and person `2` knows no one. Blue is the person compared with the current candidate (orange); grey people have been eliminated:
 
-![Eliminating non-celebrities with one knows() call each](/img/codes/the-celebrity-problem/elimination.gif)
+![Eliminating non-celebrities with one knows() call each](/img/codes/the-celebrity-problem/elimination/01.webp)
 
 ### Complexity
 

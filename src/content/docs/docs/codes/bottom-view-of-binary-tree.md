@@ -70,20 +70,7 @@ Columns are contiguous: every node's `hd` differs from its parent's by exactly o
 
 Example 2 with each node's `hd`. Green nodes are the last ones written into their column. Column `0` holds `20`, `3` and `4`; `3` and `4` are both at depth 2, and `4` comes later in level order, so it wins. Likewise `28` beats `14` in column `1`:
 
-```mermaid
-flowchart TD
-    A["20<br/>hd 0"] --> B["8<br/>hd -1"]
-    A --> C["22<br/>hd 1"]
-    B --> D["5<br/>hd -2"]
-    B --> E["3<br/>hd 0"]
-    C --> F["4<br/>hd 0"]
-    C --> G["25<br/>hd 2"]
-    E --> H["10<br/>hd -1"]
-    E --> I["14<br/>hd 1"]
-    G --> J["28<br/>hd 1"]
-    classDef seen fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class D,H,F,J,G seen
-```
+[![Example 2 tree with each node's horizontal distance; 5, 10, 4, 28 and 25 form the bottom view](/img/codes/bottom-view-of-binary-tree/bottom-view-tree.png)](/img/codes/bottom-view-of-binary-tree/bottom-view-tree.png)
 
 ### Complexity
 

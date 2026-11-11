@@ -85,7 +85,7 @@ Only one matrix is needed. During round `k` the entries in row `k` and column `k
 
 Example 2. Orange is row and column `k`, which the round reads; green marks cells that improved:
 
-![Floyd-Warshall rounds on the 3 x 3 example](/img/codes/implementing-floyd-warshall/floyd-warshall.gif)
+![Floyd-Warshall rounds on the 3 x 3 example](/img/codes/implementing-floyd-warshall/floyd-warshall/01.webp)
 
 ### Complexity
 

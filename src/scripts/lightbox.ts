@@ -1,5 +1,6 @@
 /**
- * Diagram viewer: a linked diagram (`[![alt](/img/system-design/…png)](same png)`) opens in a floating glass
+ * Diagram viewer: a linked diagram (`[![alt](/img/system-design/…png)](same png)`, or an Archify PNG under
+ * /img/codes/) opens in a floating glass
  * dialog where the reader can zoom (wheel, pinch, buttons, keys) and pan (drag, arrow keys).
  * Without JavaScript the link simply opens the image.
  *
@@ -8,7 +9,8 @@
  * is never locked (locking it re-lays out and repaints every glass surface on open and close).
  */
 
-const LINK_SELECTOR = '.sl-markdown-content a:has(> img[src*="/img/system-design/"])';
+const LINK_SELECTOR =
+	'.sl-markdown-content a:is(:has(> img[src*="/img/system-design/"]), :has(> img[src*="/img/codes/"][src$=".png"]))';
 const MIN_FACTOR = 0.5; // of the fitted scale
 const MAX_SCALE = 2; // of the image's natural pixels: beyond this a PNG turns soft
 const STEP = 1.25;

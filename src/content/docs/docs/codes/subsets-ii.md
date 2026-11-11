@@ -59,20 +59,7 @@ Using the second `2` *after* the first one (deeper in the tree, `i == start`) is
 
 Recursion tree for `nums = [1,2,2]` (after sorting). The red branch is skipped because the same value `2` was already chosen at that level:
 
-```mermaid
-flowchart TD
-    E["[ ]"] -->|+1| A["[1]"]
-    E -->|+2 first copy| B["[2]"]
-    E -.->|+2 second copy: skip| X["duplicate [2]"]
-    A -->|+2| AB["[1,2]"]
-    A -.->|+2 second copy: skip| Y["duplicate [1,2]"]
-    AB -->|+2| ABB["[1,2,2]"]
-    B -->|+2| BB["[2,2]"]
-    classDef keep fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef skip fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class E,A,B,AB,ABB,BB keep
-    class X,Y skip
-```
+[![Recursion tree for nums = [1,2,2]: six kept subsets [ ], [1], [2], [1,2], [2,2] and [1,2,2]; the second copy of 2 is skipped at the root and under [1], avoiding duplicate [2] and [1,2]](/img/codes/subsets-ii/recursion-tree.png)](/img/codes/subsets-ii/recursion-tree.png)
 
 The six green nodes are exactly the six answers.
 

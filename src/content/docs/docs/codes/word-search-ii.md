@@ -55,17 +55,7 @@ So search for **all words at once**. Put them in a **trie**; then a DFS from a c
 
 For Example 1 the trie is:
 
-```mermaid
-flowchart TD
-    root(( )) --> o((o)) --> oa((a)) --> oat((t)) --> oath(("h ✓ oath"))
-    root --> p((p)) --> pe((e)) --> pea(("a · pea"))
-    root --> e((e)) --> ea((a)) --> eat(("t ✓ eat"))
-    root --> r((r)) --> ra((a)) --> rai((i)) --> rain(("n · rain"))
-    classDef found fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef miss fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class oath,eat found
-    class pea,rain miss
-```
+[![Trie of oath, pea, eat and rain; oath and eat are found on the board, pea and rain are not](/img/codes/word-search-ii/trie.png)](/img/codes/word-search-ii/trie.png)
 
 The board has no `p`, so the whole `p` branch is never entered; and a DFS starting at the `o` in the corner follows `o → a → t → h` because each step is a child in the trie.
 

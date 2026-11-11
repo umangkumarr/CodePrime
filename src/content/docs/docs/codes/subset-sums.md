@@ -62,17 +62,7 @@ The trick that makes this optimal is to carry the **running sum** down the tree 
 
 The recursion tree for `arr = [2, 3]`; each node shows `(i, sum)` and each leaf is one subset sum:
 
-```mermaid
-flowchart TD
-    A["(0, 0)"] -->|take 2| B["(1, 2)"]
-    A -->|skip 2| C["(1, 0)"]
-    B -->|take 3| D["(2, 5)"]
-    B -->|skip 3| E["(2, 2)"]
-    C -->|take 3| F["(2, 3)"]
-    C -->|skip 3| G["(2, 0)"]
-    classDef leaf fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class D,E,F,G leaf
-```
+[![Recursion tree for arr = [2, 3] with (i, sum) nodes; take or skip each element, leaves give 5, 2, 3, 0](/img/codes/subset-sums/recursion-tree.png)](/img/codes/subset-sums/recursion-tree.png)
 
 The leaves, left to right, give `[5, 2, 3, 0]`; any order is accepted.
 

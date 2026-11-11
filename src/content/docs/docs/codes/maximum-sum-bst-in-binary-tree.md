@@ -78,23 +78,7 @@ An empty child is a BST with `min = +inf` and `max = -inf`, so it never violates
 
 Example 1, with the `Info` each call returns (`sum` only shown for BST subtrees). Green subtrees are BSTs; the subtree rooted at `3` has the largest sum, `20`:
 
-```mermaid
-flowchart TD
-    A["1 · not BST"] --> B["4 · not BST (right child 4 is not > 4)"]
-    A --> C["3 · BST, sum 20"]
-    B --> D["2 · BST, sum 2"]
-    B --> E["4 · BST, sum 4"]
-    C --> F["2 · BST, sum 2"]
-    C --> G["5 · BST, sum 15"]
-    G --> H["4 · BST, sum 4"]
-    G --> I["6 · BST, sum 6"]
-    classDef bst fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef no fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    classDef win fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class D,E,F,G,H,I bst
-    class A,B no
-    class C win
-```
+[![Example 1 tree with each subtree marked BST or not BST; the subtree rooted at 3 has the largest sum, 20](/img/codes/maximum-sum-bst-in-binary-tree/subtree-info.png)](/img/codes/maximum-sum-bst-in-binary-tree/subtree-info.png)
 
 The node `4` fails because its right child has the same key (`4 < R.mn` is false). The root `1` then fails because its left subtree is not a BST, even though `1 < 2` holds on the right.
 

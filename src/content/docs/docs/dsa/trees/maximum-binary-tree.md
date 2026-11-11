@@ -26,19 +26,7 @@ Input:  nums = [3,2,1]
 Output: [3,null,2,null,1]
 ```
 
-```mermaid
-flowchart TD
-  n6((6)) --> n3((3))
-  n6 --> n5((5))
-  n3 --> e1[ ]
-  n3 --> n2((2))
-  n2 --> e2[ ]
-  n2 --> n1((1))
-  n5 --> n0((0))
-  n5 --> e3[ ]
-  classDef empty fill:none,stroke:none,color:transparent
-  class e1,e2,e3 empty
-```
+[![Maximum binary tree of 3, 2, 1, 6, 0, 5: root 6, left subtree 3 then 2 then 1 down the right, right subtree 5 with left child 0](/img/codes/maximum-binary-tree/tree.png)](/img/codes/maximum-binary-tree/tree.png)
 
 **Constraints:**
 

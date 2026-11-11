@@ -49,17 +49,7 @@ Explanation: The root node's value is 5 but its right child's value is 4.
 
 Comparing each node only with its own children is **not** enough. In the tree below every parent–child pair looks fine, yet `3` sits in the right subtree of `5` and is smaller than `5`:
 
-```mermaid
-flowchart TD
-    n5(("5<br/>(-∞, +∞)")) --> n4(("4<br/>(-∞, 5)"))
-    n5 --> n6(("6<br/>(5, +∞)"))
-    n6 --> n3(("3<br/>(5, 6)"))
-    n6 --> n7(("7<br/>(6, +∞)"))
-    classDef ok fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class n5,n4,n6,n7 ok
-    class n3 bad
-```
+[![Tree 5, 4, 6, 3, 7 with each node's allowed range; 3 lies outside its range (5, 6)](/img/codes/validate-binary-search-tree/ranges.png)](/img/codes/validate-binary-search-tree/ranges.png)
 
 The fix is to pass **down** the constraints of all ancestors. Each node gets an open interval `(lo, hi)` its value must lie in. The root may be anything. Going **left** from a node with value `v` keeps `lo` and sets `hi = v` (everything there must be smaller than `v`, and still satisfy the older bounds); going **right** sets `lo = v`. Each interval is the intersection of all the ancestor constraints on that path, so a tree is a BST exactly when every node lies inside its interval. In the picture, `3` must lie in `(5, 6)` and fails.
 

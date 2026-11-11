@@ -51,20 +51,7 @@ Checking "is `s[start..j]` a palindrome?" by reversing the substring costs $O(n)
 
 The recursion tree for `s = "aab"`. Each edge is a palindromic piece cut from the front; red leaves are prefixes that are not palindromes (never explored), green leaves are complete partitions:
 
-```mermaid
-flowchart TD
-    r["dfs(0): 'aab'"] -->|"a"| x1["dfs(1): 'ab'"]
-    r -->|"aa"| x2["dfs(2): 'b'"]
-    r -.->|"aab"| no1["not a palindrome"]
-    x1 -->|"a"| y1["dfs(2): 'b'"]
-    x1 -.->|"ab"| no2["not a palindrome"]
-    y1 -->|"b"| ok1["[a, a, b]"]
-    x2 -->|"b"| ok2["[aa, b]"]
-    classDef good fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef bad fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class ok1,ok2 good
-    class no1,no2 bad
-```
+[![Recursion tree for aab: palindromic cuts lead to [a, a, b] and [aa, b]; ab and aab are pruned](/img/codes/palindrome-partitioning/recursion-tree.png)](/img/codes/palindrome-partitioning/recursion-tree.png)
 
 ### Complexity
 

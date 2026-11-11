@@ -68,21 +68,7 @@ BFS is also iterative, so a degenerate tree with $10^4$ levels needs no deep rec
 
 Example 1. The numbers in brackets are the BFS order in which each slot is written and read; `#` slots are the null children:
 
-```mermaid
-flowchart TD
-    A["1 (1)"] --> B["2 (2)"]
-    A --> C["3 (3)"]
-    B --> N1["# (4)"]
-    B --> N2["# (5)"]
-    C --> D["4 (6)"]
-    C --> E["5 (7)"]
-    D --> N3["# (8)"]
-    D --> N4["# (9)"]
-    E --> N5["# (10)"]
-    E --> N6["# (11)"]
-    classDef nil fill:#e9eaed,stroke:#b4b8bf,color:#5b6270
-    class N1,N2,N3,N4,N5,N6 nil
-```
+[![Example 1 tree with the BFS slot order of every value and null child](/img/codes/serialize-and-deserialize-binary-tree/bfs-slots.png)](/img/codes/serialize-and-deserialize-binary-tree/bfs-slots.png)
 
 `serialize` produces `"1,2,3,#,#,4,5,#,#,#,#,"`. During `deserialize`, node `1` takes tokens `2` and `3`, node `2` takes `#,#`, node `3` takes `4,5`, and nodes `4` and `5` each take `#,#`.
 

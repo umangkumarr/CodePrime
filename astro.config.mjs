@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 
 import rehypeProblemLayout from './src/plugins/rehype-problem-layout.mjs';
 import rehypeBaseLinks from './src/plugins/rehype-base-links.mjs';
+import rehypeStepCarousel from './src/plugins/rehype-step-carousel.mjs';
 import remarkCodeTabs from './src/plugins/remark-code-tabs.mjs';
 import {withGroupOverviews} from './src/lib/tracks.mjs';
 import {execFileSync} from 'node:child_process';
@@ -62,7 +63,7 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath, remarkCodeTabs],
-      rehypePlugins: [rehypeKatex, rehypeProblemLayout, [rehypeBaseLinks, {base: BASE}]],
+      rehypePlugins: [rehypeKatex, rehypeProblemLayout, rehypeStepCarousel, [rehypeBaseLinks, {base: BASE}]],
     }),
   },
 

@@ -99,7 +99,7 @@ The only time the array cannot take another element is when `count == cap`. Then
 
 A queue with 4 slots. Blue is `head` (the front); green cells hold queued elements; grey cells are free:
 
-![Circular array queue: enqueue, dequeue, wrap-around and growth](/img/codes/implement-a-queue-using-array/circular-queue.gif)
+![Circular array queue: enqueue, dequeue, wrap-around and growth](/img/codes/implement-a-queue-using-array/circular-queue/01.webp)
 
 ### Complexity
 

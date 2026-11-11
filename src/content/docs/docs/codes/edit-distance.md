@@ -75,7 +75,7 @@ Row `i` only reads row `i - 1` and the cell to its left, so we keep a single arr
 
 The full table for Example 1 (`word1` down the side, `word2` across the top), filled row by row. The rolling array holds just the latest row:
 
-![Edit distance table for horse and ros](/img/codes/edit-distance/table.gif)
+![Edit distance table for horse and ros](/img/codes/edit-distance/table/01.webp)
 
 ### Complexity
 

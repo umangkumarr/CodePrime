@@ -82,7 +82,7 @@ For a new value `A[i]`: pop every candidate `>= A[i]` (they are not smaller than
 
 Example 1. The blue cell is `A[i]`; the `stack` line lists the candidates from bottom to top, and `G` the answers so far:
 
-![Monotonic stack on [4, 5, 2, 10, 8]](/img/codes/nearest-smaller-element/stack.gif)
+![Monotonic stack on [4, 5, 2, 10, 8]](/img/codes/nearest-smaller-element/stack/01.webp)
 
 ### Complexity
 

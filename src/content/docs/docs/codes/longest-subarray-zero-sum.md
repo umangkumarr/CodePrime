@@ -67,7 +67,7 @@ Checking every subarray directly would be $O(n^2)$; with the map, each index is 
 
 Blue is the current index; green is the zero-sum subarray found, from just after the first occurrence of the same prefix sum up to `i`:
 
-![Prefix sums with first-occurrence map on Example 1](/img/codes/longest-subarray-zero-sum/prefix.gif)
+![Prefix sums with first-occurrence map on Example 1](/img/codes/longest-subarray-zero-sum/prefix/01.webp)
 
 ### Complexity
 

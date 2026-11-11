@@ -67,20 +67,7 @@ That gives a local rewiring that keeps pre-order intact: hang `curr->right` off 
 
 Example 1. At `curr = 1`, the left subtree is rooted at `2` and its rightmost node is `4`. The right subtree `5 → 6` is hung off `4`, and the subtree at `2` moves to `1`'s right (dashed edges are the new links):
 
-```mermaid
-flowchart TD
-    N1["1 (curr)"] -. right .-> N2["2"]
-    N2 -- left --> N3["3"]
-    N2 -- right --> N4["4 (pre)"]
-    N4 -. right .-> N5["5"]
-    N5 -- right --> N6["6"]
-    classDef cur fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef pre fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    classDef plain fill:#f4f5f7,stroke:#c5cad3,color:#1f2430
-    class N1 cur
-    class N4 pre
-    class N2,N3,N5,N6 plain
-```
+[![Example 1 at curr = 1: new right link from 1 to 2; 2 keeps left child 3 and right child 4, which is pre; new right link from 4 to 5; 5 links right to 6](/img/codes/flatten-binary-tree-to-linked-list/first-splice.png)](/img/codes/flatten-binary-tree-to-linked-list/first-splice.png)
 
 Next `curr = 2`: its left child `3` has no right child, so `pre = 3`; `3->right = 4`, `2->right = 3`. The remaining nodes have no left children, and the list reads `1 → 2 → 3 → 4 → 5 → 6`.
 

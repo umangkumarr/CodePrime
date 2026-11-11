@@ -98,21 +98,7 @@ The crucial detail is the order: the copy is registered in `copies` **before** r
 
 The DFS on Example 1. Blue calls create a copy; grey calls find the copy already in the map and return at once:
 
-```mermaid
-flowchart TD
-    c1["clone(1): create 1'"] --> c2["clone(2): create 2'"]
-    c1 --> h4["clone(4): already copied"]
-    c2 --> h1["clone(1): already copied"]
-    c2 --> c3["clone(3): create 3'"]
-    c3 --> h2["clone(2): already copied"]
-    c3 --> c4["clone(4): create 4'"]
-    c4 --> h1b["clone(1): already copied"]
-    c4 --> h3["clone(3): already copied"]
-    classDef made fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    classDef hit fill:#e9eaed,stroke:#b4b8bf,color:#1f2430
-    class c1,c2,c3,c4 made
-    class h1,h2,h1b,h3,h4 hit
-```
+[![DFS call tree for clone(1) on Example 1: clone(1), clone(2), clone(3) and clone(4) create copies; repeat calls find the copy already made](/img/codes/clone-graph/dfs-calls.png)](/img/codes/clone-graph/dfs-calls.png)
 
 Each copy collects the results of its children in the same order as the original list: `1' → [2', 4']`, `2' → [1', 3']`, `3' → [2', 4']`, `4' → [1', 3']`.
 

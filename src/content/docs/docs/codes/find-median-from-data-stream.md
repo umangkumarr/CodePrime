@@ -75,7 +75,7 @@ Maintain two invariants: every value in `lo` is `<=` every value in `hi`, and `l
 
 The stream `5, 15, 1, 3, 8, 7`, drawn as the sorted list of numbers seen so far. Blue cells are in `lo`, orange cells in `hi`; the heap tops are the two cells at the boundary:
 
-![Two heaps splitting the stream 5, 15, 1, 3, 8, 7](/img/codes/find-median-from-data-stream/two-heaps.gif)
+![Two heaps splitting the stream 5, 15, 1, 3, 8, 7](/img/codes/find-median-from-data-stream/two-heaps/01.webp)
 
 ### Complexity
 

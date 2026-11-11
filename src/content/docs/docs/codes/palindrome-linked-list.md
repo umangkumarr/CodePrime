@@ -61,16 +61,7 @@ To find where the second half starts, use **slow and fast pointers**: `fast` mov
 
 For `head = [1,2,3,2,1]`, after step 2 the list looks like this (`slow` stops at the middle node `3`):
 
-```mermaid
-flowchart LR
-    a1["1 (head)"] --> a2["2"] --> a3["3 (slow)"]
-    b1["1 (second)"] --> b2["2"] --> n["null"]
-    a3 -. "old link from slow" .-> b2
-    classDef first fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef second fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class a1,a2,a3 first
-    class b1,b2 second
-```
+[![First half 1 (head), 2, 3 (slow); reversed second half 1 (second), 2, null; slow's old link still points to the second-half 2](/img/codes/palindrome-linked-list/split-halves.png)](/img/codes/palindrome-linked-list/split-halves.png)
 
 The comparison checks `1 = 1` and `2 = 2`, then `q` reaches null and the loop stops; the middle node `3` is never compared, which is correct for an odd length. Because the second half is never longer than the first, `p` never runs off the end.
 

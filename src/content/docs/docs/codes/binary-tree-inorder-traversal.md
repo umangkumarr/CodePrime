@@ -83,22 +83,7 @@ Inorder means: the whole left subtree, then the node, then the whole right subtr
 
 In Example 2, when `cur` is the root `1` for the first time, its predecessor is `7` (the rightmost node of the subtree rooted at `2`). The dashed edge is the temporary thread that brings the walk back to `1` right after `7` is output:
 
-```mermaid
-flowchart TD
-    N1((1)) --> N2((2))
-    N1 --> N3((3))
-    N2 --> N4((4))
-    N2 --> N5((5))
-    N5 --> N6((6))
-    N5 --> N7((7))
-    N3 --> N8((8))
-    N8 --> N9((9))
-    N7 -. "thread: 7.right = 1" .-> N1
-    classDef cur fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef pred fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    class N1 cur
-    class N7 pred
-```
+[![Binary tree of Example 2 with root 1 as cur, its predecessor 7, and a dashed thread from 7 back to 1](/img/codes/binary-tree-inorder-traversal/morris-thread.png)](/img/codes/binary-tree-inorder-traversal/morris-thread.png)
 
 **Complexity:** $O(n)$ time — finding predecessors walks each edge of the tree at most a constant number of times (once to create a thread and once to remove it). $O(1)$ extra space — only two pointers; the output list is not counted.
 

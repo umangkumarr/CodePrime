@@ -70,7 +70,7 @@ Cells are sunk **when pushed**, not when popped, so no cell enters the queue twi
 
 Example 2. Blue is the island currently being flood-filled, green is land already sunk:
 
-![Flood fill counting the three islands of Example 2](/img/codes/number-of-islands/flood-fill.gif)
+![Flood fill counting the three islands of Example 2](/img/codes/number-of-islands/flood-fill/01.webp)
 
 ### Complexity
 

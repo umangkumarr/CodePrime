@@ -69,7 +69,7 @@ Building `lps` is the same procedure as the search, run with the needle against 
 
 The official examples never need a fall-back, so this trace uses `haystack = "abababcab"`, `needle = "ababc"` (`lps = [0,0,1,2,0]`). Green cells matched, red is a mismatch, and the second row shows where the needle is aligned:
 
-![KMP search for ababc in abababcab](/img/codes/implement-strstr/kmp-search.gif)
+![KMP search for ababc in abababcab](/img/codes/implement-strstr/kmp-search/01.webp)
 
 After the mismatch at `i = 4`, the matched `"abab"` ends with `"ab"`, which is also how the needle starts, so the needle slides forward by two and keeps those two characters matched (`j = lps[3] = 2`) instead of starting over.
 

@@ -48,15 +48,7 @@ Rotating right by one moves the last node to the front. Doing that `k` times is 
 
 If we link the old tail to the old head, the list becomes a **ring** and every rotation of it is the same ring cut at a different place. So: close the ring, walk to the new tail, and cut after it.
 
-```mermaid
-flowchart LR
-    n1["1"] --> n2["2"] --> n3["3 (new tail)"] -. cut .-> n4["4 (new head)"] --> n5["5 (old tail)"]
-    n5 -- "tail->next = head" --> n1
-    classDef cut fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    classDef head fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class n3 cut
-    class n4 head
-```
+[![List 1 to 5 closed into a ring by linking 5 back to 1, then cut after 3 so 4 becomes the new head](/img/codes/rotate-list/ring-cut.png)](/img/codes/rotate-list/ring-cut.png)
 
 *Example 1: `n = 5`, `k = 2`. The ring is cut after node `3`, which is `n - k - 1 = 2` steps from the old head.*
 

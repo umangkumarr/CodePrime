@@ -77,19 +77,7 @@ When a subtree does not contain `B`, the search returns `false` and the node is 
 
 Example 1: the search enters `1`, `2`, `4` (dead end, popped), then `5` = `B`. Green nodes are the returned path, red the dead end that was backtracked; `3` and its subtree are never visited:
 
-```mermaid
-flowchart TD
-    n1((1)) --> n2((2))
-    n1 --> n3((3))
-    n2 --> n4((4))
-    n2 --> n5((5))
-    n3 --> n6((6))
-    n3 --> n7((7))
-    classDef path fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef dead fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class n1,n2,n5 path
-    class n4 dead
-```
+[![Search for 5: path 1, 2, 5 is returned, 4 is a dead end, and 3, 6, 7 are never visited](/img/codes/path-to-given-node/search-path.png)](/img/codes/path-to-given-node/search-path.png)
 
 ### Complexity
 

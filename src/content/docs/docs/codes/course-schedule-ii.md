@@ -69,17 +69,7 @@ Kahn's algorithm builds the order greedily. A course whose **in-degree** (number
 
 Example 2. In-degrees start at `0:0, 1:1, 2:1, 3:2`. Course `0` is taken first and unlocks `1` and `2`; course `3` only becomes available after **both** `1` and `2` are taken.
 
-```mermaid
-flowchart LR
-    C0(("0<br/>in=0")) --> C1(("1<br/>in=1"))
-    C0 --> C2(("2<br/>in=1"))
-    C1 --> C3(("3<br/>in=2"))
-    C2 --> C3
-    classDef start fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef wait fill:#f4f5f7,stroke:#c5cad3,color:#1f2430
-    class C0 start
-    class C1,C2,C3 wait
-```
+[![Example 2 prerequisite graph: course 0 (in-degree 0) points to courses 1 and 2 (in-degree 1), which both point to course 3 (in-degree 2)](/img/codes/course-schedule-ii/prerequisites.png)](/img/codes/course-schedule-ii/prerequisites.png)
 
 The code produces `[0, 1, 2, 3]`, which is one of the accepted answers.
 

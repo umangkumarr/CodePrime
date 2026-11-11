@@ -77,7 +77,7 @@ Use two pointers. The write pointer `k` marks the end of the compacted prefix: `
 
 Example 2. Green cells are the compacted unique prefix `nums[0..k-1]`, blue is the element being read:
 
-![Read and write pointers compacting [0,0,1,1,1,2,2,3,3,4]](/img/codes/remove-duplicates-from-sorted-array/two-pointers.gif)
+![Read and write pointers compacting [0,0,1,1,1,2,2,3,3,4]](/img/codes/remove-duplicates-from-sorted-array/two-pointers/01.webp)
 
 ### Complexity
 

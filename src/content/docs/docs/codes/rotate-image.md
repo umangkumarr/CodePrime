@@ -59,7 +59,7 @@ Both are made of plain swaps, so neither needs a second matrix. Intuitively: aft
 
 Example 2. Orange cells are swapped across the blue diagonal; green cells are final:
 
-![Transpose then reverse rows on the 4 x 4 example](/img/codes/rotate-image/transpose-reverse.gif)
+![Transpose then reverse rows on the 4 x 4 example](/img/codes/rotate-image/transpose-reverse/01.webp)
 
 ### Complexity
 

@@ -66,7 +66,7 @@ In words: if the best sum ending just before `i` is negative, it can only hurt, 
 
 **Walkthrough** on Example 1 (blue is the current element, green the subarray behind `best`):
 
-![Kadane's algorithm on [-2,1,-3,4,-1,2,1,-5,4]](/img/codes/maximum-subarray/kadane.gif)
+![Kadane's algorithm on [-2,1,-3,4,-1,2,1,-5,4]](/img/codes/maximum-subarray/kadane/01.webp)
 
 **Complexity**
 

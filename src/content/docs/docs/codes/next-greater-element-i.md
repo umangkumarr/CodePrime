@@ -69,7 +69,7 @@ When a new value `x` arrives, every waiting value smaller than `x` has just met 
 
 Example 1, scanning `nums2 = [1,3,4,2]`. Blue is the current value `x`; the `stack` line lists the values still waiting (bottom → top):
 
-![Monotonic stack computing next greater elements of [1,3,4,2]](/img/codes/next-greater-element-i/stack.gif)
+![Monotonic stack computing next greater elements of [1,3,4,2]](/img/codes/next-greater-element-i/stack/01.webp)
 
 Then the queries `4, 1, 2` look up `-1, 3, -1`.
 

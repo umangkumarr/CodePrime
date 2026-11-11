@@ -59,17 +59,7 @@ So the diameter is the maximum of `height(left) + height(right)` over all nodes.
 
 Example 1. Each node shows the height returned to its parent and the candidate `l + r`; the best candidate is at the root:
 
-```mermaid
-flowchart TD
-    N1["1<br/>h=3, l+r=2+1=3"] --> N2["2<br/>h=2, l+r=1+1=2"]
-    N1 --> N3["3<br/>h=1, l+r=0"]
-    N2 --> N4["4<br/>h=1, l+r=0"]
-    N2 --> N5["5<br/>h=1, l+r=0"]
-    classDef best fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef plain fill:#f4f5f7,stroke:#c5cad3,color:#1f2430
-    class N1 best
-    class N2,N3,N4,N5 plain
-```
+[![Example 1 tree with each node's height and l + r candidate; the best candidate is at the root](/img/codes/diameter-of-binary-tree/heights.png)](/img/codes/diameter-of-binary-tree/heights.png)
 
 The answer is `3` (for example the path `4 → 2 → 1 → 3`).
 

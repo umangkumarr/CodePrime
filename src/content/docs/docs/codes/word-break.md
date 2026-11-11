@@ -70,7 +70,7 @@ One more observation makes it fast: the last word is at most `maxLen` characters
 
 Green cells are prefixes that can be segmented; `j` marks where the last word starts:
 
-![Prefix DP on "leetcode": dp[4] and dp[8] become true](/img/codes/word-break/dp.gif)
+![Prefix DP on "leetcode": dp[4] and dp[8] become true](/img/codes/word-break/dp/01.webp)
 
 ### Complexity
 

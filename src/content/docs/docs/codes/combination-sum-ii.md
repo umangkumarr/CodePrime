@@ -72,29 +72,7 @@ Sort the array first and build each combination in non-decreasing order, choosin
 
 Example 2 sorted is `[1, 2, 2, 2, 5]`, `target = 5`. Each box is a call showing `path` and the remaining sum. Green calls record an answer; grey choices are skipped as duplicates at their depth; red choices are pruned because the value exceeds `remaining`:
 
-```mermaid
-flowchart TD
-    r["[] rem 5"] --> a["[1] rem 4"]
-    r --> b["[2] rem 3"]
-    r -.-> bs["2, 2: same value at this depth"]
-    r --> e["[5] rem 0"]
-    a --> a2["[1,2] rem 2"]
-    a -.-> as["2, 2: skipped"]
-    a -.-> ap["5 > 4: stop"]
-    a2 --> a22["[1,2,2] rem 0"]
-    a2 -.-> a2s["2: skipped"]
-    a2 -.-> a2p["5 > 2: stop"]
-    b --> b2["[2,2] rem 1"]
-    b -.-> bs2["2: skipped"]
-    b -.-> bp["5 > 3: stop"]
-    b2 -.-> b2p["2 > 1: stop"]
-    classDef ok fill:#dcf5e3,stroke:#2e9e57,color:#1f2430
-    classDef skip fill:#e9eaed,stroke:#b4b8bf,color:#1f2430
-    classDef cut fill:#fde0e0,stroke:#d64545,color:#1f2430
-    class a22,e ok
-    class bs,as,a2s,bs2 skip
-    class ap,a2p,bp,b2p cut
-```
+[![Backtracking tree for [1, 2, 2, 2, 5] with target 5: answers [1,2,2] and [5], duplicate choices skipped and values larger than the remaining sum pruned](/img/codes/combination-sum-ii/recursion-tree.png)](/img/codes/combination-sum-ii/recursion-tree.png)
 
 Only two leaves reach `rem 0`: `[1,2,2]` and `[5]`.
 

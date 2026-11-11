@@ -54,7 +54,7 @@ Every palindrome is symmetric around its centre, and there are only `2n - 1` pos
 
 Blue cells are the current palindrome around the centre, green is the best found so far:
 
-![Expanding around each centre of "babad"](/img/codes/longest-palindromic-substring/expand.gif)
+![Expanding around each centre of "babad"](/img/codes/longest-palindromic-substring/expand/01.webp)
 
 **Complexity**
 

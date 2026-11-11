@@ -61,7 +61,7 @@ If we process `i` and `j` from right to left, positions are filled from least si
 
 Example 2, `123 × 456`. The blue cell is `res[i + j + 1]` receiving the product, the orange cell `res[i + j]` receives the carry:
 
-![Digit products of 123 × 456 accumulating into the result array](/img/codes/multiply-strings/positions.gif)
+![Digit products of 123 × 456 accumulating into the result array](/img/codes/multiply-strings/positions/01.webp)
 
 ### Complexity
 

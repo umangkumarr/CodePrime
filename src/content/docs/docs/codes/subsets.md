@@ -53,18 +53,7 @@ Every node of this recursion tree (not just the leaves) is a distinct subset, so
 
 Recursion tree for `nums = [1,2,3]`; each node is the subset `cur` recorded when the call starts, and each edge appends one element:
 
-```mermaid
-flowchart TD
-    E["[ ]"] -->|+1| A["[1]"]
-    E -->|+2| B["[2]"]
-    E -->|+3| C["[3]"]
-    A -->|+2| AB["[1,2]"]
-    A -->|+3| AC["[1,3]"]
-    B -->|+3| BC["[2,3]"]
-    AB -->|+3| ABC["[1,2,3]"]
-    classDef sub fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    class E,A,B,C,AB,AC,BC,ABC sub
-```
+[![Recursion tree for [1, 2, 3]: each call records its subset and each child appends one larger element](/img/codes/subsets/recursion-tree.png)](/img/codes/subsets/recursion-tree.png)
 
 Pre-order (the order `ans` is filled): `[]`, `[1]`, `[1,2]`, `[1,2,3]`, `[1,3]`, `[2]`, `[2,3]`, `[3]`.
 

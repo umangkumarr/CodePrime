@@ -75,15 +75,7 @@ Merging two sorted lists is easy and linear (see [Merge Two Sorted Lists](/docs/
 
 Example 1 with `k = 3`:
 
-```mermaid
-flowchart LR
-    L0["lists[0]: 1→4→5"] --> M1["step 1: lists[0] = 1→1→3→4→4→5"]
-    L1["lists[1]: 1→3→4"] --> M1
-    M1 --> M2["step 2: lists[0] = 1→1→2→3→4→4→5→6"]
-    L2["lists[2]: 2→6"] --> M2
-    classDef done fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class M2 done
-```
+[![Pairwise merging on Example 1: step 1 merges lists[0] = 1 → 4 → 5 with lists[1] = 1 → 3 → 4; step 2 merges that result with lists[2] = 2 → 6 into 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6](/img/codes/merge-k-sorted-lists/merge-rounds.png)](/img/codes/merge-k-sorted-lists/merge-rounds.png)
 
 In round `step = 1` only the pair `(0, 1)` exists (`lists[2]` has no partner), and in round `step = 2` the pair `(0, 2)` is merged.
 

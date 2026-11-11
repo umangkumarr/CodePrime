@@ -70,7 +70,7 @@ Every `dp[i - c]` refers to a smaller amount, so filling the table from `0` upwa
 
 Example 1 (`coins = [1, 2, 5]`, `amount = 11`). Blue is the cell being filled, orange are the cells `i - coin` it reads:
 
-![DP table for coin change filling amounts 0 to 11 with coins 1, 2, 5](/img/codes/coin-change/dp-table.gif)
+![DP table for coin change filling amounts 0 to 11 with coins 1, 2, 5](/img/codes/coin-change/dp-table/01.webp)
 
 ### Complexity
 

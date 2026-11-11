@@ -66,15 +66,7 @@ When the range has even length there are two middle elements and either works. T
 
 Example 1. Each node shows the index range it was built from; its value is the (upper) middle element of that range:
 
-```mermaid
-flowchart TD
-    a["0 from [0..4]"] --> b["-3 from [0..1]"]
-    a --> c["9 from [3..4]"]
-    b --> d["-10 from [0..0]"]
-    c --> e["5 from [3..3]"]
-    classDef made fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    class a,b,c,d,e made
-```
+[![BST built from -10, -3, 0, 5, 9, each node labelled with the index range it was built from](/img/codes/convert-sorted-array-to-binary-search-tree/recursion-tree.png)](/img/codes/convert-sorted-array-to-binary-search-tree/recursion-tree.png)
 
 This is `[0,-3,9,-10,null,5]`, the expected output.
 

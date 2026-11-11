@@ -67,7 +67,7 @@ That same fact gives the negative-cycle test: if after $V - 1$ rounds some edge 
 
 Example 1, with the edges relaxed in input order. Because the edge `0 → 1` comes **last** in the list, each round only pushes correct distances one edge further — this is exactly why up to $V - 1$ rounds are needed:
 
-![Bellman-Ford distance table, one row per round](/img/codes/distance-from-the-source-bellman-ford-algorithm/rounds.gif)
+![Bellman-Ford distance table, one row per round](/img/codes/distance-from-the-source-bellman-ford-algorithm/rounds/01.webp)
 
 ### Complexity
 

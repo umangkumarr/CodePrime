@@ -70,18 +70,7 @@ Because the alphabet is `'a'..'z'`, each node holds a fixed array `next[26]`; fo
 
 The trie after the example's two insertions, `"apple"` then `"app"`. Green nodes have `isEnd = true`:
 
-```mermaid
-flowchart LR
-    root(("root")) -->|a| a(("a"))
-    a -->|p| ap(("ap"))
-    ap -->|p| app(("app"))
-    app -->|l| appl(("appl"))
-    appl -->|e| apple(("apple"))
-    classDef endNode fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef mid fill:#f4f5f7,stroke:#c5cad3,color:#1f2430
-    class app,apple endNode
-    class root,a,ap,appl mid
-```
+[![Trie chain root, a, ap, app, appl, apple with letter edges; app and apple are marked as word ends](/img/codes/implement-trie-prefix-tree/trie.png)](/img/codes/implement-trie-prefix-tree/trie.png)
 
 Before `insert("app")`, the `app` node already existed (it lies on the path of `"apple"`) but was not marked, so `search("app")` returned `false` while `startsWith("app")` returned `true`. Inserting `"app"` creates no nodes; it only sets the flag.
 

@@ -87,21 +87,7 @@ Candidates only ever increase along the path: we go right after recording one, s
 
 Example 4 (`X = 8`): the search visits 5, 10 and 6. Green nodes were recorded as candidates; the orange node was too large and sent the search left.
 
-```mermaid
-flowchart TD
-    n5((5)) --> n3((3))
-    n5 -->|"5 is below 8: candidate, go right"| n10((10))
-    n3 --> n2((2))
-    n3 --> n4((4))
-    n10 -->|"10 is above 8: go left"| n6((6))
-    n10 --> n15((15))
-    classDef cand fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef big fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    classDef off fill:#f4f5f7,stroke:#c5cad3,color:#8a8f98
-    class n5,n6 cand
-    class n10 big
-    class n3,n2,n4,n15 off
-```
+[![BST search for the floor of 8: candidate 5, go right to 10, which is too large, go left to candidate 6](/img/codes/floor-in-bst/search-path.png)](/img/codes/floor-in-bst/search-path.png)
 
 At 6 we record `floorVal = 6` and step right into an empty subtree, so the loop ends and `6` is returned.
 

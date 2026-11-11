@@ -77,7 +77,7 @@ Skipping duplicates only on `lo` is enough: if `nums[lo]` changes and `nums[i]` 
 
 Example 1 after sorting is `[-4,-1,-1,0,1,2]`. Blue is the fixed element `i`, orange the pair `lo`/`hi`, grey the values already ruled out:
 
-![Two-pointer sweep for 3Sum on [-4,-1,-1,0,1,2]](/img/codes/3sum/two-pointers.gif)
+![Two-pointer sweep for 3Sum on [-4,-1,-1,0,1,2]](/img/codes/3sum/two-pointers/01.webp)
 
 ### Complexity
 

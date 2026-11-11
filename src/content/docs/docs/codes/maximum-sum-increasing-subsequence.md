@@ -64,7 +64,7 @@ The answer is the largest `dp[i]`, since the best subsequence ends somewhere.
 
 **Walkthrough** on Example 1 (orange is the best predecessor `j` chosen for the blue `i`):
 
-![dp values for [1, 101, 2, 3, 100]](/img/codes/maximum-sum-increasing-subsequence/dp.gif)
+![dp values for [1, 101, 2, 3, 100]](/img/codes/maximum-sum-increasing-subsequence/dp/01.webp)
 
 **Complexity**
 

@@ -67,22 +67,7 @@ A dummy node `root` sits before the head so that the first group is attached in 
 
 Example 1 (`k = 2`) just before and just after the second group `3 → 4` is reversed. `tail` is the last node of the finished part, `first` the group's first node and `t` the node after the group:
 
-```mermaid
-flowchart LR
-    subgraph before["Before"]
-        direction LR
-        b2["2"] --> b1["1 (tail)"] --> b3["3 (first)"] --> b4["4"] --> b5["5 (t)"]
-    end
-    subgraph after["After"]
-        direction LR
-        a2["2"] --> a1["1 (tail)"] --> a4["4 (prev)"] --> a3["3 (first, new tail)"] --> a5["5 (t)"]
-    end
-    before ~~~ after
-    classDef grp fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef done fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class b3,b4,a4,a3 grp
-    class b2,b1,a2,a1 done
-```
+[![List 2, 1, 3, 4, 5 before and 2, 1, 4, 3, 5 after reversing the group 3, 4: tail is 1, first is 3 (the new tail), prev is 4 and t is 5](/img/codes/reverse-nodes-in-k-group/group-reversal.png)](/img/codes/reverse-nodes-in-k-group/group-reversal.png)
 
 Because `prev` started at `t`, the group's old first node `3` ends up pointing at `5` with no extra fix-up; `tail->next = prev` then attaches `4` behind `1`.
 

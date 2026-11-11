@@ -73,7 +73,7 @@ A valid split always exists (the true merged order defines one), and the search 
 
 On `nums1 = [2,3,5,6,17,36,39]`, `nums2 = [1,8,12,16,18,29,37]` (14 elements, `half = 7`, median `(12 + 16) / 2 = 14`). Green cells form the left half, orange cells are `L1`, `R1`, `L2`, `R2`:
 
-![Binary search for the partition](/img/codes/median-of-two-sorted-arrays/partition.gif)
+![Binary search for the partition](/img/codes/median-of-two-sorted-arrays/partition/01.webp)
 
 ### Complexity
 

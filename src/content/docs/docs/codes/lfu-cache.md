@@ -79,23 +79,7 @@ On eviction we need "the least recently used key among those with the smallest u
 
 So the victim is always `byFreq[minFreq].back()`, found in $O(1)$.
 
-```mermaid
-flowchart LR
-    subgraph before["Before put(4, 4): minFreq = 2"]
-        direction LR
-        f2a["freq 2"] --> k3a["3"] --> k1a["1 (LRU)"]
-    end
-    subgraph after["After put(4, 4): minFreq = 1"]
-        direction LR
-        f1b["freq 1"] --> k4b["4"]
-        f2b["freq 2"] --> k3b["3"]
-    end
-    before -- "evict back of byFreq[2], insert 4 into byFreq[1]" --> after
-    classDef evict fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    classDef fresh fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class k1a evict
-    class k4b fresh
-```
+[![LFU buckets before and after put(4, 4): key 1 is evicted from the freq 2 bucket and key 4 enters a new freq 1 bucket](/img/codes/lfu-cache/eviction.png)](/img/codes/lfu-cache/eviction.png)
 
 ### Algorithm
 

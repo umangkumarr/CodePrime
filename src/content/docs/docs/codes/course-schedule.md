@@ -62,13 +62,7 @@ Kahn's algorithm detects this by simulating the semester. A course with **in-deg
 
 Example 2: both courses start with in-degree `1`, so `ready` starts empty, `taken` stays `0`, and the answer is `false`.
 
-```mermaid
-flowchart LR
-    C0(("0<br/>in=1")) --> C1(("1<br/>in=1"))
-    C1 --> C0
-    classDef stuck fill:#fde0e0,stroke:#d64545,color:#7d1a1a
-    class C0,C1 stuck
-```
+[![Courses 0 and 1 point at each other, each stuck at in-degree 1](/img/codes/course-schedule/cycle.png)](/img/codes/course-schedule/cycle.png)
 
 ### Complexity
 

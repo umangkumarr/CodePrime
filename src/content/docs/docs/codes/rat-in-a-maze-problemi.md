@@ -68,7 +68,7 @@ Two details make it work:
 
 Example 1. Blue is the current path (blocked while on it), red is a dead end being backtracked from, green is a completed path:
 
-![Backtracking search through the maze of Example 1](/img/codes/rat-in-a-maze-problemi/backtrack.gif)
+![Backtracking search through the maze of Example 1](/img/codes/rat-in-a-maze-problemi/backtrack/01.webp)
 
 ### Complexity
 

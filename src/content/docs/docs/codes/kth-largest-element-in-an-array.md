@@ -74,7 +74,7 @@ The range `[lo, hi]` always contains index `target`, so the loop ends.
 
 Example 2 (`k = 4`, so `target = 5`). The animation uses the pivots `3`, `5`, `4` in turn (the code picks them at random). Grey cells are discarded, blue cells equal the pivot and are in their final place:
 
-![Quickselect on [3,2,3,1,2,4,5,5,6] with k = 4](/img/codes/kth-largest-element-in-an-array/quickselect.gif)
+![Quickselect on [3,2,3,1,2,4,5,5,6] with k = 4](/img/codes/kth-largest-element-in-an-array/quickselect/01.webp)
 
 ### Complexity
 

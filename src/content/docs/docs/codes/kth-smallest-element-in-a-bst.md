@@ -47,16 +47,7 @@ An in-order traversal of a BST (left, node, right) visits the keys in increasing
 
 We do not need the whole sorted list — only the k-th visit. An **iterative** in-order traversal with an explicit stack can stop the moment it gets there. Before the first visit it walks down the left spine (up to `h` nodes); after that each step produces one more visit, so the work is $O(h + k)$ rather than $O(n)$. The explicit stack also avoids deep recursion on a skewed tree.
 
-```mermaid
-flowchart TD
-    n5["5 · 5th"] --> n3["3 · 3rd"]
-    n5 --> n6["6 · 6th"]
-    n3 --> n2["2 · 2nd"]
-    n3 --> n4["4 · 4th"]
-    n2 --> n1["1 · 1st"]
-    classDef ans fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class n3 ans
-```
+[![Example 2 BST with each node's in-order position: 1 is 1st, 2 is 2nd, 3 is 3rd (the answer for k = 3), 4 is 4th, 5 is 5th, 6 is 6th](/img/codes/kth-smallest-element-in-a-bst/inorder-positions.png)](/img/codes/kth-smallest-element-in-a-bst/inorder-positions.png)
 
 Example 2 with each node's in-order position: with `k = 3`, the traversal pops `1`, `2`, `3` and returns `3` without touching `4`, `5`, `6`.
 

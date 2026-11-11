@@ -72,7 +72,7 @@ The only danger is overwriting a flag before it has been read. Clearing from the
 
 Example 2. Orange cells are the marker row/column, blue is the cell being looked at, red cells have been cleared:
 
-![Marking the first row and column, then clearing from the bottom-right on [[0,1,2,0],[3,4,5,2],[1,3,1,5]]](/img/codes/set-matrix-zeroes/markers.gif)
+![Marking the first row and column, then clearing from the bottom-right on [[0,1,2,0],[3,4,5,2],[1,3,1,5]]](/img/codes/set-matrix-zeroes/markers/01.webp)
 
 ### Complexity
 

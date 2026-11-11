@@ -76,7 +76,7 @@ The answer is `dp[n][m]`. There are only $n \cdot m$ prefix pairs, each solved i
 
 Example 1 (`text1 = "abcde"`, `text2 = "ace"`). Each frame fills one row: green cells are matches (`diagonal + 1`), blue cells take `max(up, left)`, and the last frame traces one LCS back from the corner in orange. The full table is drawn for clarity; the code only ever keeps the two most recent rows.
 
-![LCS table for "abcde" and "ace"](/img/codes/longest-common-subsequence/dp-table.gif)
+![LCS table for "abcde" and "ace"](/img/codes/longest-common-subsequence/dp-table/01.webp)
 
 ### Complexity
 

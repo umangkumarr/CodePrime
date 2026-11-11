@@ -68,7 +68,7 @@ Use the same binary search as in the version without duplicates: compare `nums[m
 
 `[3,3,1,3]` is the case that needs the tie rule: at the first step `nums[mid] == nums[hi]`, and the minimum lies to the **right** of `mid`, so neither `hi = mid` nor any halving rule would be safe.
 
-![Binary search with duplicates on [3,3,1,3]](/img/codes/find-minimum-in-rotated-sorted-array-ii/search.gif)
+![Binary search with duplicates on [3,3,1,3]](/img/codes/find-minimum-in-rotated-sorted-array-ii/search/01.webp)
 
 ### Complexity
 

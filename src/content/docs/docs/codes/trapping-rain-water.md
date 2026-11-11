@@ -65,7 +65,7 @@ So at each step we settle the column on the **lower** side, whose water level is
 
 Purple cells are bars, blue cells are water already counted, and green heights are settled columns:
 
-![Two pointers settling columns of [0,1,0,2,1,0,1,3,2,1,2,1] from the lower side](/img/codes/trapping-rain-water/two-pointers.gif)
+![Two pointers settling columns of [0,1,0,2,1,0,1,3,2,1,2,1] from the lower side](/img/codes/trapping-rain-water/two-pointers/01.webp)
 
 ### Complexity
 

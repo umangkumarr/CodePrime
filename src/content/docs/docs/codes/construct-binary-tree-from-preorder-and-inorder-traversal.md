@@ -67,7 +67,7 @@ Searching inorder linearly for the root costs $O(n)$ per node, $O(n^2)$ overall 
 
 Example 1. Each step shows one call: blue is the root taken from the front of the preorder block and found in inorder; orange is its left block, purple its right block:
 
-![Splitting preorder and inorder around each root for the tree 3, 9, 20, 15, 7](/img/codes/construct-binary-tree-from-preorder-and-inorder-traversal/split.gif)
+![Splitting preorder and inorder around each root for the tree 3, 9, 20, 15, 7](/img/codes/construct-binary-tree-from-preorder-and-inorder-traversal/split/01.webp)
 
 ### Complexity
 

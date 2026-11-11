@@ -67,7 +67,7 @@ Checking every prefix directly is $O(n^2)$, which is too slow for $n = 10^6$; KM
 
 Example 2: scanning `rev = "AAAACECAA"`. The blue cell is the character just read; `j` is how many characters of `A = "AACECAAAA"` are currently matched:
 
-![KMP match of A against reverse(A) for AACECAAAA](/img/codes/minimum-characters-required-to-make-a-string-palindromic/kmp.gif)
+![KMP match of A against reverse(A) for AACECAAAA](/img/codes/minimum-characters-required-to-make-a-string-palindromic/kmp/01.webp)
 
 The scan ends with `j = 7`: the prefix `"AACECAA"` is a palindrome, so `9 - 7 = 2` characters must be added.
 

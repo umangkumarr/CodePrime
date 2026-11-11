@@ -66,7 +66,7 @@ Every window `s[left .. right]` is the longest valid substring ending at `right`
 
 The blue cells are the current window; orange marks the earlier copy that forces `left` to jump:
 
-![Sliding window on "abcabcbb"](/img/codes/longest-substring-without-repeating-characters/window.gif)
+![Sliding window on "abcabcbb"](/img/codes/longest-substring-without-repeating-characters/window/01.webp)
 
 ### Complexity
 

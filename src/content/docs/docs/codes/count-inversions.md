@@ -67,7 +67,7 @@ Split the array into a left and a right half. Every inversion is either inside t
 
 The last merge of Example 2. The left half `[2, 5, 1]` has already been sorted to `[1, 2, 5]` (contributing 2 inversions) and the right half `[3, 4]` (contributing 0):
 
-![Merging [1,2,5] with [3,4] while counting split inversions](/img/codes/count-inversions/merge-count.gif)
+![Merging [1,2,5] with [3,4] while counting split inversions](/img/codes/count-inversions/merge-count/01.webp)
 
 ### Complexity
 

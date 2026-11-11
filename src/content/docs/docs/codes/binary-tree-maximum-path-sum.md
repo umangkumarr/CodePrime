@@ -71,15 +71,7 @@ A post-order DFS computes both quantities in one pass: it gets `left = max(0, ga
 
 Example 2, with the value each call returns (`gain`) and the path it tries as the top (`try`). The best is at node `20`: `20 + 15 + 7 = 42`. The root can only offer `-10 + 9 + 35 = 34`:
 
-```mermaid
-flowchart TD
-    A["-10<br/>try -10 + 9 + 35 = 34<br/>gain 25"] --> B["9<br/>try 9, gain 9"]
-    A --> C["20<br/>try 20 + 15 + 7 = 42<br/>gain 35"]
-    C --> D["15<br/>try 15, gain 15"]
-    C --> E["7<br/>try 7, gain 7"]
-    classDef best fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    class C,D,E best
-```
+[![Tree -10 with children 9 and 20, and 20 with children 15 and 7; each node shows the path it tries as the top and the gain it returns, and the best path 20 + 15 + 7 = 42 is highlighted](/img/codes/binary-tree-maximum-path-sum/path-sums.png)](/img/codes/binary-tree-maximum-path-sum/path-sums.png)
 
 ### Complexity
 

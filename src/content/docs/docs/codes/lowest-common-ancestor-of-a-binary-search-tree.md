@@ -76,23 +76,7 @@ This is just the search path to `p` and `q`, followed while it is shared.
 
 Example 2 (`p = 2`, `q = 4`): at `6` both values are smaller, so go left; at `2`, `p` equals the node, so the paths split here and `2` is returned.
 
-```mermaid
-flowchart TD
-    n6((6)) --> n2((2))
-    n6 --> n8((8))
-    n2 --> n0((0))
-    n2 --> n4((4))
-    n8 --> n7((7))
-    n8 --> n9((9))
-    n4 --> n3((3))
-    n4 --> n5((5))
-    classDef path fill:#dbe8ff,stroke:#2f6fde,color:#123b8a
-    classDef ans fill:#dcf5e3,stroke:#2e9e57,color:#145c2e
-    classDef target fill:#ffeccc,stroke:#d9822b,color:#7a4106
-    class n6 path
-    class n2 ans
-    class n4 target
-```
+[![BST rooted at 6: the search goes left from 6 to 2, which is p and the LCA of 2 and 4](/img/codes/lowest-common-ancestor-of-a-binary-search-tree/bst-search.png)](/img/codes/lowest-common-ancestor-of-a-binary-search-tree/bst-search.png)
 
 Blue: visited and both values on one side; green: the split point (the answer); orange: the other target.
 

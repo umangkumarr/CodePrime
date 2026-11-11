@@ -77,7 +77,7 @@ Marking a cell rotten (`grid[x][y] = 2`) when it is pushed doubles as the "visit
 
 Example 1, one frame per minute. Orange cells rotted during that minute; red cells are rotten; green cells are still fresh:
 
-![Multi-source BFS on [[2,1,1],[1,1,0],[0,1,1]]](/img/codes/rotting-oranges/bfs.gif)
+![Multi-source BFS on [[2,1,1],[1,1,0],[0,1,1]]](/img/codes/rotting-oranges/bfs/01.webp)
 
 ### Complexity
 

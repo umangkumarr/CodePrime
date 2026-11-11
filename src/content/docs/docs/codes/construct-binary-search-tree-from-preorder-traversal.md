@@ -69,23 +69,7 @@ If `preorder[idx]` exceeds the bound, it is not part of this subtree: return nul
 
 Example 1, `preorder = [8, 5, 1, 7, 10, 12]`. Each node shows its value and the bound it was checked against; the dashed edges are the calls that returned null because the next value was too large:
 
-```mermaid
-flowchart TD
-    n8["8 (bound ∞)"] --> n5["5 (bound 8)"]
-    n8 --> n10["10 (bound ∞)"]
-    n5 --> n1["1 (bound 5)"]
-    n5 --> n7["7 (bound 8)"]
-    n1 -.-> x1["left: 7 > 1, null"]
-    n1 -.-> x2["right: 7 > 5, null"]
-    n7 -.-> x3["left: 10 > 7, null"]
-    n7 -.-> x4["right: 10 > 8, null"]
-    n10 -.-> x5["left: 12 > 10, null"]
-    n10 --> n12["12 (bound ∞)"]
-    classDef made fill:#dbe8ff,stroke:#2f6fde,color:#1f2430
-    classDef nul fill:#e9eaed,stroke:#b4b8bf,color:#1f2430
-    class n8,n5,n10,n1,n7,n12 made
-    class x1,x2,x3,x4,x5 nul
-```
+[![BST built from preorder 8, 5, 1, 7, 10, 12, each node with its bound and the null calls that rejected the next value](/img/codes/construct-binary-search-tree-from-preorder-traversal/recursion-tree.png)](/img/codes/construct-binary-search-tree-from-preorder-traversal/recursion-tree.png)
 
 The key moment is after `7`: its right call has bound `8` and sees `10`, so it returns null; the recursion climbs back to `8`, whose right call has bound `∞` and accepts `10`.
 

@@ -58,7 +58,7 @@ Invariant: after `k` steps, `slow` is node `k` and `fast` is node `2k` (0-indexe
 
 Example 2, with `slow` in blue and `fast` in orange (the trailing `null` is where `fast` falls off the list):
 
-![slow and fast pointers on 1→2→3→4→5→6](/img/codes/middle-of-the-linked-list/slow-fast.gif)
+![slow and fast pointers on 1→2→3→4→5→6](/img/codes/middle-of-the-linked-list/slow-fast/01.webp)
 
 ### Complexity
 

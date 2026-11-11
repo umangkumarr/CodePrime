@@ -80,7 +80,7 @@ For the follow-up, two cheap checks before searching cut the work a lot:
 
 Example 2, `word = "SEE"` (orange = cell just added, blue = rest of the path, red = rejected or backtracked):
 
-![Backtracking DFS for "SEE": the S at (1,0) fails, the S at (1,3) leads to E, E](/img/codes/word-search/backtracking.gif)
+![Backtracking DFS for "SEE": the S at (1,0) fails, the S at (1,3) leads to E, E](/img/codes/word-search/backtracking/01.webp)
 
 ### Complexity
 

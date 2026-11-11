@@ -633,15 +633,18 @@
   margin-top: 0;
 }
 
-/* System design diagrams (exported PNGs on white): centred, rounded card, never upscaled. */
-.sl-markdown-content a:has(> img[src*='/img/system-design/']) {
+/* Diagrams exported as PNGs on white (system design, and Archify diagrams on problem pages):
+   centred, rounded card, never upscaled. */
+.sl-markdown-content a:has(> img[src*='/img/system-design/']),
+.sl-markdown-content a:has(> img[src*='/img/codes/'][src$='.png']) {
   display: block;
   width: fit-content;
   max-width: 100%;
   margin-inline: auto;
 }
 
-.sl-markdown-content img[src*='/img/system-design/'] {
+.sl-markdown-content img[src*='/img/system-design/'],
+.sl-markdown-content img[src*='/img/codes/'][src$='.png'] {
   display: block;
   max-width: 100%;
   height: auto;
@@ -655,4 +658,138 @@
   text-align: center;
   font-size: 0.85rem;
   color: var(--cp-muted);
+}
+
+/* Step carousels (rehype-step-carousel + src/scripts/steps.ts): one walkthrough frame at a time.
+   Without JavaScript the track is a plain horizontal scroll-snap strip. */
+.cp-steps {
+  width: min(100%, var(--cp-steps-w, 40rem));
+  margin: 1.5rem auto;
+}
+
+.cp-steps__track {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  background: #fff;
+}
+
+.cp-steps.is-enhanced .cp-steps__track {
+  scrollbar-width: none;
+}
+
+.cp-steps.is-enhanced .cp-steps__track::-webkit-scrollbar {
+  display: none;
+}
+
+.cp-steps__track:focus-visible {
+  outline: 2px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+
+.cp-steps__slide {
+  flex: 0 0 100%;
+  margin: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.cp-steps__slide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.cp-steps__caption {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cp-muted);
+}
+
+.cp-steps__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cp-steps__btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--cp-text);
+  background: var(--glass-control);
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.cp-steps__btn:hover:not(:disabled) {
+  background: var(--glass-control-hover);
+}
+
+.cp-steps__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cp-steps__btn:focus-visible {
+  outline: 2px solid var(--cp-accent);
+  outline-offset: 2px;
+}
+
+.cp-steps__play {
+  font-size: 0.85rem;
+  min-width: 4.75rem;
+}
+
+.cp-steps__count {
+  min-width: 6.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--cp-text-2);
+}
+
+.cp-steps__progress {
+  flex: 0 1 6rem;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--cp-border-strong);
+}
+
+.cp-steps__progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--cp-text-2);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+@media (max-width: 30rem) {
+  .cp-steps__progress {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-steps__progress-bar {
+    transition: none;
+  }
 }

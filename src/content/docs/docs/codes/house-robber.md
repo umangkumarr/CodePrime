@@ -63,7 +63,7 @@ Each value depends only on the two before it, so instead of a whole table we kee
 
 Example 2, `nums = [2,7,9,3,1]`. The second row is `best(i)`; blue is the house being decided, orange the two earlier totals it is computed from, and green the new total:
 
-![House Robber DP on [2,7,9,3,1]](/img/codes/house-robber/house-robber-dp.gif)
+![House Robber DP on [2,7,9,3,1]](/img/codes/house-robber/house-robber-dp/01.webp)
 
 ### Complexity
 
