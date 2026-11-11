@@ -38,6 +38,8 @@ Here is the journey of one message from `alice@ourmail.com` to `bob@othermail.co
 
 [![How one email travels: Alice's app submits to our outbound server, which looks up othermail.com's MX record in DNS, delivers over SMTP to their inbound server, which files it in Bob's mailbox for Bob's app to sync](/img/system-design/email-service/01-journey.png)](/img/system-design/email-service/01-journey.png)
 
+*Select the diagram to open it at full size.*
+
 Two facts from this picture shape the whole design:
 
 1. **We are on both sides.** Our service receives mail from strangers on the internet (inbound) and delivers
@@ -194,6 +196,8 @@ are turned away during the SMTP conversation, before we spend any storage or CPU
 
 [![Data model: USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels; MESSAGE has ATTACHMENTs, and both point to content-addressed BLOBs](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
 
+*Select the diagram to open it at full size.*
+
 Five design decisions hide in this diagram.
 
 **1. Every table starts with `user_id`.** Almost every query is about one user's mailbox ("my inbox", "my
@@ -300,6 +304,8 @@ user. A query touches exactly one user's index, which is small and fast.
 
 [![Search: the indexer turns each new message into words and adds it to Bob's index; a query is parsed, each word's list is looked up and intersected, ranked, and the top results' metadata is fetched](/img/system-design/email-service/08-search.png)](/img/system-design/email-service/08-search.png)
 
+*Select the diagram to open it at full size.*
+
 An **inverted index** is the same idea as the index at the back of a book: for each word, the list of messages
 that contain it.
 
@@ -327,6 +333,8 @@ Close to half of all email on the internet is spam. Filtering is a funnel: cheap
 see as little traffic as possible.
 
 [![Spam filtering funnel: connection checks, then SPF/DKIM/DMARC, then content classification, then attachment and link scanning, then a spam score that routes mail to Spam or Inbox; user reports feed back into the content classifier](/img/system-design/email-service/09-spam.png)](/img/system-design/email-service/09-spam.png)
+
+*Select the diagram to open it at full size.*
 
 What each authentication check proves:
 
