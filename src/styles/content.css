@@ -10,6 +10,11 @@
   color: var(--cp-text-2);
 }
 
+/* Mermaid wraps labels in <p>; let them keep the diagram's own text colour (classDef color), not the prose grey. */
+.sl-markdown-content .mermaid :is(p, li) {
+  color: inherit;
+}
+
 .sl-markdown-content strong {
   color: var(--sl-color-white);
 }
@@ -626,4 +631,28 @@
 .cp-code-tabs > .cp-code-tabs__list + .expressive-code,
 .cp-code-tabs > [role='tabpanel'] {
   margin-top: 0;
+}
+
+/* System design diagrams (exported PNGs on white): centred, rounded card, never upscaled. */
+.sl-markdown-content a:has(> img[src*='/img/system-design/']) {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.sl-markdown-content img[src*='/img/system-design/'] {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--cp-radius);
+  border: 1px solid var(--cp-border);
+}
+
+.sl-markdown-content a:has(> img[src*='/img/system-design/']) + em,
+.sl-markdown-content p:has(> a > img[src*='/img/system-design/']) + p > em:only-child {
+  display: block;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cp-muted);
 }
