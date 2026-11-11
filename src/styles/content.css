@@ -10,6 +10,11 @@
   color: var(--cp-text-2);
 }
 
+/* Mermaid wraps labels in <p>; let them keep the diagram's own text colour (classDef color), not the prose grey. */
+.sl-markdown-content .mermaid :is(p, li) {
+  color: inherit;
+}
+
 .sl-markdown-content strong {
   color: var(--sl-color-white);
 }
