@@ -192,7 +192,7 @@ are turned away during the SMTP conversation, before we spend any storage or CPU
 
 ### What we store
 
-[![Data model: USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels sorted by received_at; MESSAGE and ATTACHMENT point to content-addressed BLOBs](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
+[![Data model: USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels; MESSAGE has ATTACHMENTs, and both point to content-addressed BLOBs](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
 
 Five design decisions hide in this diagram.
 
