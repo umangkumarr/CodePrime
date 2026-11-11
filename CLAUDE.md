@@ -6,7 +6,8 @@ problem page has the full official statement, an explanation that teaches the id
 Python** solutions tested against brute force.
 
 - Live site: https://umangkumarr.github.io/CodePrime/ (GitHub Pages, base path `/CodePrime`)
-- Audience: people preparing for coding interviews. Optimise for clarity and trust, not cleverness.
+- Audience: people preparing for coding interviews, from first practice to last-minute revision the night
+  before. Optimise for clarity and trust, not cleverness; keep the header, intuition and complexity skimmable.
 - `AGENTS.md` is a symlink to this file. Edit `CLAUDE.md` only.
 
 ## Golden rules
@@ -254,6 +255,15 @@ Editing an existing problem: keep its slug and front-matter keys; re-test any co
 
 Based on Apple's Human Interface Guidelines (purpose, simplicity, familiarity, accessibility, craft):
 
+- **Glass is only for the floating functional layer** (Apple's Liquid Glass rule). `src/styles/glass.css`
+  styles the top bar, sidebar, "On this page" panel, phone menu and contents bar, search dialog, spoiler
+  gates and the notes scratchpad: they float inset from the window edges over an ambient light field.
+  **Never put clear glass on content.** Problem pages use two strengths: the problem header and language tabs
+  (controls) take the regular glass; reading surfaces (statement card, related problems, page links) take the
+  thick material `--glass-thick` (about 80% opaque); prose and code blocks stay fully opaque. Don't add new glass surfaces without a strong reason; reuse the `--glass-*` tokens if you must.
+  Reduce Transparency / Increase Contrast / no `backdrop-filter` support fall back to opaque surfaces —
+  keep that working. Beware: `backdrop-filter` makes an element the containing block of its `position: fixed`
+  children (it once unpinned the phone "On this page" bar).
 - **One job per screen**; every element earns its place. Prefer removing to adding.
 - **Use the tokens** in `src/styles/theme.css` (`--cp-*`, `--sl-*`); never hard-code new colours or fonts.
   Every colour needs light and dark values.

@@ -5,7 +5,8 @@
 **Learn the pattern, not the answer.**
 
 192 interview problems — the Striver SDE sheet, Blind 75 and more — each explained step by step,<br />
-with C++, Java and Python solutions tested against brute force.
+with C++, Java and Python solutions tested against brute force.<br />
+Use it to prepare from scratch, or for a last-minute revision before the interview.
 
 [**Open the site →**](https://umangkumarr.github.io/CodePrime/)
 
@@ -26,6 +27,7 @@ with C++, Java and Python solutions tested against brute force.
 - **Tested, not just written.** Every solution was checked against the official examples and thousands of random inputs compared with a brute force before it was published.
 - **A scratchpad on every problem.** Notes, dry-run tables and an outline template, saved per problem in your browser.
 - **Track your progress.** Mark problems solved and watch each sheet fill up.
+- **Built for last-minute revision too.** Every page leads with the difficulty, time and space complexity and the topics, and each approach opens with its intuition. Turn on *Always show solutions* and skim a whole sheet, or one topic, the night before.
 
 | Switch languages | Dry-run in the scratchpad |
 | --- | --- |

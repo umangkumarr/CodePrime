@@ -28,7 +28,7 @@ const tracks = [
 
 const topics = tags.slice(0, 10);
 
-const description = `${problems} DSA interview problems from the Striver SDE sheet and Blind 75, each explained step by step with C++, Java and Python solutions tested against brute force.`;
+const description = `${problems} DSA interview problems from the Striver SDE sheet and Blind 75, explained step by step with tested C++, Java and Python solutions. For thorough prep and last-minute revision.`;
 const siteUrl = new URL(`${base}/`, Astro.site).href;
 
 // Tells search engines and AI answers exactly which "CodePrime" this is, and who makes it.
@@ -53,7 +53,7 @@ const structuredData = {
       description,
       learningResourceType: ['Tutorial', 'Practice problems'],
       educationalLevel: 'Intermediate',
-      teaches: ['Data structures', 'Algorithms', 'Coding interview preparation'],
+      teaches: ['Data structures', 'Algorithms', 'Coding interview preparation', 'Last-minute interview revision'],
       programmingLanguage: ['C++', 'Java', 'Python'],
       isAccessibleForFree: true,
       license: 'https://opensource.org/licenses/MIT',
@@ -86,7 +86,7 @@ const structuredData = {
     <section class="hero">
       <div class="hero__copy">
         <h1 class="hero__title">Learn the pattern,<br />not the answer.</h1>
-        <p class="hero__lead">{problems} interview problems, each explained step by step with C++, Java and Python solutions tested against brute force.</p>
+        <p class="hero__lead">{problems} interview problems, each explained step by step with C++, Java and Python solutions tested against brute force. Prepare properly, or revise the night before.</p>
         <div class="actions">
           <a class="btn btn--primary" href={`${base}/docs/leetcode/`}>Start solving</a>
           <button type="button" class="btn btn--secondary" data-open-search>
