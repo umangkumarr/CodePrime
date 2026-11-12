@@ -86,7 +86,7 @@ another's, nobody can tell. That freedom makes the whole design possible.
 
 Ads, images and video search, maps, the knowledge panel, personalisation beyond language and region, and abuse
 of the crawler. The crawler itself is **covered in depth in the
-web crawler case study (in the Hard section)**; here we treat it as a box that delivers
+[web crawler case study](/system-design/case-studies/hard/web-crawler/)**; here we treat it as a box that delivers
 pages.
 
 ## 3. Back-of-the-envelope estimates

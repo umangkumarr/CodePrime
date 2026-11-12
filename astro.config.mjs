@@ -167,6 +167,7 @@ export default defineConfig({
                 {label: 'How to answer', link: '/system-design/how-to-answer/'},
                 {label: 'Easy', items: [{autogenerate: {directory: 'system-design/case-studies/easy'}}]},
                 {label: 'Medium', items: [{autogenerate: {directory: 'system-design/case-studies/medium'}}]},
+                {label: 'Hard', items: [{autogenerate: {directory: 'system-design/case-studies/hard'}}]},
               ],
             },
           ],
