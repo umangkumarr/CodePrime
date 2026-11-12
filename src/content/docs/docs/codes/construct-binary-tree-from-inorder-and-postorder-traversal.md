@@ -1,6 +1,6 @@
 ---
 title: "Construct Binary Tree from Inorder and Postorder Traversal"
-description: "Rebuild a binary tree from its inorder and postorder traversals in linear time: the last postorder value is the root, and a hash map finds it in inorder to split the subtrees."
+description: "Rebuild a binary tree from inorder and postorder in O(n): the last postorder value is the root, and a hash map finds it in inorder to split the subtrees."
 source: "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/"
 difficulty: "Medium"
 tags: ["Array", "Hash Table", "Divide and Conquer", "Tree", "Binary Tree"]

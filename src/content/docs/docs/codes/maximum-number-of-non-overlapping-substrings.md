@@ -1,6 +1,6 @@
 ---
 title: "Maximum Number of Non-Overlapping Substrings"
-description: "Pick the most non-overlapping substrings that each contain every occurrence of their letters, by building one minimal candidate per letter and choosing greedily."
+description: "Pick the most non-overlapping substrings that each hold every occurrence of their letters: one minimal candidate per letter, then choose greedily."
 source: "https://leetcode.com/problems/maximum-number-of-non-overlapping-substrings/"
 difficulty: "Hard"
 tags: ["Hash Table", "String", "Greedy", "Sorting"]

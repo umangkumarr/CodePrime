@@ -1,6 +1,6 @@
 ---
 title: "Flatten Binary Tree to Linked List"
-description: "Flatten a binary tree in place into a right-pointer list in pre-order, with O(1) extra space by splicing each left subtree in front of the right one (Morris-style)."
+description: "Flatten a binary tree in place into a pre-order right-pointer list with O(1) extra space, splicing each left subtree in front of the right (Morris-style)."
 source: "https://leetcode.com/problems/flatten-binary-tree-to-linked-list/"
 difficulty: "Medium"
 tags: ["Linked List", "Stack", "Tree", "Depth-First Search", "Binary Tree"]

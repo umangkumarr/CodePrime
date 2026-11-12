@@ -1,6 +1,6 @@
 ---
 title: "Super Egg Drop"
-description: "Find the minimum number of drops that identifies the critical floor with k eggs and n floors, by flipping the DP to 'floors covered by m moves' and binary searching m."
+description: "Find the fewest drops that find the critical floor with k eggs and n floors, by flipping the DP to 'floors covered by m moves' and searching on m."
 source: "https://leetcode.com/problems/super-egg-drop/"
 difficulty: "Hard"
 tags: ["Math", "Binary Search", "Dynamic Programming"]

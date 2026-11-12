@@ -1,6 +1,6 @@
 ---
 title: "Binary Tree Zigzag Level Order Traversal"
-description: "Return a binary tree's levels in alternating left-to-right and right-to-left order, using level-by-level BFS that writes each value straight into its final slot."
+description: "Return a binary tree's levels in alternating left-to-right and right-to-left order, using level-order BFS that writes each value into its final slot."
 source: "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/"
 difficulty: "Medium"
 tags: ["Tree", "Breadth-First Search", "Binary Tree"]
