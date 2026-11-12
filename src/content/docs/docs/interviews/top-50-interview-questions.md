@@ -1,6 +1,6 @@
 ---
 title: "Top 50 Interview questions"
-description: "Top 50 Interview question"
+description: "The 50 most-asked coding interview problems, from Two Sum onwards, with step-by-step C++, Java and Python solutions for most of them."
 ---
 
 | # | Problem | Solution |
