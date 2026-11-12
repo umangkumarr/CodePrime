@@ -1,6 +1,6 @@
 ---
 title: "The Celebrity Problem"
-description: "Find the person known by everyone who knows no one, with fewer than 3n calls to knows(), by eliminating one non-celebrity per call and then verifying the survivor."
+description: "Find the person everyone knows who knows no one, with under 3n calls to knows(): eliminate one non-celebrity per call, then verify the survivor."
 source: "https://www.naukri.com/code360/problems/the-celebrity-problem_982769"
 difficulty: "Medium"
 tags: ["Number Theory", "Two Pointers", "Graph", "Stack"]

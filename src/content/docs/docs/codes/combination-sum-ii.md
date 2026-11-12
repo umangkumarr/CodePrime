@@ -1,6 +1,6 @@
 ---
 title: "Combination Sum II"
-description: "List every unique combination of candidates (each used at most once) that sums to target, by backtracking over the sorted array and skipping equal values at the same depth."
+description: "List every unique combination that sums to target with each candidate used once, by backtracking over the sorted array and skipping repeats per depth."
 source: "https://leetcode.com/problems/combination-sum-ii/"
 difficulty: "Medium"
 tags: ["Array", "Backtracking"]
