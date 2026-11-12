@@ -5,26 +5,67 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const studies = (
   await getCollection('docs', (e) => e.id.startsWith('system-design/case-studies/') && !e.data.draft)
 ).sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+const levels = [
+  {name: 'Easy', note: 'One core idea each. Start here.'},
+  {name: 'Medium', note: 'Full products with several moving parts.'},
+  {name: 'Hard', note: 'Real-time, geo, collaboration and large-scale infrastructure.'},
+] as const;
+const groups = levels
+  .map((level) => ({...level, items: studies.filter((s) => s.data.difficulty === level.name)}))
+  .filter((g) => g.items.length > 0);
 ---
 
 {
-  studies.length > 0 ? (
-    <ul class="cp-list not-content">
-      {studies.map((s) => (
-        <li>
-          <a href={`${base}/${s.id}/`}>
-            <span>{s.data.title}</span>
-            {s.data.company && <span class="cp-list__meta">{s.data.company}</span>}
-          </a>
-        </li>
-      ))}
-    </ul>
+  groups.length > 0 ? (
+    groups.map((g) => (
+      <section class="cp-studies not-content" aria-labelledby={`studies-${g.name.toLowerCase()}`}>
+        <h3 id={`studies-${g.name.toLowerCase()}`} class="cp-studies__title">
+          {g.name} <span class="cp-studies__count">{g.items.length}</span>
+        </h3>
+        <p class="cp-studies__note">{g.note}</p>
+        <ul class="cp-list">
+          {g.items.map((s) => (
+            <li>
+              <a href={`${base}/${s.id}/`}>
+                <span>{s.data.title}</span>
+                {s.data.company && <span class="cp-list__meta">{s.data.company}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
   ) : (
     <p class="cp-empty not-content">The first case studies are being written. Check back soon.</p>
   )
 }
 
 <style>
+  .cp-studies + .cp-studies {
+    margin-top: 2rem;
+  }
+
+  .cp-studies__title {
+    margin: 0;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .cp-studies__count {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--cp-muted);
+  }
+
+  .cp-studies__note {
+    margin: 0.25rem 0 0.75rem;
+    color: var(--cp-text-2);
+    font-size: 0.95rem;
+  }
+
   .cp-empty {
     padding: 1.25rem 1.4rem;
     border: 1px dashed var(--cp-border-strong);

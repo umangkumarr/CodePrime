@@ -164,7 +164,9 @@ export default defineConfig({
               badge: {text: 'New', variant: 'tip'},
               items: [
                 {label: 'Overview', link: '/system-design/'},
-                {label: 'Case studies', items: [{autogenerate: {directory: 'system-design/case-studies'}}]},
+                {label: 'How to answer', link: '/system-design/how-to-answer/'},
+                {label: 'Easy', items: [{autogenerate: {directory: 'system-design/case-studies/easy'}}]},
+                {label: 'Medium', items: [{autogenerate: {directory: 'system-design/case-studies/medium'}}]},
               ],
             },
           ],

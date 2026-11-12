@@ -1,6 +1,7 @@
 ---
 title: "Design an Email Service (like Gmail)"
 description: "Design a Gmail-scale email service step by step: SMTP and IMAP, sending and receiving, mailbox storage, threading, search, spam filtering and multi-device sync."
+difficulty: "Medium"
 sidebar:
   label: "Email service (like Gmail)"
 tags: ["Email", "Storage", "Search", "Queues", "Real-time sync"]
