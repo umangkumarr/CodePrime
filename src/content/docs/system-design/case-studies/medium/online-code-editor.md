@@ -437,7 +437,7 @@ Pair-programming interviews (and Replit's multiplayer mode) let two people type 
 part is merging concurrent edits so both screens end up identical. The two standard techniques are
 **operational transformation** (OT: a server rewrites each edit against the edits it missed) and **CRDTs**
 (conflict-free replicated data types: each character gets a unique, ordered ID, so edits merge in any order).
-Both are covered in depth in the Google Docs case study (in the Hard section).
+Both are covered in depth in the [Google Docs case study](/system-design/case-studies/hard/google-docs/).
 For a code editor the extra pieces are small: the same WebSocket carries edits and cursor positions, a
 document service keeps the authoritative copy and a log of operations, and "Run" sends a snapshot of the
 document at a version number so everyone sees which code was judged.
