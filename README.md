@@ -4,8 +4,8 @@
 
 **Learn the pattern, not the answer.**
 
-192 interview problems — the Striver SDE sheet, Blind 75 and more — each explained step by step,<br />
-with C++, Java and Python solutions tested against brute force.<br />
+192 coding interview problems — the Striver SDE sheet, Blind 75 and more — with C++, Java and Python solutions,<br />
+and 46 system design case studies from easy to hard, each explained step by step.<br />
 Use it to prepare from scratch, or for a last-minute revision before the interview.
 
 [**Open the site →**](https://umangkumarr.github.io/CodePrime/)
@@ -39,7 +39,7 @@ Use it to prepare from scratch, or for a last-minute revision before the intervi
 | --- | --- |
 | [**LeetCode sheets**](https://umangkumarr.github.io/CodePrime/docs/leetcode/) | Striver SDE sheet (177 problems in 27 sections), Striver DP, Blind 75, company interview lists and more |
 | [**DSA fundamentals**](https://umangkumarr.github.io/CodePrime/docs/dsa/) | Bit manipulation, number theory and trees, from first principles |
-| [**System design**](https://umangkumarr.github.io/CodePrime/system-design/) | How real products work end to end, and what changed as they scaled |
+| [**System design**](https://umangkumarr.github.io/CodePrime/system-design/) | 46 interview case studies, easy to hard (URL shortener, WhatsApp, Uber, Google Docs and more), plus a guide to answering the interview. Each has diagrams, estimates, trade-offs and a revision cheat sheet |
 | [**Project Euler+**](https://umangkumarr.github.io/CodePrime/docs/project-euler/) | Maths-heavy challenges where brute force fails |
 
 Or [browse by topic](https://umangkumarr.github.io/CodePrime/docs/tags/): arrays, trees, dynamic programming, graphs, two pointers and dozens more.
@@ -77,7 +77,7 @@ npm run dev        # http://localhost:4321/CodePrime/
 | `src/content/docs/docs/dsa/` | DSA fundamentals articles |
 | `src/content/docs/docs/interviews/` | Company interview lists |
 | `src/content/docs/docs/project-euler/` | Project Euler+ solutions |
-| `src/content/docs/system-design/` | System design overview and case studies |
+| `src/content/docs/system-design/` | System design overview, the how-to-answer guide and case studies in `case-studies/{easy,medium,hard}/` |
 | `src/data/sidebar.json` | Sidebar groups; the LeetCode sheet pages are generated from it |
 | `src/plugins/` | Markdown pipeline: problem layout, language tabs, base-path links |
 | `src/components/` | Problem header, notes scratchpad, track pages, Starlight overrides |
