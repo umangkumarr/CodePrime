@@ -1,6 +1,6 @@
 ---
 title: "Design Google Maps (maps, routing, ETAs, live traffic)"
-description: "Design a Google Maps-scale service: the map tile pyramid and CDN, routing with Dijkstra, A* and contraction hierarchies, live traffic from phones, ETAs and rerouting."
+description: "Design Google Maps: map tiles and CDN, routing with Dijkstra, A* and contraction hierarchies, live traffic from phones, ETAs and rerouting."
 difficulty: "Hard"
 sidebar:
   label: "Google Maps (routing, ETAs, traffic)"

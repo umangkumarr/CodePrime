@@ -1,6 +1,6 @@
 ---
 title: "Design a Distributed Locking Service (like Chubby / ZooKeeper / etcd locks)"
-description: "Design a distributed lock service: leases, process pauses and fencing tokens, the Redlock debate, Raft consensus, ZooKeeper and etcd lock recipes, sessions and scaling."
+description: "Design a distributed lock service: leases, process pauses and fencing tokens, the Redlock debate, Raft, ZooKeeper and etcd lock recipes, and scaling."
 difficulty: "Hard"
 sidebar:
   label: "Distributed lock (like Chubby)"

@@ -1,6 +1,6 @@
 ---
 title: "Design a Unified Payments Interface (UPI)"
-description: "How India's UPI moves money in seconds: PSP apps, banks and the NPCI switch, UPI IDs, PIN security, pay and collect flows, pending transactions and exactly-once payments."
+description: "How India's UPI moves money in seconds: PSP apps, banks, the NPCI switch, UPI IDs, PIN security, pay and collect flows, and exactly-once payments."
 difficulty: "Easy"
 sidebar:
   label: "UPI (India's real-time payments)"

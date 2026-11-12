@@ -1,6 +1,6 @@
 ---
 title: "Design Uber (ride hailing)"
-description: "Design a ride-hailing service like Uber: live driver locations in an in-memory H3 geo index, ETA-based dispatch, the trip state machine, surge pricing and failover."
+description: "Design a ride-hailing service like Uber: live driver locations in an H3 geo index, ETA-based dispatch, the trip state machine, surge pricing."
 difficulty: "Hard"
 sidebar:
   label: "Uber (ride hailing)"

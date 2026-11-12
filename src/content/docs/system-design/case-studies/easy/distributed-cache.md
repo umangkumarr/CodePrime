@@ -1,6 +1,6 @@
 ---
 title: "Design a Distributed Cache (like Memcached / Redis Cluster)"
-description: "Design a distributed cache like Memcached or Redis Cluster: caching patterns, LRU and TTL eviction, consistent hashing, replication, hot keys and cache stampedes."
+description: "Design a distributed cache like Redis Cluster: caching patterns, LRU and TTL eviction, consistent hashing, replication, hot keys and cache stampedes."
 difficulty: "Easy"
 sidebar:
   label: "Distributed cache (like Redis)"

@@ -1,6 +1,6 @@
 ---
 title: "Design a Code Deployment System (CI/CD at scale)"
-description: "Design CI/CD from commit to production: webhooks, hermetic cached builds, immutable artefacts, a pipeline DAG with gates, canary rollouts and automatic rollback."
+description: "Design CI/CD from commit to production: hermetic cached builds, immutable artefacts, a pipeline DAG with gates, canary rollouts and automatic rollback."
 difficulty: "Hard"
 sidebar:
   label: "Code deployment (CI/CD)"

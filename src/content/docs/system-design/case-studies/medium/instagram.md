@@ -1,6 +1,6 @@
 ---
 title: "Design Instagram (photo sharing)"
-description: "Design a photo-sharing app step by step: direct uploads to object storage, a media pipeline and CDN, the follow graph, a hybrid fan-out feed, counters, stories and IDs."
+description: "Design Instagram: direct uploads to object storage, a media pipeline and CDN, the follow graph, a hybrid fan-out feed, counters and stories."
 difficulty: "Medium"
 sidebar:
   label: "Instagram (photo sharing)"

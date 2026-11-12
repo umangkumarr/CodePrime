@@ -1,6 +1,6 @@
 ---
 title: "Design a Parking Garage System"
-description: "Design a parking garage step by step: the object model, spot allocation with no double booking, tickets, pricing, payments, reservations and gates that work offline."
+description: "Design a parking garage system: the object model, spot allocation without double booking, tickets, pricing, payments, reservations and offline gates."
 difficulty: "Easy"
 sidebar:
   label: "Parking garage"

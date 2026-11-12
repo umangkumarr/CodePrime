@@ -8,6 +8,10 @@
  *  - JSON-LD: a TechArticle describing what the page teaches, and a BreadcrumbList
  *    (Home › LeetCode › sheet › problem) that Google can show instead of the raw URL.
  *
+ * System design case studies and the how-to-answer guide get the same treatment, with short titles like
+ * "URL shortener (like TinyURL) — System Design | CodePrime" and breadcrumbs
+ * Home › System Design › page.
+ *
  * Every value comes from the page's front matter and src/data/sidebar.json, so new pages get this automatically.
  */
 import {defineRouteMiddleware} from '@astrojs/starlight/route-data';
@@ -47,7 +51,9 @@ export const onRequest = defineRouteMiddleware((context) => {
       ? 'dsa'
       : id.startsWith('docs/project-euler/') && id !== 'docs/project-euler'
         ? 'euler'
-        : undefined;
+        : id.startsWith('system-design/case-studies/') || id === 'system-design/how-to-answer'
+          ? 'system'
+          : undefined;
   if (!kind) return;
 
   const site = context.site ?? new URL('https://umangkumarr.github.io');
@@ -57,13 +63,20 @@ export const onRequest = defineRouteMiddleware((context) => {
   const {title, description, tags = [], difficulty, source} = entry.data;
 
   // Title shaped like the searches people make.
+  // System design titles are long ("Design a File Sharing and Sync System (like Dropbox / Google Drive)"); Google
+  // shows about 60 characters, so the <title> uses the short sidebar label instead.
+  const shortName: string = entry.data.sidebar?.label ?? title;
   const eulerNumber = kind === 'euler' ? String(parseInt(id.split('/').pop() ?? '', 10)) : '';
   const searchTitle =
     kind === 'problem'
       ? `${title} — Solution in ${LANGS}`
       : kind === 'euler'
         ? `Project Euler ${eulerNumber}: ${title} — ${LANGS}`
-        : `${title} — Explained with ${LANGS}`;
+        : kind === 'system'
+          ? /system design/i.test(title)
+            ? title
+            : `${shortName} — System Design`
+          : `${title} — Explained with ${LANGS}`;
   const titleTag = head.find((h) => h.tag === 'title');
   if (titleTag) titleTag.content = `${searchTitle} | ${SITE_NAME}`;
   setMeta(head, 'property', 'og:title', searchTitle);
@@ -77,6 +90,8 @@ export const onRequest = defineRouteMiddleware((context) => {
     if (sheet) crumbs.push({name: sheet, url: abs(groupRoute('leetcode', sheet))});
   } else if (kind === 'dsa') {
     crumbs.push({name: 'DSA Fundamentals', url: abs('/docs/dsa/')});
+  } else if (kind === 'system') {
+    crumbs.push({name: 'System Design', url: abs('/system-design/')});
   } else {
     crumbs.push({name: 'Project Euler+', url: abs('/docs/project-euler/')});
   }
@@ -86,7 +101,7 @@ export const onRequest = defineRouteMiddleware((context) => {
   const article: Record<string, unknown> = {
     '@type': 'TechArticle',
     '@id': `${url}#article`,
-    headline: searchTitle,
+    headline: kind === 'system' && title.length <= 110 ? title : searchTitle,
     name: title,
     description,
     url,
@@ -97,7 +112,10 @@ export const onRequest = defineRouteMiddleware((context) => {
     author: {'@id': PERSON_ID},
     publisher: {'@id': PERSON_ID},
     isPartOf: {'@type': 'WebSite', '@id': `${abs('/')}#website`, name: SITE_NAME, url: abs('/')},
-    keywords: [title, ...tags, 'C++', 'Java', 'Python', kind === 'euler' ? 'Project Euler' : 'coding interview'].join(', '),
+    keywords: (kind === 'system'
+      ? [title, ...tags, 'system design', 'system design interview']
+      : [title, ...tags, 'C++', 'Java', 'Python', kind === 'euler' ? 'Project Euler' : 'coding interview']
+    ).join(', '),
     about: tags.map((t: string) => ({'@type': 'Thing', name: t})),
   };
   if (proficiency) article.proficiencyLevel = proficiency;
