@@ -1,6 +1,6 @@
 ---
 title: "Design Reddit (communities, posts, voting, threaded comments)"
-description: "Design a Reddit-scale forum: subreddits, voting at scale, hot/top/new ranking, precomputed listings, threaded comment trees, moderation, anti-spam and viral posts."
+description: "Design a Reddit-scale forum: subreddits, voting at scale, hot/top/new ranking, precomputed listings, threaded comment trees, moderation, anti-spam, viral posts."
 difficulty: "Medium"
 sidebar:
   label: "Reddit (communities and voting)"
@@ -315,7 +315,8 @@ Is a comment with 1 upvote and 0 downvotes (100% positive) better than one with 
 ratio says yes, which is clearly wrong: one vote proves very little. The **"best"** sort ranks by the **lower bound
 of the Wilson score interval**: "given these votes, we are 95% sure the true upvote ratio is at least this much".
 For 1 of 1 the lower bound is about **0.21**; for 90 of 100 it is about **0.83**. Few votes mean wide uncertainty and
-a low bound; many consistent votes mean a high one. This is how a good late reply can still rise above an early,
+a low bound; many consistent votes mean a high one. (Reddit's open-source code uses a looser 80% level, which gives
+about 0.38 and 0.85; the ordering is the same.) This is how a good late reply can still rise above an early,
 lightly voted one.
 
 ## 9. Deep dive: precomputed listings and the front page
@@ -429,7 +430,8 @@ Moderation is layered, cheapest and fastest first:
 - **Reports from users** feed both the queue and the spam models.
 - **Site-wide admins** handle illegal content and policy violations across all communities.
 
-Archiving (Reddit archives old posts, by default after six months) makes old threads read-only. That is good for
+Archiving makes old threads read-only (Reddit lets each community choose whether posts are archived after six
+months). That is good for
 moderation (no necro-spam on forgotten threads) and for the system: archived posts never change, so they can be
 cached forever and dropped from live ranking.
 

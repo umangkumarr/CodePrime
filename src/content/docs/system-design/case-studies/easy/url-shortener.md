@@ -171,7 +171,7 @@ rate limit.
 
 Notice that the redirect path, `GET /{code}`, lives on the **root of the short domain** and is not under `/api`.
 That keeps the short URL short, and it means we must **reserve** words such as `api`, `login`, `admin` and `help`
-so nobody can register them as custom aliases.
+so nobody can register them as custom aliases. (The diagrams below drop the `/v1` version prefix to save space.)
 
 Should shortening the same long URL twice return the same code? It is tempting, because it saves space, but two
 users shortening the same page usually want **separate** links: each has its own owner, expiry and click counts.
@@ -302,9 +302,12 @@ How it works:
 **The catch: sequential codes are guessable.** If my link is `kYJb`, I can try `kYJc`, `kYJd` and so on, and read
 other people's links, which may point to private documents. Two common fixes:
 
-1. **Scramble the number before encoding it.** Apply a reversible, collision-free shuffle to the ID, for example
-   multiplying by a large odd constant modulo $62^7$, or a small block cipher designed for a fixed range of numbers.
-   Each ID still maps to exactly one code, so uniqueness is kept, but neighbouring IDs produce codes that look
+1. **Scramble the number before encoding it.** Apply a reversible, collision-free shuffle to the ID. The simplest
+   is multiplying by a large constant modulo $62^7$; the constant must share no factor with $62^7 = 2^7 \times 31^7$
+   (odd and not a multiple of 31), or two IDs could land on the same code. That only hides the order from a casual
+   look, because consecutive codes still differ by the same constant. A determined guesser is stopped by a small
+   block cipher with a secret key, designed for a fixed range of numbers (format-preserving encryption). Either
+   way each ID still maps to exactly one code, so uniqueness is kept, but neighbouring IDs produce codes that look
    unrelated.
 2. **Add a few random characters** to each code. This makes codes longer but makes guessing hopeless.
 
@@ -320,6 +323,11 @@ marks those as used so no one else gets them.
 - As with ranges, keys held by a server that crashes are wasted, which is acceptable.
 - The cost is an extra service and table to run, and the key store must be replicated so it is not a single point
   of failure.
+
+One limit applies to every approach: "unguessable" stops someone walking from one code to its neighbours, but it
+cannot stop **random** guessing. With 12 billion of 3.5 trillion seven-character codes in use, about one random
+guess in 300 hits a real link, however the codes were made. That is why rate limits on `404`s (section 16) and not
+putting secrets behind short links matter as much as the code scheme.
 
 ### Which one to choose?
 
@@ -373,7 +381,8 @@ Design decisions in this diagram:
 3. **`status`** (active or disabled) lets us switch a link off without deleting it, so we keep the evidence when we
    take down a phishing link.
 4. **`daily_clicks` lives in the analytics store, not in the URL database.** Counting clicks means a write on every
-   redirect; keeping those writes away from the mapping table protects the hot path. Its key `(code, day, country)`
+   redirect; keeping those writes away from the mapping table protects the hot path. Since the two stores are separate, `code` here is a
+   logical reference, not an enforced foreign key. Its key `(code, day, country)`
    matches the question owners ask: "clicks per day, by country, for this link".
 
 ### Which database?
@@ -420,7 +429,8 @@ That is the ideal case for a cache.
   safety net that bounds how long a stale entry can live.
 - **Invalidation:** when a link is disabled, deleted or has its expiry changed, the write path also **deletes** the
   cache entry. The next redirect misses, reads the new state and refills the cache. Deleting is safer than
-  updating: two concurrent updates can leave the wrong value behind, a deletion cannot.
+  updating: two concurrent updates can leave the wrong value behind, while a deletion simply makes the next read
+  fetch the current row. (A rare race can still re-cache an old value; the TTL bounds how long it lives.)
 - **Negative caching:** remember "this code does not exist" for a minute, so scanners cannot hammer the database.
 - **The hot key problem.** One link receiving 50,000 clicks a second all lands on the **one** cache node that owns
   that key. Fixes: keep a tiny **in-process cache** (inside each redirect server's memory) for the top few thousand
@@ -450,7 +460,8 @@ How it fits together:
 - **The queue** (for example Kafka, a durable, replayable log of messages) absorbs bursts. Keying by code keeps one
   link's events in order on one partition.
 - **The stream aggregator** counts in memory, for example "link `kYJb`, 14:05, India: 312 clicks", and writes one
-  row per minute instead of one per click. That turns 3,900 writes per second into a few hundred.
+  row per minute instead of one per click. A viral link's thousands of clicks a minute become a handful of rows, so
+  the store receives far fewer writes than the 3,900 clicks per second.
 - **The analytics store** is a column-oriented database built for adding up large tables (ClickHouse, Druid,
   BigQuery and similar). The stats API reads it.
 - **Raw events go to cheap object storage** as well. If we find a bug in the counting logic, we can replay history

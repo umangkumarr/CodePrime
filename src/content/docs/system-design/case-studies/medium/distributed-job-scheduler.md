@@ -4,7 +4,7 @@ description: "Design cron at scale: one-off and recurring jobs, finding due runs
 difficulty: "Medium"
 sidebar:
   label: "Distributed job scheduler (cron)"
-tags: ["Scheduling", "Queues", "Distributed Systems", "Fault Tolerance", "Databases"]
+tags: ["Scheduling", "Queues", "Distributed systems", "Fault tolerance", "Databases"]
 ---
 
 Every large company runs millions of small tasks on a timer. Send the daily summary email at 08:00. Retry
@@ -221,7 +221,7 @@ same job at once cannot silently overwrite each other.
 
 ## 7. Flow: dispatching one due run
 
-The nightly report job has a run `r1` due at 10:05:00 in partition 7.
+The daily report job has a run `r1` due at 10:05:00 in partition 7.
 
 [![Sequence: the scheduler that owns partition 7 asks the job store for runs due in bucket 10:05, gets r1, claims it with a conditional update that only succeeds if r1 is still scheduled, creates the next run r2, and enqueues r1; the queue delivers r1 to a worker, which marks it running with a 30 second lease and token 8, heartbeats every 10 seconds, records success with token 8 and acknowledges the queue message](/img/system-design/distributed-job-scheduler/03-dispatch.png)](/img/system-design/distributed-job-scheduler/03-dispatch.png)
 
@@ -243,7 +243,9 @@ Things worth noticing:
   succeeds, fails or takes an hour. Steps 3 and 4 go in one transaction so we never lose the next run.
 - **Order matters between step 3 and step 5.** We mark the run `queued` *before* enqueuing. If the scheduler
   crashes in between, the run sits in `queued` but was never sent. A sweeper finds runs stuck in `queued` for
-  longer than, say, a minute and enqueues them again. (The reverse order would risk a run that is in the queue
+  longer than, say, a minute and enqueues them again. If the run had in fact been sent and is only waiting
+  behind a backlog, the second copy is harmless: the worker's claim (step 7) is itself conditional on the run
+  still being `queued`, so only one copy ever starts. (The reverse order would risk a run that is in the queue
   but still `scheduled`, which the next poll would enqueue a second time.)
 - **The worker takes a lease** (step 7) and keeps renewing it (step 8). The lease is how the system learns,
   without any explicit "I died" message, that a worker is gone.
@@ -363,7 +365,8 @@ A worker that crashes cannot tell anyone. So we turn silence into a signal:
 - When a worker claims a run, it gets a **lease** (say 30 seconds) and a **fencing token**, a number that
   increases every time the run is handed out.
 - While working, it **heartbeats** every 10 seconds, pushing the lease forward. Heartbeat interval is usually
-  a third of the lease, so two missed heartbeats in a row do not kill a healthy run.
+  a third of the lease, so a single lost heartbeat does not kill a healthy run. Heartbeats carry the token too,
+  so a zombie cannot extend a lease it no longer holds.
 - A **lease reaper** (part of the scheduler) regularly looks for runs where `lease_expires_at < now()` and puts
   them back into retry, with the attempt number and fencing token increased.
 
@@ -403,7 +406,7 @@ Not every failure deserves a retry, and retrying too eagerly can turn a small ou
 - **Exponential backoff:** wait `base × 2^attempt`, capped. With a 10-second base: 10 s, 20 s, 40 s, 80 s… This
   gives a struggling dependency room to recover instead of being hammered.
 - **Jitter:** add a random amount (for example a random value between 0 and the computed delay). Without it,
-  a thousand runs that failed together at 10:00 all retry together at 10:00:20 and fail together again.
+  a thousand runs that failed together at 10:00 all retry together at 10:00:10 and fail together again.
 - **Retry scheduling reuses the scheduler.** A retry is just the same run put back into `due_runs` with a new
   time. No special retry machinery is needed.
 - **Dead-letter queue:** after `max_attempts`, the run moves to the DLQ with its last error. Humans fix the
@@ -489,14 +492,15 @@ seconds off. Rules that keep us safe:
 
 ## 15. Deep dive: missed runs after an outage (catch-up)
 
-Suppose the scheduler, or a downstream system, is down from 02:00 to 05:00. An every-15-minutes job missed 12
-runs. What should happen at 05:00? It depends on the job, so it is a per-job **catch-up policy**:
+Suppose the scheduler, or a downstream system, is down from 02:00 to 04:50. An every-15-minutes job missed 12
+runs (02:00, 02:15, …, 04:45). What should happen at 04:50? It depends on the job, so it is a per-job
+**catch-up policy**:
 
-| Policy | What happens at 05:00 | Good for |
+| Policy | What happens at 04:50 | Good for |
 | --- | --- | --- |
 | **Run all missed** (backfill) | All 12 runs are dispatched, oldest first | Jobs that process "the data for that interval", like hourly billing |
 | **Run once** (latest only) | One run now; the other 11 are marked `skipped` | "Refresh the cache", "sync the latest state" |
-| **Skip** | Nothing now; wait for 05:15 | Time-sensitive jobs: "send the 08:00 reminder" is pointless at 11:00 |
+| **Skip** | Nothing now; wait for the 05:00 run | Time-sensitive jobs: "send the 08:00 reminder" is pointless at 11:00 |
 
 Supporting details:
 

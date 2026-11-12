@@ -1,6 +1,6 @@
 ---
 title: "Design Spotify (Music Streaming)"
-description: "Design a Spotify-scale music service: encodings and bitrates, chunked streaming with a CDN, fast playback start, playlists, offline DRM, exact play counts and recommendations."
+description: "Design a Spotify-scale music service: bitrate ladders, CDN streaming, fast playback start, shared playlists, offline DRM, exact play counts and recommendations."
 difficulty: "Medium"
 sidebar:
   label: "Spotify (music streaming)"
@@ -397,14 +397,18 @@ this only if the files cannot simply be copied out of the app. That is what DRM 
   device and app install. Copying the file and key to another device gets you nothing usable.
 - **An offline licence has an expiry.** The device must check in periodically to renew it, which is when the
   service confirms the subscription is still active and the tracks are still licensed. Spotify's help pages
-  state that downloads need the app to go online at least once every **30 days**, and limit downloads to
-  **10,000 songs on each of up to 5 devices**.
+  state that downloads need the app to go online at least once every **30 days** (otherwise they are
+  removed), and limit downloads to **10,000 songs on each of up to 5 devices**.
 - **Limits are enforced on the server.** The licence service tracks which devices hold downloads; a sixth
   device has to free a slot first.
 
 [![Lifecycle of a downloaded track: not downloaded, queued, downloading, playable offline; downloading pauses when the network is lost and resumes from the last byte range; after 30 days offline the licence expires and the file is kept but cannot play until the app goes online and renews; if the plan has ended the file and key are deleted](/img/system-design/spotify/07-offline.png)](/img/system-design/spotify/07-offline.png)
 
 *Select the diagram to zoom in and move around.*
+
+The diagram keeps the encrypted file when the licence expires, so renewing does not mean downloading it
+again; deleting the downloads, as Spotify does, is the simpler choice. Either way, nothing plays without a
+valid licence.
 
 No DRM is unbreakable: a determined attacker controls the device. The honest goal is to make copying **harder
 than paying**, and to make each leak small (one file, one key, one device). Plays made offline still count:
@@ -443,11 +447,13 @@ three wrong, and at 330,000 events per second it would also melt the database.
    recomputed: the batch job simply reruns over the affected days.
 
 ```sql
--- Daily royalty count, conceptually (the real job runs on a distributed engine)
+-- Daily royalty count, conceptually (the real job runs on a distributed engine).
+-- Only the "stream" event (sent once per play at 30 s) counts; DISTINCT drops retried copies.
 SELECT track_id, country, COUNT(*) AS streams
 FROM (SELECT DISTINCT event_id, track_id, country
       FROM play_events
-      WHERE event_date = '2026-11-11' AND ms_played >= 30000 AND NOT flagged_fraud) t
+      WHERE event_date = '2026-11-11' AND event_type = 'stream'
+        AND ms_played >= 30000 AND NOT flagged_fraud) t
 GROUP BY track_id, country;
 ```
 

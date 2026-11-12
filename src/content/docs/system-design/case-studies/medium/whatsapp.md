@@ -78,7 +78,7 @@ Two facts from this vocabulary drive every decision below:
 | --- | --- | --- |
 | **Latency** | Under ~500 ms end to end when both people are online; ideally around 100–200 ms within a region | It must feel like a conversation |
 | **Reliability** | Never lose a message the server has acknowledged; never show a message twice | A lost "I'm on my way" is worse than a slow one |
-| **Ordering** | Messages in a chat appear in the same order for everyone | Replies that jump ahead of their question are confusing |
+| **Ordering** | Each sender's messages appear in the order they were sent; a group shows one order to every member | Replies that jump ahead of their question are confusing |
 | **Availability** | 99.99%; a server crash should cost a reconnect, not a message | People rely on chat for everything from family to work |
 | **Scale** | ~2 billion users, ~1 billion daily active, hundreds of millions connected at once | WhatsApp-sized |
 | **Privacy** | E2EE; store as little as possible, for as short a time as possible | Messages are among the most private things people write |
@@ -315,9 +315,11 @@ What ordering do we actually guarantee?
   sends them over one connection, the server appends them to Bob's inbox in arrival order, and the inbox is
   delivered in sequence order. If a message is retried, the app does not send the next one until the earlier
   one is acked (or it sends them with their own sequence numbers so the server can put them back in order).
-- **Between two senders in a 1:1 chat: arrival order at the server.** If Alice and Bob both send at the same
-  instant, each sees their own message first for a moment; when the server assigns order, the apps settle on it.
-  This is acceptable for chat, and nobody can do better without making one of them wait.
+- **Between two senders in a 1:1 chat: no single order.** Alice's message goes into Bob's inbox and Bob's into
+  Alice's, so there is no shared sequence for the chat. If both press Send at the same instant, each phone shows
+  its own message first, and the two screens can disagree on the order of those two lines. This is acceptable
+  for chat; a shared order would need a sequencer per conversation and a round trip before showing your own
+  message.
 - **In a group: one order for everyone.** Each group has a log owned by one place (the shard that owns the
   group), and that owner stamps every message with the next group sequence number. All members then sort by it,
   so everyone sees the same conversation.
@@ -348,7 +350,9 @@ A chat app with a group cap around a thousand uses **fan-out on write**: 1,000 s
 every member the same instant, push-based delivery as 1:1 chat. Two tricks keep it efficient:
 
 - **Store the body once, fan out pointers.** Each inbox entry is a small reference to the stored message, not a
-  copy of it.
+  copy of it. Every member's device gets an entry, online or not; the diagram separates the two paths only to
+  show that online members are also pushed the message at once. As in Flow 1, the inbox entry is what makes a
+  lost push harmless.
 - **Fan out asynchronously.** The chat server stores the message, acks Alice, and hands fan-out to a queue and
   worker pool. A burst into a large group then cannot stall Alice's connection.
 
@@ -382,7 +386,8 @@ idea without the maths.
 
 Step by step:
 
-1. **Keys are born on the device.** At install, each device generates a long-term **identity key pair** and a
+1. **Keys are born on the device.** At install, each device generates a long-term **identity key pair**, a
+   **signed prekey** (rotated every so often and signed with the identity key, so the server cannot swap it) and a
    batch of one-time **prekeys**. The private halves never leave the phone. The public halves are uploaded to
    the key server, which is just a directory: knowing public keys does not let you decrypt anything.
 2. **Starting a session works even if Bob is offline.** Alice downloads Bob's public **key bundle** and combines
@@ -418,8 +423,9 @@ What this means for the system design:
   The chat servers never touch the megabytes.
 - **The key travels in the message.** The chat message carries the media ID, `K`, a hash of the encrypted file
   (so Bob can detect tampering or corruption), and a tiny blurred thumbnail so the chat shows something at once.
-- **Download through a CDN.** Bob's phone fetches the blob from a nearby CDN cache; only the first download in a
-  region goes back to the object store. In a 500-person group, that saves the origin 499 downloads.
+- **Download through a CDN.** Bob's phone fetches the blob from a nearby CDN cache; only a cache miss goes back
+  to the object store. In a 500-person group, the origin serves a handful of downloads (about one per edge
+  location) instead of 500.
 - **Retention.** Since the server cannot see the photo, it cannot do anything useful with it after delivery.
   A typical design keeps media for a limited time, long enough for every recipient to download it, then deletes
   it. Forwarding an already uploaded file can reuse the same blob (same ID and key), which saves re-uploading
@@ -485,7 +491,7 @@ Phones aggressively suspend background apps, so an open socket cannot be relied 
 
 ## 14. Low-level design: the data model and storage choices
 
-[![Data model: groups have group_members; users create groups and join them; users have devices; devices publish prekeys and have pending inbox entries keyed by user_id, device_id and seq, each holding a unique message_id, the sender, the chat and the ciphertext](/img/system-design/whatsapp/09-data-model.png)](/img/system-design/whatsapp/09-data-model.png)
+[![Data model: groups have group_members; users create groups and join them; users have devices; devices publish prekeys and have pending inbox entries keyed by user_id, device_id and seq, each holding the message_id (unique within that device's inbox), the sender, the chat and the ciphertext](/img/system-design/whatsapp/09-data-model.png)](/img/system-design/whatsapp/09-data-model.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -495,8 +501,9 @@ Design decisions hidden in this diagram:
 operations trivial: *append* at the end, and *read everything after N* as one sequential range scan. All of a
 device's pending messages live in one partition, on one set of replicas.
 
-**2. `message_id` is unique.** The delivery path checks it before inserting, so a retried send cannot create a
-second copy. This is how we get "never twice" on top of "at least once" delivery.
+**2. `message_id` is unique within a device's inbox.** The same message lands in several inboxes (each of Bob's
+devices, every group member), so uniqueness is per `(user_id, device_id, message_id)`. The delivery path checks it
+before inserting, so a retried send cannot create a second copy. This is how we get "never twice" on top of "at least once" delivery.
 
 **3. The inbox is a queue, so it stays small.** Rows are deleted after the device acks them, with a TTL as a
 backstop. Deletes create **tombstones** (markers that the data was removed) in wide-column stores like
@@ -542,7 +549,7 @@ hop retries until it gets an ack, and every receiver drops IDs it has already se
 in the same second and overload the load balancers, authentication and the registry. *Fix:* exponential
 backoff with jitter on clients, slow draining during deploys, and connection-rate limits on each chat server.
 
-**The hot registry key.** Every message does a registry lookup, so the registry carries more reads than any
+**The registry hot path.** Every message does a registry lookup, so the registry carries more reads than any
 other store. *Fix:* shard it by user, replicate each shard, and let chat servers cache "Bob is on server B"
 briefly, falling back to the inbox if the forward fails.
 

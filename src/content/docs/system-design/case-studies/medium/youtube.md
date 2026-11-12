@@ -14,8 +14,8 @@ network** that puts those versions close to two billion viewers, a **referee** c
 copyrighted material and the rules, and a **scoreboard** that counts billions of views without being fooled by
 bots.
 
-The thing that makes it different from Netflix is **who supplies the videos**. Netflix has a few thousand
-carefully produced titles that it encodes once, with great care, and can predict who will watch. YouTube has
+The thing that makes it different from Netflix is **who supplies the videos**. Netflix has thousands of
+carefully produced films and series that it encodes once, with great care, and can predict who will watch. YouTube has
 hundreds of hours of new video uploaded **every minute** by anyone, most of which few people will ever watch,
 and a few of which will be watched hundreds of millions of times within days. Uploads, the processing
 pipeline and that **long tail** of rarely watched videos shape this whole design.
@@ -87,7 +87,7 @@ the video editor, and digital rights management. Mention them, then set them asi
 :::note[How is this different from Netflix?]
 | | Netflix-style service | YouTube-style service |
 | --- | --- | --- |
-| Who uploads | The company, a few thousand titles | Anyone, hundreds of hours a minute |
+| Who uploads | The company, thousands of films and series | Anyone, hundreds of hours a minute |
 | Encoding | Slow, careful, per-title tuning; time is cheap per title | Must be fast and automatic for every upload |
 | Popularity | Few titles, mostly predictable; can pre-position everything | Huge catalogue, power-law popularity, viral surprises |
 | Hard parts | Delivery, personalisation | Uploads, processing pipeline, long tail, abuse, counting |
@@ -203,7 +203,7 @@ A creator uploads a 2 GB file from a laptop on a train. With one plain HTTP requ
 95% means starting again, and on mobile networks that can happen every time. So uploads are **resumable and
 chunked**.
 
-[![Sequence for a resumable upload: the creator app opens a session and the upload service reserves a video_id in the metadata DB and returns a session URL; chunks are sent and appended to the raw store with a 308 reply saying how many bytes arrived; after a dropped chunk the app asks how much was received and resumes from byte 16 MB; the last chunk seals the file, status becomes uploaded and a video.uploaded event goes to the job queue](/img/system-design/youtube/02-upload.png)](/img/system-design/youtube/02-upload.png)
+[![Sequence for a resumable upload: the creator app opens a session and the upload service reserves a video_id in the metadata DB and returns a session URL; chunks are sent and appended to the raw store with a 308 reply saying how many bytes arrived; after a dropped connection (the bytes arrived but the reply was lost) the app asks how much was received and resumes from byte 16 MB; the last chunk seals the file, status becomes uploaded and a video.uploaded event goes to the job queue](/img/system-design/youtube/02-upload.png)](/img/system-design/youtube/02-upload.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -382,7 +382,8 @@ Things worth noticing:
   speed and how many seconds are already buffered. A full buffer allows a higher quality; a draining buffer
   forces a step down before the video stalls. The server only has to serve files.
 - **Seeking** is cheap: the manifest says which segment holds minute 37, and the player fetches just that one.
-- **Every cache that misses keeps a copy**, so the next viewer in that region gets a hit.
+- **Every cache that misses can keep a copy**, so the next viewer in that region gets a hit (the edge
+  is choosier about what it keeps; see admission in section 10).
 
 ## 10. Deep dive: the CDN and the long tail
 
@@ -397,6 +398,8 @@ platform.
   hot content for no benefit. They are served from the origin, a little more slowly, and that is fine.
 
 [![Serving a segment: a request goes to the edge lookup; a hit (most traffic) is served directly; on a miss it goes to the regional lookup and, on another miss, to the video store; the returned segment passes an admit-to-edge check, which keeps it or passes it through to the viewer; a pre-warm job copies predicted hot videos to the edge early](/img/system-design/youtube/07-cache-tiers.png)](/img/system-design/youtube/07-cache-tiers.png)
+
+*Select the diagram to zoom in and move around.*
 
 The techniques that make this work:
 

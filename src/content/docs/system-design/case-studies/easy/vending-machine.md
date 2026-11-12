@@ -4,7 +4,7 @@ description: "Design a vending machine end to end: classes and the state pattern
 difficulty: "Easy"
 sidebar:
   label: "Vending machine"
-tags: ["Object-Oriented Design", "State Machines", "Payments", "IoT", "Algorithms"]
+tags: ["Object-oriented design", "State machines", "Payments", "IoT", "Algorithms"]
 ---
 
 A vending machine is the classic warm-up for **object-oriented design** (OOD) interviews, and for good reason.
@@ -269,8 +269,9 @@ def make_change(amount, tubes):          # tubes: {coin value: count}, amounts i
     return plan[amount]                  # None means exact change is impossible
 ```
 
-For the example, `make_change(6, {5: 1, 2: 3})` returns `[2, 2, 2]`. The cost is
-$O(A \times C)$ where $C$ is the number of coins in the tubes. A real machine works in its smallest coin unit, owes
+For the example, `make_change(6, {5: 1, 2: 3})` returns `[2, 2, 2]`. It runs
+$O(A \times C)$ steps, where $C$ is the number of coins in the tubes (copying lists keeps the code short; storing
+a coin count and a back-pointer per amount instead makes each step constant time). A real machine works in its smallest coin unit, owes
 at most a few hundred rupees and holds a few hundred coins, so this is tens of thousands of steps: instant even on a
 small controller.
 
@@ -394,7 +395,7 @@ others empty since yesterday. With it, the van goes where the stock is needed.
   misses, say, three in a row, the health monitor opens a ticket. A missed heartbeat alone may just be a dead modem,
   so the ticket says "unreachable", not "broken".
 - **Events carry a per-machine sequence number** (from the journal). The cloud drops duplicates and notices gaps,
-  which the agent fills by resending from its local store. MQTT's "at least once" delivery plus de-duplication by
+  which the agent fills by resending from its local store. MQTT's QoS 1 ("at least once") delivery plus de-duplication by
   sequence number gives effectively exactly-once processing.
 - **Stock is tracked per slot**: last restock count minus vends since. A slot is "low" when it will run out before the
   next planned visit, which a simple forecast from recent sales rate gives: hours left = items left ÷ items sold per

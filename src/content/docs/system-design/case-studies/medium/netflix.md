@@ -1,10 +1,10 @@
 ---
 title: "Design Netflix (video on demand streaming)"
-description: "Design a Netflix-style streaming service: a cloud control plane, ISP-embedded CDN appliances, per-title encoding, adaptive bitrate, DRM and overnight pre-positioning."
+description: "Design a Netflix-style streaming service: a cloud control plane, ISP-embedded CDN appliances, per-title encoding, ABR, DRM and overnight pre-positioning."
 difficulty: "Medium"
 sidebar:
   label: "Netflix (video streaming)"
-tags: ["Video streaming", "CDN", "Encoding", "Caching", "Resilience"]
+tags: ["Video", "CDN", "Encoding", "Caching", "Resilience"]
 ---
 
 You open the app on your TV, pick a show, and within a couple of seconds a sharp picture fills the screen.
@@ -75,7 +75,7 @@ changes almost every decision:
 | **Rebuffering** | As close to zero as possible; quality may drop, but the picture should not freeze | A frozen picture is the most hated failure |
 | **Video quality** | The best quality the network and device can sustain | People pay for HD and 4K |
 | **Availability** | Browsing and play start at 99.99%; streams already playing keep playing even if parts of the cloud fail | Evenings are when everyone watches |
-| **Scale** | 300+ million paid memberships (Netflix's public figure since early 2025), tens of millions of concurrent streams at peak | Global evening peaks |
+| **Scale** | 300+ million paid memberships (Netflix's last reported figure, for the end of 2024), tens of millions of concurrent streams at peak | Global evening peaks |
 | **Cost** | Bandwidth cost per hour watched as low as possible | Video bytes are by far the biggest bill |
 | **Security** | Content encrypted end to end; licences tied to device and plan | Studios require it before licensing content |
 
@@ -195,7 +195,7 @@ A new film arrives from a studio as a **master** (sometimes called a mezzanine f
 lightly compressed file, often hundreds of gigabytes. We cannot stream that. We must turn it into a ladder of
 renditions in several codecs, plus audio tracks and subtitles in many languages.
 
-[![Encoding pipeline: the studio master is split at shot boundaries into chunks; sample shots decide the ladder per title and per shot; encoder workers encode chunks in parallel in AVC, HEVC, VP9 and AV1; chunks are stitched and quality checked with VMAF; streams are packaged into segments, encrypted with keys from the key store, and written to the encoded file store](/img/system-design/netflix/02-encoding.png)](/img/system-design/netflix/02-encoding.png)
+[![Encoding pipeline: the studio master is split at shot boundaries into chunks; sample shots decide the ladder per title and per shot; encoder workers encode chunks in parallel in AVC, HEVC, VP9 and AV1; chunks are stitched and quality checked with VMAF; streams are packaged into segments, encrypted with per-tier keys from the key store, and written to the encoded file store](/img/system-design/netflix/02-encoding.png)](/img/system-design/netflix/02-encoding.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -232,7 +232,9 @@ Each title is encoded in several codecs because devices differ: AVC plays almost
 bits on newer devices, and **AV1** saves more still on devices that can decode it. Add HDR versions, dozens of
 audio tracks (languages, stereo and surround), and subtitles, and **one title can easily become hundreds of
 files**. Each finished rendition is cut into segments (or indexed so byte ranges map to segments), **encrypted**
-with the title's content key, and written to the encoded file store.
+with the title's content keys, and written to the encoded file store. A title typically has several keys,
+for example one per resolution tier (SD, HD, 4K) and one for audio, so a licence can unlock the lower tiers
+without unlocking 4K (section 12).
 
 Things worth noticing:
 
@@ -282,6 +284,8 @@ The thresholds here (10 s, 30 s, 1.5×) are illustrative; real players tune them
 
 - **Protect the buffer first.** When the buffer gets low, drop quality immediately. A blurrier picture is far
   better than a spinning wheel.
+- **Stop when the buffer is full.** Once a few minutes are buffered, the player pauses downloads until it
+  drains a little. Fetching further ahead wastes bytes if the viewer stops or seeks.
 - **Climb cautiously.** Only step up when there is both a healthy buffer and clear spare bandwidth, and one rung
   at a time. Jumping up and down every few seconds ("oscillation") is visibly annoying.
 - **Use both signals.** Throughput estimates are noisy (one fast segment proves little), while buffer level is

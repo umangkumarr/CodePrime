@@ -169,8 +169,10 @@ What each piece does, in one line:
 - **Payment service + ledger:** talks to a **payment provider** (a company such as Stripe or Adyen that
   connects to card networks and banks) and records every money movement in a ledger.
 - **Messaging service:** guest-host conversations.
-- **Event bus** (for example Kafka): every change to listings and calendars is published as an event. The
-  search indexer, the payout scheduler, review reminders and notifications all consume it.
+- **Event bus** (for example Kafka): every change to listings and calendars is published as an event, either
+  by **change data capture** (CDC: a connector that tails the database's change log) or through an **outbox**
+  table written in the same transaction as the change, so an event is never lost or sent for a change that did
+  not commit. The search indexer, the payout scheduler, review reminders and notifications all consume it.
 - **Calendar sync:** imports and exports iCal feeds from other booking sites.
 
 The single most useful idea in this design: **split the read world from the write world.** Searches hit a fast,
@@ -271,6 +273,8 @@ Things worth noticing:
   reservation, not two.
 - **The host hears about it asynchronously.** The booking is done when the database says BOOKED; notifying the
   host, emailing the guest and updating search all happen from the event stream.
+- **Authorise now, capture on confirm.** Steps 4 to 7 only reserve the money on the card; the payment service
+  captures it once the reservation is confirmed (section 11).
 - **For request to book**, step 8 is different: the reservation waits for the host (section 11).
 
 ## 8. Low-level design: the data model
@@ -368,7 +372,10 @@ A hold that is never paid must not block the listing. Two complementary mechanis
 - **A sweeper job** runs every minute: find reservations with `status = 'HELD'` and `hold_expires_at < now()`,
   mark them `EXPIRED` and delete their `listing_night` rows, in one transaction per reservation.
 - **Lazy expiry**: when an insert hits a duplicate key, check whether the existing row belongs to an expired
-  hold; if so, delete it and retry. This frees nights immediately even if the sweeper is behind.
+  hold; if so, expire that hold exactly as the sweeper would (in one transaction, mark its reservation
+  `EXPIRED` with `... WHERE status = 'HELD' AND hold_expires_at < now()`, then delete its nights) and retry.
+  This frees nights immediately even if the sweeper is behind. Deleting the nights **without** marking the old
+  reservation would be a bug: its late payment could still confirm it, on nights now sold to someone else.
 
 The payment must not complete **after** the hold expired. So "confirm" is a conditional update:
 `UPDATE reservation SET status = 'CONFIRMED' WHERE id = :rid AND status = 'HELD'`. If it changes zero rows, the
@@ -401,7 +408,8 @@ down prevents nonsense such as reviewing a stay that was cancelled, or paying ou
 - **Instant book:** HELD → (payment succeeds) → CONFIRMED.
 - **Request to book:** HELD → (card authorised) → AWAITING HOST → CONFIRMED if the host accepts, or
   DECLINED / EXPIRED if the host declines or does not answer in 24 hours. In our design the nights stay held
-  while the host decides, so a second guest cannot book them meanwhile. The alternative, leaving the nights open
+  while the host decides (moving to AWAITING HOST pushes `hold_expires_at` out to the host's 24-hour deadline,
+  and the sweeper expires those too), so a second guest cannot book them meanwhile. The alternative, leaving the nights open
   until the host accepts, sells more but forces the host to decline requests that became impossible.
 - **Card authorisation** reserves the money on the guest's card without taking it. We **capture** (actually take)
   the money when the reservation is confirmed, and **void** the authorisation if it is declined, so a declined
@@ -425,9 +433,11 @@ the guest knows the host is paid only if the stay actually starts, and the host 
 collected.
 
 **The ledger.** Every money movement is written as a **double-entry** record: each entry debits one account and
-credits another, so the totals always balance. When the guest pays 400, the ledger records 400 into "held for
-reservation R", split later into "owed to host" (for example 388) and "platform fees" (the guest and host
-service fees). The ledger is append-only: a mistake is corrected with a new entry, never by editing an old one.
+credits another, so the totals always balance. Take the stay from section 9: three nights at
+120 + 120 + 135 = 375, plus an illustrative guest service fee of 25, so the guest pays 400. The ledger records
+400 into "held for reservation R", split later into "owed to host" 363.75 (375 minus a 3% host service fee of
+11.25) and "platform fees" 36.25 (25 + 11.25). 363.75 + 36.25 = 400: every unit is accounted for. (Fee
+percentages vary by market and fee model; these are only for the arithmetic.) The ledger is append-only: a mistake is corrected with a new entry, never by editing an old one.
 That makes it auditable.
 
 **The payout scheduler** reads confirmed reservations whose check-in has passed (from events or a query on
@@ -587,8 +597,9 @@ payout scheduler by host, and reconcile against providers daily.
    interval for listings with frequent bookings, integrate with channel managers or partner APIs for push updates,
    and add a support flow that finds the guest an equivalent place.
 4. **How would you add a "hotel" listing with 20 identical rooms?** The night is no longer unique. Store a
-   **count** per (listing, night) with capacity, and book with a conditional update:
-   `UPDATE ... SET booked = booked + 1 WHERE booked < capacity`. Zero rows updated means sold out.
+   **count** per (listing, night) with capacity, and book every night of the stay in one transaction with a
+   conditional update: `UPDATE ... SET booked = booked + 1 WHERE listing_id = ? AND night = ? AND booked < capacity`.
+   Zero rows updated for any night means sold out: roll back the whole stay.
 5. **Why not just query the calendar database for search?** Searches outnumber bookings 100 to 1 and need geo and
    full-text queries the transactional DB is not built for. Running them there would slow down bookings, the one
    operation that must never fail. A derived index scales reads independently, and the booking re-check keeps

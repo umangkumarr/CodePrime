@@ -360,7 +360,7 @@ slow per write) and makes an in-memory store with atomic operations and built-in
 
 ### The request flow
 
-[![Request sequence: the client calls GET /v1/orders with key k1; the gateway, holding the rule 100 per minute, runs the bucket script on Redis, which answers allowed with 37 left; the gateway forwards to the orders service and returns 200 with RateLimit-Remaining 37. Later, Redis answers denied with the next token in 2 seconds, and the gateway returns 429 with Retry-After 2 without calling the service](/img/system-design/rate-limiter/04-request-flow.png)](/img/system-design/rate-limiter/04-request-flow.png)
+[![Request sequence: the client calls GET /v1/orders with key k1; the gateway, holding the rule 100 per minute, runs the bucket script on Redis, which answers allowed with 37 left; the gateway forwards to the orders service and returns 200 with RateLimit-Remaining 37. Later, Redis answers denied with the next token in 0.6 seconds, and the gateway returns 429 with Retry-After 1 (whole seconds, rounded up) without calling the service](/img/system-design/rate-limiter/04-request-flow.png)](/img/system-design/rate-limiter/04-request-flow.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -379,19 +379,21 @@ Use **503 Service Unavailable** instead when the *server* is overloaded for ever
 
 ```http
 HTTP/1.1 429 Too Many Requests
-Retry-After: 2
+Retry-After: 1
 RateLimit-Limit: 100
 RateLimit-Remaining: 0
-RateLimit-Reset: 2
+RateLimit-Reset: 1
 Content-Type: application/json
 
-{"error": "rate_limited", "message": "Limit of 100 requests per minute exceeded. Retry in 2 seconds."}
+{"error": "rate_limited", "message": "Limit of 100 requests per minute exceeded. Retry in 1 second."}
 ```
 
 - **`Retry-After`** is a standard HTTP header: either a number of seconds or a date.
+- With 100 tokens a minute, a new token arrives every 0.6 s, so the wait rounds up to 1 second.
 - The **remaining-quota headers** are a convention. Many APIs use `X-RateLimit-Limit`, `X-RateLimit-Remaining`
-  and `X-RateLimit-Reset` (GitHub does, for example, with the reset as a Unix timestamp). An IETF draft is
-  standardising `RateLimit` and `RateLimit-Policy` header fields. Pick one style and document it.
+  and `X-RateLimit-Reset` (GitHub does, for example, with the reset as a Unix timestamp). Early drafts of an IETF
+  specification used the three `RateLimit-*` fields shown above; later drafts fold them into two fields,
+  `RateLimit` and `RateLimit-Policy`. Pick one style and document it.
 - **Good clients** honour `Retry-After` and retry with **exponential backoff plus jitter** (random spread), so a
   thousand rejected clients do not all retry in the same millisecond.
 
@@ -418,8 +420,11 @@ count = INCR user:42:12:01
 if count == 1: EXPIRE user:42:12:01 60    # crash here, and the key never expires
 ```
 
-If the gateway crashes between `INCR` and `EXPIRE`, the key lives forever and the user stays blocked after
-the limit is reached. Do both in **one** atomic step: a `MULTI`/`EXEC` transaction, or a short script.
+If the gateway crashes between `INCR` and `EXPIRE`, the key never expires. Here the key name contains the
+minute, so the cost is leaked memory; in the common variant whose key has no window in its name and relies on
+the expiry to reset the count, the user stays blocked for good once they reach the limit. Do both in **one**
+atomic step: a short script that sets the expiry when the count is 1, or a `MULTI`/`EXEC` transaction that
+sends `INCR` and `EXPIRE` together (safe to repeat here only because the key name already fixes the window).
 
 ### Token bucket: a Lua script
 
@@ -436,7 +441,7 @@ local b      = redis.call('HMGET', KEYS[1], 'tokens', 'ts')
 local tokens = tonumber(b[1]) or capacity
 local ts     = tonumber(b[2]) or now
 
-tokens = math.min(capacity, tokens + (now - ts) * rate)
+tokens = math.min(capacity, tokens + math.max(0, now - ts) * rate)
 local allowed = 0
 if tokens >= cost then
   tokens  = tokens - cost
@@ -450,14 +455,17 @@ return { allowed, tostring(tokens) }
 Details that interviewers like:
 
 - **Use the store's clock** (`TIME`), not each gateway's. Gateways' clocks drift apart by milliseconds or more,
-  and a gateway whose clock runs ahead would hand out extra tokens.
+  and a gateway whose clock runs ahead would hand out extra tokens. Clamp the elapsed time at zero, because after
+  a failover the new primary's clock may be slightly behind the old one. (Calling `TIME` inside a script that
+  writes is fine since Redis 5, which replicates a script's effects rather than the script itself.)
 - **The TTL equals the time to refill a full bucket** (plus a margin). After that, a missing key and a full
   bucket mean the same thing, so deleting it loses nothing.
 - **Load the script once** (`SCRIPT LOAD`) and call it by its hash (`EVALSHA`) to avoid sending the source on
   every request.
 - In **Redis Cluster**, all keys a script touches must live on the same shard. Use one key per bucket, or
   **hash tags** like `{user:42}:search` and `{user:42}:global` to keep one user's keys together, so all of that
-  user's rules can be checked in a single script call.
+  user's rules can be checked in a single script call. A rule keyed on something else, such as an endpoint-wide
+  cap, lives on another shard; send that call in parallel, so the request still waits for only one round trip.
 
 ### Why not a database lock?
 
@@ -489,9 +497,10 @@ second against a limit of 1,000 per minute can get roughly 50 extra. For most AP
 "5 login attempts", it is not, so those rules stay on the exact path.
 
 A simpler variant is to **split the limit**: with 10 gateways, each allows 1/10 of the limit with no shared
-store at all. It is fast but unfair when traffic is uneven: a caller whose requests all land on one gateway
-gets only a tenth of its allowance. It works well when the load balancer sends each key to the same gateway
-(**sticky routing** by consistent hashing of the key).
+store at all. It works when the load balancer spreads every caller's requests evenly over the gateways, but is
+unfair when traffic is uneven: a caller whose requests all land on one gateway (one long-lived connection, say)
+gets only a tenth of its allowance. The opposite fix is **sticky routing**: send each key to the same gateway
+(consistent hashing of the key), which can then enforce the full limit on its own.
 
 | Approach | Latency added | Accuracy | Store load |
 | --- | --- | --- | --- |

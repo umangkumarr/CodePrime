@@ -30,7 +30,7 @@ Outlook, Yahoo and millions of small company mail servers, so it has to speak th
 | **MUA** (mail user agent) | The app you read mail in: the Gmail web app, Apple Mail, Outlook | You, writing a letter |
 | **MTA** (mail transfer agent) | A server that relays mail to other servers using SMTP | The postal truck between cities |
 | **MDA** (mail delivery agent) | Puts an arriving message into the right mailbox | The postman at your door |
-| **SMTP** | *Simple Mail Transfer Protocol*: how servers **send** mail to each other (port 25), and how apps submit mail (port 587) | The rules every post office agrees on |
+| **SMTP** | *Simple Mail Transfer Protocol*: how servers **send** mail to each other (port 25), and how apps submit mail (port 587, or 465 with TLS from the start) | The rules every post office agrees on |
 | **IMAP / POP3 / JMAP** | How an app **reads** a mailbox from its server. IMAP and JMAP keep mail on the server and sync; POP3 downloads and usually deletes | Checking your PO box |
 | **MX record** | A DNS entry saying which servers accept mail for a domain (`othermail.com` → `mx.othermail.com`) | The address of the town's post office |
 | **SPF, DKIM, DMARC** | Ways to prove a message really came from the domain it claims | The postmark and a wax seal |
@@ -45,8 +45,8 @@ Two facts from this picture shape the whole design:
 
 1. **We are on both sides.** Our service receives mail from strangers on the internet (inbound) and delivers
    mail to strangers (outbound). Both directions need their own pipelines.
-2. **SMTP is a hand-off, not a phone call.** When a server answers `250 OK`, it has taken legal and technical
-   responsibility for the message. So we must **write the message durably before saying OK**. If we crash
+2. **SMTP is a hand-off, not a phone call.** When a server answers `250 OK`, it has accepted responsibility for
+   delivering the message (the SMTP standard's own wording). So we must **write the message durably before saying OK**. If we crash
    after saying OK and lose it, the mail is gone forever and the sender never knows.
 
 ## 2. Requirements
@@ -92,8 +92,9 @@ Each user opens their inbox or a message about **20** times a day.
 - Messages received per day: $500\text{M} \times 40 = 20\text{B}$, about **230,000 per second** on average
   and roughly **700,000 per second** at peak (3× average).
 - Messages sent per day: $500\text{M} \times 10 = 5\text{B}$, about **58,000 per second**.
-- Reads: $500\text{M} \times 20 = 10\text{B}$ a day, about **115,000 per second**. Mail is read far more
-  often than it is written, so reads must be cheap.
+- Reads: $500\text{M} \times 20 = 10\text{B}$ a day, about **115,000 per second**. That is fewer than the
+  deliveries (much mail is never opened on its own), but every read is a person waiting, while deliveries can
+  queue for a second, so reads must be cheap and fast.
 
 **Storage per day (before compression and deduplication)**
 
@@ -168,7 +169,7 @@ Things worth noticing:
 - **The user gets "sent" as soon as the message is durably queued**, not when every recipient has it. Delivery
   to slow external servers can take minutes; the user should not wait.
 - **The idempotency key** protects against the classic mobile bug: the phone sends, the network drops before
-  the reply, the app retries, and Bob gets the message twice. The send service remembers `k1` for a day and
+  the reply, the app retries, and Bob gets the message twice. The send service remembers each key for a day and
   returns the first result for any repeat.
 - **Internal recipients take a fast path.** No SMTP, no internet: the delivery worker writes straight into
   Bob's mailbox. Bob typically sees it in well under a second.
@@ -195,13 +196,13 @@ are turned away during the SMTP conversation, before we spend any storage or CPU
 
 ### What we store
 
-[![Data model: USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels; MESSAGE has ATTACHMENTs, and both point to content-addressed BLOBs](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
+[![Data model: every mailbox table's key starts with user_id; USER owns LABELs and THREADs; a THREAD contains MESSAGEs; MESSAGE_LABEL links messages to labels, including system labels such as UNREAD; MESSAGE has ATTACHMENTs, and both point to content-addressed BLOBs with a ref_count](/img/system-design/email-service/05-data-model.png)](/img/system-design/email-service/05-data-model.png)
 
 *Select the diagram to zoom in and move around.*
 
 Five design decisions hide in this diagram.
 
-**1. Every table starts with `user_id`.** Almost every query is about one user's mailbox ("my inbox", "my
+**1. Every mailbox table starts with `user_id`.** Almost every query is about one user's mailbox ("my inbox", "my
 labels", "my search"), so we **shard by `user_id`**. One user's data lives together on one shard, every query
 hits exactly one shard, and adding shards adds capacity. Shards are assigned with consistent hashing (or a
 lookup directory) so we can move users between machines without downtime.
@@ -316,7 +317,9 @@ that contain it.
 | `lunch` | 18, 19, 4400 |
 | `from:alice` | 17, 18, 4400, 4512 |
 
-"from:alice invoice" is the intersection of two lists: messages 17 and 4512.
+Words are stored **stemmed** (cut to a common root), so "invoice", "invoices" and "invoicing" all become `invoic`,
+and the query word is stemmed the same way. "from:alice invoice" is then the intersection of two lists: messages 17
+and 4512.
 
 Practical details:
 
@@ -333,19 +336,26 @@ Practical details:
 Close to half of all email on the internet is spam. Filtering is a funnel: cheap checks first so expensive checks
 see as little traffic as possible.
 
-[![Spam filtering funnel: connection checks, then SPF/DKIM/DMARC, then content classification, then attachment and link scanning, then a spam score that routes mail to Spam or Inbox; user reports feed back into the content classifier](/img/system-design/email-service/09-spam.png)](/img/system-design/email-service/09-spam.png)
+[![Spam filtering funnel: connection checks, then SPF/DKIM/DMARC, then content classification, then attachment and link scanning, then a spam score that routes mail to Spam or Inbox; a bad IP is rejected in SMTP, a DMARC failure is rejected in SMTP or quarantined after 250 OK, malware is quarantined or dropped; user reports feed back into the content classifier](/img/system-design/email-service/09-spam.png)](/img/system-design/email-service/09-spam.png)
 
 *Select the diagram to zoom in and move around.*
 
 What each authentication check proves:
 
 - **SPF**: the sending server's IP is on the list the domain published in DNS ("these IPs may send for
-  `othermail.com`").
-- **DKIM**: the message carries a cryptographic signature from the domain, so the content was not altered on
-  the way.
-- **DMARC**: the domain's policy for failures ("if SPF and DKIM both fail, reject it"), and it requires the
-  visible From address to match the authenticated domain. This is what stops someone sending as
+  `othermail.com`"). It checks the envelope sender (the `MAIL FROM` address used for bounces), not the From
+  line the reader sees.
+- **DKIM**: the message carries a cryptographic signature from a domain over the body and chosen headers, so
+  that domain vouches for it and the signed parts were not altered on the way.
+- **DMARC**: ties the two to the visible From address. A message passes only if SPF or DKIM passes **for the
+  same domain as the From line** (called alignment), and the domain publishes what to do when neither does:
+  `p=none` (just report), `p=quarantine` (spam folder) or `p=reject`. This is what stops someone sending as
   `security@yourbank.com` from a random server.
+
+These checks are cheap, so they can run during the SMTP conversation, before the final `250 OK`, where a
+`p=reject` failure is refused outright. If they run after acceptance instead (as in the receive flow in
+section 7), a failing message is quarantined or dropped rather than bounced, because bouncing would send mail
+to an address that was probably forged.
 
 The **feedback loop** is what makes filtering good over time: millions of "Report spam" clicks a day are labelled
 training data. A message many users report is pulled into spam for everyone who received it, sometimes within
@@ -353,7 +363,10 @@ minutes of a campaign starting.
 
 We must also be a **good citizen outbound**: rate-limit new accounts, watch for compromised accounts suddenly
 sending thousands of messages, and sign everything with DKIM. If our servers send spam, other providers block
-our IP addresses and all our users suffer.
+our IP addresses and all our users suffer. The big providers now enforce this: since February 2024 Gmail and
+Yahoo require bulk senders (for Gmail, more than 5,000 messages a day to its users) to pass SPF and DKIM,
+publish a DMARC policy with an aligned From domain, offer one-click unsubscribe, and keep reported spam below
+0.3%.
 
 ## 13. Low-level design: outbound delivery to other providers
 
@@ -414,7 +427,7 @@ of inactive users and rebuilding them on demand, and indexing attachment text la
 | Decision | Option A | Option B | What we chose and why |
 | --- | --- | --- | --- |
 | When to say "sent" | After all recipients have it | After durably queued | **Queued**: external delivery can take minutes; durability is what matters |
-| Where bodies live | In the database with metadata | In a blob store | **Blob store**: 50× cheaper per byte, keeps the DB small and fast |
+| Where bodies live | In the database with metadata | In a blob store | **Blob store**: far cheaper per byte, keeps the DB small and fast |
 | One copy per recipient or shared | Copy per mailbox | Content-addressed, shared | **Shared** with reference counts: huge savings on bulk mail |
 | Folders or labels | Folders (one place) | Labels (many tags) | **Labels**: more flexible; folders are a special case |
 | Search index | Global | Per user | **Per user**: smaller, faster, and isolates users' data |
@@ -436,7 +449,8 @@ of inactive users and rebuilding them on demand, and indexing attachment text la
 - **Search** = per-user inverted index, built asynchronously from change events.
 - **Spam** = funnel: IP reputation → SPF / DKIM / DMARC → ML content → attachment scan, improved by user reports.
 - **Reliability** = replicated queues + idempotent writes + soft deletes + multi-zone replication.
-- **Numbers:** ~20B messages received a day (~230K/s, ~700K/s peak), ~3 PB raw content a day, reads ~2× writes.
+- **Numbers:** ~20B messages received a day (~230K/s, ~700K/s peak), ~3 PB raw content a day, ~10B reads a
+  day (~115K/s).
 
 ## Practice questions
 

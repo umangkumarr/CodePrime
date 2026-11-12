@@ -36,8 +36,8 @@ The words you will need:
 | **Retweet** | Re-sharing someone else's tweet to your own followers | Photocopying a column and posting it on your board |
 | **Trend** | A topic whose tweet rate is suddenly far above normal | The headline everyone is suddenly talking about |
 
-The one fact that shapes the whole design is that **follows are asymmetric**. On Facebook, friendship is
-mutual and capped (a few thousand friends), so every account has a similar, modest audience. On Twitter,
+The one fact that shapes the whole design is that **follows are asymmetric**. On [Facebook](/system-design/case-studies/medium/facebook/), friendship is
+mutual and capped (a few thousand friends), so every personal profile has a modest audience. On Twitter,
 anyone can follow anyone without permission. The result is a hugely **skewed graph**: most accounts have a
 few hundred followers, and a handful of celebrities have tens of millions, even over a hundred million. A
 design that works for the median user breaks completely for those few.
@@ -181,7 +181,8 @@ Things worth noticing:
 - **Alice waits only for steps 1 to 4**: one ID generation and one database write. Fan-out to 2,000 followers
   happens afterwards, in the background. Her app also shows the tweet in her own timeline immediately
   (read-your-writes) without waiting for fan-out.
-- **The timeline cache stores IDs, not tweets.** Each follower's list holds small `(tweet_id, author_id)` pairs.
+- **The timeline cache stores IDs, not tweets.** Each follower's timeline is a **sorted set** of small `(tweet_id, author_id)`
+  pairs, ordered by tweet ID (which is time-ordered), so inserting the same tweet twice is harmless.
   The tweet text lives once in the tweet store. If Alice edits or deletes the tweet, no follower list needs
   rewriting; hydration simply returns the new version or drops it.
 - **Lists are capped** at about 800 entries. Nobody scrolls back through thousands of tweets in a cached
@@ -322,7 +323,7 @@ bytes live in object storage and are served by the CDN.
 | --- | --- | --- | --- |
 | Tweets, user timeline index | Billions of small, immutable rows; point and range reads | Sharded MySQL / Postgres or a wide-column store (Cassandra, ScyllaDB) | Simple keys, horizontal scale |
 | Social graph | Billions of edges, read by one side | Sharded key-value or wide-column, both directions | "All followers of X" is a range scan |
-| Home timelines | Short, capped lists of IDs per user | In-memory store (Redis lists or sorted sets) | Read on every app open; derived and rebuildable |
+| Home timelines | Short, capped, time-ordered sets of IDs per user | In-memory store (Redis sorted sets keyed by tweet ID) | Read on every app open; derived and rebuildable |
 | Hot tweets, users, counters | Read-heavy key-value | Memcached / Redis | Hydration multi-gets |
 | Events | Ordered, replayable stream | Kafka or similar | Many independent consumers |
 | Search index | Inverted index, time-partitioned | Lucene-style engine | Full-text queries |
@@ -408,7 +409,7 @@ It is a grid of counters with $d$ rows and $w$ columns, plus one hash function p
 Different terms sometimes land on the same counter (collisions), so a counter can only be **too high**, never
 too low. Taking the minimum across rows picks the counter that suffered least. With $w = 2{,}720$ and
 $d = 5$, the estimate is within about 0.1% of the total count ($e / w \approx 0.001$) with about 99%
-probability ($1 - e^{-5}$), using $5 \times 2{,}720$ counters, roughly 54 KB. Small enough to keep one sketch per
+probability ($1 - e^{-5}$), using $5 \times 2{,}720 = 13{,}600$ four-byte counters, roughly 54 KB. Small enough to keep one sketch per
 region per minute.
 
 A sketch answers "how many?" but cannot list terms. So alongside it we keep a **heavy-hitters** structure: a
@@ -575,8 +576,8 @@ freshness, not data.
    is a cheap range count on the cached list plus the celebrity merge.
 5. **Why not build trends by running `GROUP BY hashtag` over the tweet table every minute?** It would rescan
    every tweet in the window (about 350,000 new ones a minute worldwide), compete with real traffic, and still
-   not know what is *unusual*. Streaming counts in sketches over windows, compared with baselines, does it continuously in fixed
-   memory.
-6. **A bug fanned out the same tweet twice. Does Bob see it twice?** No, if the timeline list is a sorted set
-   keyed by tweet ID: the second insert is a no-op. Hydration also de-duplicates by ID as a second line of
+   not know what is *unusual*. Streaming counts in sketches over windows, compared with baselines, does it
+   continuously in fixed memory.
+6. **A bug fanned out the same tweet twice. Does Bob see it twice?** No. The timeline is a sorted set keyed by
+   tweet ID, so the second insert is a no-op. Hydration also de-duplicates by ID as a second line of
    defence.

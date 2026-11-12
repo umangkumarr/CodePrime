@@ -1,6 +1,6 @@
 ---
 title: "Design Tinder (a location-based dating app)"
-description: "Design a Tinder-style dating app: geo-indexing with geohash, quadtrees and S2, the recommendation deck, high-rate swipes, race-free matching and location privacy."
+description: "Design a Tinder-style dating app: geo-indexing with geohash, quadtrees and S2, the deck, high-rate swipes, race-free matching and location privacy."
 difficulty: "Medium"
 sidebar:
   label: "Dating app (like Tinder)"
@@ -352,12 +352,15 @@ processed **one after the other by the same match worker**. A log partition is c
 worker at a time, so there is no "same instant" any more.
 
 **2. Store the pair as one row and change it atomically.** The `pairs` row holds both votes: `low_vote` and
-`high_vote`, each empty, like or pass. Recording a vote is a single-row update that **returns the row after the
-change**, and almost every database makes a single-row update atomic:
+`high_vote`, each empty, like or pass. Recording a vote is a single-row **upsert** (create the row on the pair's
+first swipe, update it on the second) that **returns the row after the change**, and almost every database makes a
+single-row write atomic. Bob has the higher ID, so his vote goes in `high_vote`:
 
 ```sql
-UPDATE pairs SET high_vote = 'L', updated_at = now()
-WHERE user_low = 17 AND user_high = 42
+INSERT INTO pairs (user_low, user_high, high_vote, updated_at)
+VALUES (17, 42, 'L', now())
+ON CONFLICT (user_low, user_high)
+DO UPDATE SET high_vote = 'L', updated_at = now()
 RETURNING low_vote, high_vote;            -- both 'L'?  then it is a match
 ```
 

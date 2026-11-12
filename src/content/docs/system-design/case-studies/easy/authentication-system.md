@@ -197,9 +197,10 @@ Practical rules that interviewers like to hear:
 - **Same work for unknown emails.** If the email doesn't exist, still hash the password against a dummy hash.
   Otherwise "unknown user" answers in 1 ms and "wrong password" in 50 ms, and an attacker can tell which emails
   have accounts.
-- **Password rules.** Current NIST guidance (SP 800-63B) favours length over composition rules ("one capital,
-  one symbol"), allows long passphrases (at least 64 characters), rejects passwords found in breach lists, and
-  drops forced periodic changes, which only push people to `Summer2024!` → `Autumn2024!`.
+- **Password rules.** Current NIST guidance (SP 800-63B-4) favours length over composition rules ("one capital,
+  one symbol"): at least 15 characters when the password is the only factor (8 when it is part of MFA), long
+  passphrases allowed (up to at least 64 characters), passwords found in breach lists rejected, and no forced
+  periodic changes, which only push people to `Summer2024!` → `Autumn2024!`.
 
 ## 7. Flow 1: logging in with a password and a second factor
 
@@ -240,12 +241,14 @@ Defence is a funnel: cheap checks first, so the slow hash only runs for requests
 **Rate limits on several keys.** A per-IP limit alone fails because botnets spread attempts over thousands of IP
 addresses. A per-account limit alone fails against spraying. So count on several keys at once: per IP, per
 account, per IP range or network, and globally (a sudden rise in failed logins across the site is itself an
-alarm). A common implementation is a sliding window or token bucket in Redis:
+alarm). The simplest implementation is a fixed-window counter in Redis (a sliding window or token bucket smooths
+the burst at each window edge):
 
 ```text
 key  = "login:fail:acct:" + user_id       value = count, expiry = 15 min
 key  = "login:ip:" + ip                   value = count, expiry = 1 min
-INCR the key; if this is the first increment, set the expiry; refuse when over the limit
+INCR the key; if this is the first increment, set the expiry (atomically, in a small Lua script);
+refuse when over the limit
 ```
 
 **Breached-password checks.** At signup, password change and even login, check the password against known
@@ -309,8 +312,9 @@ minutes and can be revoked instantly. Revocation then takes effect within one ac
 
 **Where the browser keeps tokens.** Store the refresh token (or session ID) in a cookie marked **`HttpOnly`**
 (JavaScript cannot read it, so a cross-site scripting bug cannot steal it), **`Secure`** (HTTPS only), and
-**`SameSite=Lax` or `Strict`** (not sent on most cross-site requests, which blocks cross-site request forgery,
-CSRF). Avoid `localStorage` for long-lived tokens: any injected script can read it. Mobile apps use the platform's
+**`SameSite=Lax` or `Strict`** (not sent on most cross-site requests, which blocks most cross-site request
+forgery, CSRF; keep state-changing actions off `GET` and add a CSRF token or an `Origin` check as a second
+layer). Avoid `localStorage` for long-lived tokens: any injected script can read it. Mobile apps use the platform's
 secure storage (iOS Keychain, Android Keystore). Also **issue a new session ID at login**, never reuse one from
 before, or an attacker who planted a session ID can ride along (**session fixation**).
 
@@ -331,7 +335,8 @@ OAuth 2.0 security best-practice document (RFC 9700) for clients that can't keep
 
 One practical wrinkle: a phone may send a refresh request, lose the response on a bad network, and retry with the
 same token. A small **grace window** (accept the just-rotated token for a few seconds and return the same new
-pair) avoids logging out honest users on flaky networks.
+pair) avoids logging out honest users on flaky networks. Reuse after the window, as in the diagram, triggers the
+family revocation.
 
 **Logout and revocation, precisely:**
 
@@ -398,8 +403,8 @@ signature. Three properties make this special:
 - **Nothing secret is stored on our side.** A database leak reveals only public keys.
 - **Phishing-resistant.** The browser binds the signature to the website's real origin, so a look-alike site
   `examp1e.com` gets nothing usable. TOTP codes, by contrast, can be typed into a fake site and relayed.
-- **Passkeys** are WebAuthn credentials synced across a user's devices by their platform (Apple, Google,
-  Microsoft password managers), so they can replace the password entirely.
+- **Passkeys** are WebAuthn credentials synced across a user's devices by a password manager (for example
+  iCloud Keychain or Google Password Manager), so they can replace the password entirely.
 
 **Recovery codes** (ten single-use codes, stored hashed) let users in when they lose their phone. Account recovery
 is the weak spot of every MFA system; treat it as carefully as login.
@@ -540,7 +545,7 @@ when only a **protective counter** is unavailable, degrade gracefully.
 | Password hash | Fast (SHA-256) | Slow, memory-hard (Argon2id) | **Argon2id**: makes offline cracking of a leak impractical |
 | Brute-force response | Hard account lockout | Delays, CAPTCHA, step-up MFA | **Soft measures**: lockout lets anyone lock out a victim |
 | Second factor | SMS | TOTP / passkeys | **Offer passkeys and TOTP**, SMS only as a fallback |
-| Token storage in browser | `localStorage` | `HttpOnly` cookie | **Cookie**: script injection can't read it; `SameSite` handles CSRF |
+| Token storage in browser | `localStorage` | `HttpOnly` cookie | **Cookie**: script injection can't read it; `SameSite` plus a CSRF token or `Origin` check handles CSRF |
 | Build or buy | In-house | Managed identity provider (Auth0, Cognito, Firebase Auth…) | Depends: buying is often wiser for small teams; large companies build for control and cost |
 
 ## Cheat sheet for last-minute revision
