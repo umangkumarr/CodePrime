@@ -4,7 +4,7 @@ description: "Design a TikTok-style short-video app: the For You feed built on a
 difficulty: "Medium"
 sidebar:
   label: "TikTok (short-video feed)"
-tags: ["Recommendation", "Video", "Streaming", "Feeds", "CDN"]
+tags: ["Recommendations", "Video", "Streaming", "News feed", "CDN"]
 ---
 
 Open TikTok and a video is already playing. Swipe up and the next one starts instantly. After ten minutes the
@@ -162,7 +162,7 @@ The diagram has three horizontal paths, one for each job:
   **event log** (Kafka-style topics). **Stream processors** turn the raw events into fresh features and
   counter updates within seconds.
 
-And on the far left, the **CDN edge** serves all video bytes. The app talks to it directly using the manifest
+And in the top-left corner, the **CDN edge** serves all video bytes. The app talks to it directly using the manifest
 URLs from the feed.
 
 The single most useful idea in this design: **the feed path and the learning path form a loop.** You watch,
@@ -187,7 +187,7 @@ Things worth noticing:
   each into short **segments** for streaming, extracts a cover image and **fingerprints the audio** so the
   sound can be matched to an existing one or registered as a new original sound.
 - **Safety checks run before distribution.** Automated models score the video before it reaches anyone's
-  For You feed (section 13).
+  For You feed (section 14).
 - **Step 9 puts the video into a fresh pool**, the starting point for exploration (section 10).
 
 The transcoding pipeline is the same idea as YouTube's, at smaller sizes. For a deeper treatment (splitting a

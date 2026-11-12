@@ -231,7 +231,7 @@ always: **how much of the real host kernel can the untrusted code reach?**
 | Option | How it isolates | Strength | Start-up cost |
 | --- | --- | --- | --- |
 | **Language-level sandbox** (a restricted Python, a JavaScript engine, WebAssembly) | The language runtime refuses dangerous operations | Weak on its own for native languages: one interpreter bug or forgotten module and it is gone. Not applicable to C++ at all | Milliseconds |
-| **Process sandbox** (Linux namespaces, cgroups, `setrlimit` per-process limits, seccomp; for example the `isolate` tool used in programming olympiads) | A normal process with a private view of the system and a syscall filter | Good if the filter is tight, but the code still talks to the **shared host kernel** | Milliseconds |
+| **Process sandbox** (Linux namespaces, cgroups, `setrlimit` per-process limits, ideally a seccomp filter; for example the `isolate` tool used in programming olympiads) | A normal process with a private view of the system, hard resource caps and a restricted set of syscalls | Good if the filter is tight, but the code still talks to the **shared host kernel** | Milliseconds |
 | **Container** (Docker with default settings) | The same kernel features, packaged | The same as above; a container is not a security boundary by default | Hundreds of ms |
 | **User-space kernel** (gVisor) | A kernel written in Go intercepts every syscall; only a small, filtered set reaches the host | Strong: the host kernel's attack surface shrinks a lot | Hundreds of ms; slower syscalls |
 | **MicroVM** (Firecracker, Kata Containers) | A tiny virtual machine with **its own guest kernel**, using hardware virtualisation (KVM) | Strongest practical option: to escape, you must break the guest kernel **and** the virtual machine monitor | About 125 ms to boot; less with snapshots |
@@ -239,22 +239,24 @@ always: **how much of the real host kernel can the untrusted code reach?**
 **Namespaces** give a process its own private view: its own process list (it is PID 1 and sees nothing else),
 its own file system tree, its own (empty) network. **cgroups** (control groups) put hard caps on CPU, memory
 and number of processes for a group of processes. **seccomp-bpf** is a filter, set once and impossible to
-remove, that lists which syscalls a process may make; anything else kills it.
+remove (child processes inherit it), that lists which syscalls a process may make; any other syscall is
+refused with an error or kills the process, whichever the filter specifies.
 
 Our choice: **one Firecracker microVM per job, with process-level limits inside it as well.** This is defence
 in depth: if one layer has a bug, the next still holds. Firecracker was built by AWS for exactly this problem
 (running other people's code in Lambda and Fargate): it boots in about 125 ms, costs a few megabytes of memory
 per VM, and deliberately emulates very few devices, which keeps its own attack surface small.
 
-[![Inside one judge host: the trusted worker agent boots or restores a Firecracker VMM that runs inside a jailer with chroot, cgroups and seccomp; it sends the job over vsock to a runner inside the microVM, which runs as nobody and execs the user program with rlimits; the program reads a read-only language image, writes a size-capped scratch disk, and makes seccomp-filtered syscalls to its own guest kernel, which reaches the VMM only through virtio disk and vsock; the microVM has no network device](/img/system-design/online-code-editor/03-sandbox.png)](/img/system-design/online-code-editor/03-sandbox.png)
+[![Inside one judge host: the trusted worker agent boots or restores a Firecracker VMM (which installs its own seccomp filters) that runs inside a jailer with chroot, namespaces and cgroups; it sends the job over vsock to a runner inside the microVM, which runs as nobody and execs the user program with rlimits; the program reads a read-only language image, writes a size-capped scratch disk, and makes seccomp-filtered syscalls to its own guest kernel, which reaches the VMM only through virtio disk and vsock; the microVM has no network device](/img/system-design/online-code-editor/03-sandbox.png)](/img/system-design/online-code-editor/03-sandbox.png)
 
 *Select the diagram to zoom in and move around.*
 
 The layers in the picture, from outside in:
 
-1. **The jailer** around the virtual machine monitor (VMM) itself: it runs in a `chroot` (it sees only its own
-   directory), in its own namespaces and cgroup, as an unprivileged user, with a seccomp filter. Even if the
-   guest broke into the VMM process, it would land in a cage.
+1. **The jailer** around the virtual machine monitor (VMM) itself: it starts the VMM in a `chroot` (it sees only
+   its own directory), in its own namespaces and cgroup, as an unprivileged user. The VMM then installs its own
+   seccomp filters, allowing only the few syscalls it needs, before running any guest code. Even if the guest
+   broke into the VMM process, it would land in a cage.
 2. **The microVM** has no network device configured, so there is no way to send a packet. The guest talks to the
    worker only through **vsock** (a simple host-to-guest socket) and a couple of virtual disks.
 3. **The file system:** the language image (compilers, runtimes, standard libraries) is mounted **read-only**.
@@ -281,7 +283,8 @@ Two subtleties interviewers like:
 - **CPU time vs wall time.** We judge on CPU time because it does not depend on how busy the host is, which
   keeps verdicts fair. The wall-clock limit is only a safety net. To keep CPU time stable we also pin each
   sandbox to dedicated cores and do not overcommit the host.
-- **Memory for managed languages.** The Java virtual machine and Python reserve memory up front. Judges usually
+- **Memory for managed languages.** The Java virtual machine reserves a large heap address range up front, and
+  interpreters load sizeable runtimes before your first line runs. Judges usually
   tune the runtime (for example the JVM's maximum heap) and measure resident memory, not reserved address
   space, so a Java "Hello world" is not an MLE. Many judges also give slower languages a time multiplier.
 
@@ -532,7 +535,7 @@ build pipeline per language image, versioned, with the canary set run against ea
 - **Verdicts:** AC, WA, TLE, MLE, RE, CE. Check in the order time, memory, exit status, output. System errors are
   retried and never blamed on the user.
 - **Sandbox (defence in depth):** Firecracker microVM per job (own guest kernel, KVM), VMM in a jailer (chroot,
-  cgroups, seccomp), no network device, read-only image, size-capped scratch disk, runner as `nobody` with
+  cgroups, unprivileged user) with its own seccomp filters, no network device, read-only image, size-capped scratch disk, runner as `nobody` with
   `no_new_privs`, seccomp allow-list, compile inside the sandbox too.
 - **Limits:** CPU time, wall clock, memory (cgroup), processes (`pids.max`, stops fork bombs), output size,
   file size, open files.

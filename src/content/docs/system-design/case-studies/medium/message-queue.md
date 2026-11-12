@@ -258,8 +258,8 @@ Think of it as numbering the pages you post: if page 5 arrives twice, the receiv
 ## 8. Storage: why an append-only log is so fast
 
 Disks are slow at **random** access and fast at **sequential** access. Even a spinning disk can stream
-hundreds of MB/s when it reads or writes one long run of bytes, but only a few hundred random operations a
-second. A message log only ever **appends to the end** and consumers mostly **read forward**, so almost all
+a couple of hundred MB/s when it reads or writes one long run of bytes, but manages only a hundred or two random
+operations a second. A message log only ever **appends to the end** and consumers mostly **read forward**, so almost all
 I/O is sequential. That one fact explains most of Kafka's performance.
 
 ### Segment files

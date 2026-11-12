@@ -116,13 +116,15 @@ tiny, a few thousand are huge. Peak days run at about 10× the average.
 **Custom domains**
 
 - If 40% of shops use one, that is **2 million TLS certificates**. Free ACME certificates (explained in section
-  10) last 90 days, so renewing each one every ~60 days is $2\text{M} / 60 \approx 33,000$ renewals a day.
+  10) from Let's Encrypt last 90 days today, so renewing each one every ~60 days is
+  $2\text{M} / 60 \approx 33,000$ renewals a day. Let's Encrypt plans to cut the lifetime to 45 days by 2028,
+  which roughly doubles that rate: renewal must be automatic and cheap.
 
 Three conclusions follow:
 
 1. **The average shop is tiny.** 10 MB a year fits thousands of shops on one database. Giving each shop its own
    database (the silo model) would waste almost everything.
-2. **The biggest shops are not tiny.** A few shops are a million times the average, so we must be able to move
+2. **The biggest shops are not tiny.** A few shops are thousands of times the average, so we must be able to move
    them, isolate them, and absorb their spikes.
 3. **Reads dwarf writes.** 23,000 page views a second against a few hundred orders: storefronts must be served
    from caches, and checkout must be protected from browsing traffic.
@@ -385,7 +387,9 @@ on request(app, shop):
 | 41st request a moment later | `429`, retry after about half a second |
 | App then sends 2 per second forever | Always accepted: it matches the leak |
 
-The counters live in Redis (fast, shared by every web server) with an expiry, so idle buckets disappear.
+The counters live in Redis (fast, shared by every web server) with an expiry, so idle buckets disappear. The
+read, check and write must run as **one atomic step** (a small Lua script inside Redis); otherwise two web servers
+can both read the same level and both admit a request that only one should get.
 
 For a **GraphQL** API, counting requests is not fair: one query can ask for 5 fields or 50,000. Shopify documents a
 **cost-based** variant: each query is given a calculated cost from the fields and page sizes it requests, and the
@@ -428,8 +432,10 @@ The defences:
    ticket** with their arrival time. The page polls; tickets are admitted roughly in order. A signature means a
    buyer cannot forge an earlier place. The queue state lives in the ticket, so it costs the platform no storage.
 4. **Atomic stock.** Each admitted checkout reserves stock with a conditional update
-   (`UPDATE variants SET inventory_qty = inventory_qty - 1 WHERE shop_id = ? AND variant_id = ? AND inventory_qty > 0`).
-   It can never go below zero, so we never oversell. (The reservation and saga details are in the
+   (`UPDATE variants SET inventory_qty = inventory_qty - 1 WHERE shop_id = ? AND variant_id = ? AND inventory_qty > 0`),
+   and in the same transaction writes a reservation row with an expiry; if the checkout is abandoned or the
+   payment fails, the reservation is released and the unit added back. The count can never go below zero, so we
+   never oversell. (The reservation and saga details are in the
    [e-commerce store case study](/system-design/case-studies/medium/ecommerce-store/).)
 5. **Sold out fast.** When stock hits zero, a flag in cache makes the throttle answer "sold out" immediately,
    instead of letting thousands more into a queue for nothing.
@@ -550,6 +556,9 @@ analytics or global store, and never query pods across the board on a live reque
    column, but millions of schemas strain the database's catalogue, migrations must run millions of times, and it
    does nothing for noisy neighbours, which still share CPU, memory and disk. Pods with a `shop_id` key get most
    of the benefit at far lower cost.
-6. **During a flash sale, payments start timing out at the provider. What happens to stock?** Each reservation has
-   a time limit. If payment does not succeed in time, the reservation is released and the stock goes back on sale.
-   The checkout's idempotency key means a buyer who retries is never charged twice.
+6. **During a flash sale, payments start timing out at the provider. What happens to stock?** A timeout is an
+   *unknown* outcome, not a failure: the card may have been charged. So the reservation is kept (its expiry
+   extended) while the payments service asks the provider for the result of that idempotency key. A confirmed
+   failure releases the stock back on sale; a success completes the order. The checkout's idempotency key means a
+   buyer who retries is never charged twice. If timeouts persist, the throttle should also admit fewer checkouts,
+   so that stock is not locked up by payments stuck in limbo.

@@ -38,9 +38,9 @@ end. If you have an hour, read top to bottom: every section builds on the previo
 
 How this differs from the neighbouring interview questions:
 
-- **Twitter** is a **follow graph**: one-way, and some accounts have 100 million followers. The hard part is the
+- **[Twitter](/system-design/case-studies/medium/twitter/)** is a **follow graph**: one-way, and some accounts have 100 million followers. The hard part is the
   celebrity fan-out. Posts are almost always public.
-- **Instagram** is also mostly a follow graph, centred on photos and video.
+- **[Instagram](/system-design/case-studies/medium/instagram/)** is also mostly a follow graph, centred on photos and video.
 - **Facebook** is a **friend graph**: mutual, and capped (a personal profile can have at most **5,000
   friends**). Posts carry **audiences**, so the same post is visible to some people and invisible to others,
   and that must be checked on every read. The feed is **ranked**, mixing friends, groups and Pages.
@@ -272,7 +272,7 @@ Things worth noticing:
   reading the database's own change log.
 - **Media is uploaded first**, straight to the blob store with a pre-signed URL, so the post request carries
   only small media IDs.
-- **Fan-out stores IDs, not posts.** Each friend's feed list holds `(post_id, author_id, time)`; the post itself
+- **Fan-out stores IDs, not posts.** Each friend's feed list holds `(post_id, author_id)` pairs (the time is inside the post ID); the post itself
   is fetched (from cache) when the feed is read. Edits and deletes then need no fan-out at all.
 
 ## 9. Deep dive: fan-out on write vs fan-out on read
@@ -351,7 +351,7 @@ Design rules for the check:
   audience check is `assoc_get(A, FRIEND, [V])` for Friends, or membership in a friend list for custom audiences.
 - **Hidden means absent.** A hidden post is dropped silently, as if it did not exist. Returning "permission
   denied" would tell Bob that a post exists.
-- **Everything is cached.** About 100 million checks per second (section 3) is only possible because each check
+- **Everything is cached.** Over 100 million checks per second (section 3) is only possible because each check
   is a few in-memory graph lookups, batched for the whole candidate set.
 - **One privacy library, used everywhere.** Feed, search, profile, comments and notifications all call the same
   rules. Re-implementing them per service is how leaks happen.
@@ -496,7 +496,7 @@ the two-pass funnel, caching features, and precomputing parts of the feed for us
 | --- | --- |
 | A post is saved but its event is lost | Outbox pattern or change-log capture: the event is derived from the committed write |
 | An event is processed twice | Idempotent consumers: adding a post ID that is already in a list, or setting the same reaction, changes nothing |
-| A cache tier fails | Followers are many and interchangeable; if a leader fails, followers route around it to another member of the leader tier; a small spare ("gutter") pool can absorb a failed cache's traffic so the database is not flooded |
+| A cache tier fails | Followers are many and interchangeable; if a leader fails, followers send read misses straight to the database and writes to another member of the leader tier; a small spare ("gutter") pool can absorb a failed cache's traffic so the database is not flooded |
 | A region fails | Another region is promoted to primary for its shards; users are routed to the nearest healthy region; recent unreplicated writes may need reconciling |
 | The ranking service is slow | Time out and fall back to a simpler ordering (recent posts from close friends). A plain feed beats an error page |
 | A privacy-rule bug | One shared privacy library, deny by default, tests on every rule, and audit logs of which rule allowed each view |

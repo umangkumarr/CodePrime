@@ -284,8 +284,9 @@ WHERE  sku_id = :sku AND warehouse_id = :wh
 -- 1 row updated: reserved.  0 rows updated: not enough stock.
 ```
 
-The row lock taken by the update makes concurrent attempts queue up for a moment, and the `WHERE` clause means
-the second shopper's update matches 0 rows. Available stock is `on_hand - reserved`; it can never go below zero.
+The row lock taken by the update makes concurrent attempts queue up for a moment. When the first commits, the
+database re-checks the second update's `WHERE` clause against the new row (PostgreSQL at its default `READ
+COMMITTED` level, and MySQL InnoDB, both do this), so the second shopper's update matches 0 rows. Available stock is `on_hand - reserved`; it can never go below zero.
 An equivalent alternative is **optimistic concurrency** with a `version` column (`... WHERE version = :v`) and a
 retry on conflict.
 
@@ -300,8 +301,13 @@ never happens:
 
 - Each reservation row has an `expires_at`. A sweeper job (or a delayed message) releases expired holds:
   `reserved = reserved - qty`, and the reservation becomes `RELEASED`.
-- Releasing must be **idempotent**: the status changes from `HELD` to `RELEASED` with a conditional update, so a
-  sweeper and a "payment failed" message racing each other cannot release the units twice.
+- Releasing must be **idempotent**: the status changes from `HELD` to `RELEASED` with a conditional update, in the
+  same transaction as `reserved = reserved - qty`, so a sweeper and a "payment failed" message racing each other
+  cannot release the units twice.
+- Committing is guarded the same way: `HELD` to `COMMITTED` only if the reservation is still `HELD`. A payment
+  that succeeds just after its hold expired finds it `RELEASED`; the orchestrator then tries to reserve again and
+  refunds if the stock is gone. While a payment's outcome is unknown (section 11), the sweeper must not release
+  its hold: the orchestrator extends `expires_at` until the outcome is known.
 - When the warehouse ships, `on_hand` and `reserved` both drop by the quantity.
 
 ### When to reserve
@@ -400,8 +406,8 @@ VALUES (...);              -- UNIQUE (user_id, idempotency_key)
 The unique constraint, not an application-level check, is what makes this safe under concurrency: two retries
 arriving at the same instant cannot both insert.
 
-**Taking payment.** The payment service uses a key derived from the order (for example `order_id` plus attempt
-number) for its own `payment` row **and** passes an idempotency key to the PSP; major providers such as Stripe
+**Taking payment.** The payment service uses a key derived from the order (the `order_id`, or `order_id` plus an
+attempt number if the shopper may retry with another card) for its own `payment` row **and** passes an idempotency key to the PSP; major providers such as Stripe
 document support for this. A retried "charge" then returns the original result instead of charging again.
 
 **The unknown outcome.** Sometimes the PSP call times out and we do not know whether the card was charged. Never
@@ -448,20 +454,22 @@ The idea is a **funnel that rejects cheaply and early**:
    each request spends a token; an empty bucket means `429 Too Many Requests`.
 3. **A waiting room.** Admitted shoppers get a place in a queue and are let through at a rate the backend can
    handle, for example 2,000 per second. The shopper sees "You are in the queue" instead of an error page.
-4. **Pre-allocated stock in memory.** Before the sale, the 10,000 units are moved from the database into a
-   counter in Redis. Each buyer runs an **atomic decrement**; a result of 0 or more means "you got one", below 0
-   means "sold out". An in-memory counter handles hundreds of thousands of decrements a second where a database
-   row would become a lock queue. For even more throughput, split the stock into several counters (10 buckets of
-   1,000) and send each buyer to one.
+4. **Pre-allocated stock in memory.** Before the sale, the sale quantity (10,000) is loaded into a counter in
+   Redis. Each buyer runs an **atomic decrement**; a result of 0 or more means "you got one", below 0 means "sold
+   out". An in-memory counter handles hundreds of thousands of decrements a second where a database row would
+   become a lock queue. For even more throughput, split the stock into several counters (10 buckets of 1,000) and
+   send each buyer to one; a buyer whose bucket is empty tries the others before being told "sold out".
 5. **A queue for orders.** Winners are put on a durable queue, and the order service creates their orders at a
    steady pace through the normal saga, with the unit already guaranteed.
 
 What keeps this honest:
 
-- The in-memory counter is a **ticket dispenser**, not the source of truth. The database reservation is still
-  made for each winner, so even a counter bug cannot oversell beyond the units that were moved across.
-- Winners who do not pay within the timeout lose their reservation, and the unit goes back to the counter (or
-  to a "second chance" queue).
+- The in-memory counter is a **ticket dispenser**, not the source of truth. The database reservation (the
+  conditional update of section 9) is still made for each winner, so even a counter bug cannot oversell: the
+  database refuses the 10,001st reservation.
+- Winners who do not pay within the timeout lose their reservation, and the unit goes back on sale. Careful:
+  after the sell-out, losing buyers have pushed the counter below zero, so a plain increment would be swallowed.
+  The release sets `count = max(count, 0) + 1` in one script, or hands the unit to a "second chance" queue.
 - **One per customer** is enforced with a set of buyer IDs checked in the same atomic step as the decrement
   (in Redis, a small Lua script runs both as one operation).
 
@@ -530,12 +538,14 @@ always change together, they are one service.
 
 ## 16. Low-level design: the data model
 
-[![Data model: product has many SKUs; cart_item, inventory and order_item each point to a SKU; inventory rows are per SKU and warehouse with on_hand, reserved and version; reservation points to an inventory row and an order; order has a unique idempotency key and many order items; payment points to an order and has its own unique idempotency key](/img/system-design/ecommerce-store/08-data-model.png)](/img/system-design/ecommerce-store/08-data-model.png)
+[![Data model: product has many SKUs; cart_item, inventory and order_item each point to a SKU; inventory rows are per SKU and warehouse with on_hand, reserved and version; reservation points to an inventory row (by SKU and warehouse) and an order; order has a unique idempotency key and many order items; payment points to an order and has its own unique idempotency key](/img/system-design/ecommerce-store/08-data-model.png)](/img/system-design/ecommerce-store/08-data-model.png)
 
 *Select the diagram to zoom in and move around.*
 
 The tables are drawn together for clarity; in production each group lives in its own service's database, and
-"foreign keys" across groups are IDs, not enforced constraints.
+"foreign keys" across groups are IDs, not enforced constraints. A reservation names its warehouse as well as its
+SKU, so a release or commit adjusts exactly the inventory row it reserved from. The order's idempotency key is
+unique per user, as in section 11.
 
 | Data | Shape | Good fit | Why |
 | --- | --- | --- | --- |
@@ -626,7 +636,8 @@ serves the page.
    the row and sets `reserved = 1`; the second finds `on_hand - reserved = 0`, updates 0 rows, and gets "out of
    stock". Its saga cancels the order before any payment is attempted.
 2. **The payment provider timed out. Did we charge the customer?** We do not know yet, so the payment is marked
-   `UNKNOWN` and the order stays `PENDING` (the reservation is kept). We query the PSP using the same idempotency
+   `UNKNOWN` and the order stays `PENDING` (the reservation's expiry is extended so the sweeper does not release
+   it). We query the PSP using the same idempotency
    key, wait for its webhook, and reconcile. Only a confirmed failure releases stock; a late success completes the
    order. A retry with the same key can never create a second charge.
 3. **A shopper's guest cart has 2 of an item; their account cart has 1. What should the merged cart contain,

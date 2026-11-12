@@ -1,6 +1,6 @@
 ---
 title: "Design a Payment System (like Stripe)"
-description: "Design a payment service step by step: the card ecosystem, payment states, idempotency end to end, a double-entry ledger, webhooks, reconciliation and PCI scope."
+description: "Design a payment service: the card ecosystem, payment states, end-to-end idempotency, a double-entry ledger, webhooks, reconciliation and PCI scope."
 difficulty: "Medium"
 sidebar:
   label: "Payment system (like Stripe)"
@@ -235,6 +235,8 @@ Rules that make it safe:
 
 - **States only move forward.** A late event saying "authorised" for a payment that is already `CAPTURED` is
   ignored. This is what makes out-of-order webhooks harmless (section 13).
+- **A one-step sale** (section 8) passes through `AUTHORISED` and lands in `CAPTURED` in the same update, because
+  the PSP's single reply covers both.
 - **`Unknown` is a real state.** A timeout is not a failure; we genuinely do not know. Section 12 is about it.
 - **Refunds and disputes are their own objects** with their own small state machines (`pending → succeeded /
   failed`), linked to the payment. A payment can have several partial refunds; the diagram shows only the
@@ -254,7 +256,7 @@ before the reply arrives.
 | Our API → database | Two retries racing each other | Unique constraint on `(merchant_id, key)`; the loser reads the winner's row |
 | Payment service → PSP | Our retry after a timeout | Pass our attempt ID as the PSP's idempotency key |
 | PSP → our webhook | PSP retries until it gets a `2xx` | Unique `psp_event_id`; a duplicate insert is a no-op |
-| Our service → ledger | A job re-running after a crash | Unique `(payment_id, kind)` on journal entries, so "capture" is posted once |
+| Our service → ledger | A job re-running after a crash | Unique `(source_id, kind)` on journal entries (the payment ID for a capture, the refund ID for each refund), so every business event is posted once |
 | Our service → queue consumers | Kafka redelivers after a rebalance | Consumers de-duplicate by event ID |
 
 How the API handles a key, step by step:
@@ -288,7 +290,8 @@ solved this 500 years ago with **double-entry bookkeeping**, and every serious p
   recomputable).
 
 Debit and credit are just the two sides, not "good" and "bad". By convention, a **debit increases an asset**
-(something we own or are owed) and a **credit increases a liability or revenue** (something we owe or earned).
+(something we own or are owed) **or an expense** (something we paid out, like a fee), and a **credit increases a
+liability or revenue** (something we owe or earned).
 
 ### A worked example
 
@@ -417,7 +420,8 @@ chargeback and fee in that payout), and the bank statement shows the money that 
 
 *Select the diagram to zoom in and move around.*
 
-The matcher joins on `psp_ref` and sorts every row into a bucket:
+The matcher joins our ledger and the settlement file on `psp_ref`, checks each payout total in the file against a
+credit on the bank statement, and sorts every row into a bucket:
 
 | Result | Typical cause | Action |
 | --- | --- | --- |
@@ -549,7 +553,7 @@ acknowledges; workers drain the table at their own pace, and de-duplication make
 - **State machine:** created → processing → authorised → captured → refunded, with requires-action, unknown,
   failed, cancelled and disputed. Forward-only, enforced with conditional updates.
 - **Idempotency at every hop:** client key → unique constraint → same key to the PSP → unique webhook event ID →
-  unique journal entry per payment and kind.
+  unique journal entry per business event (capture, each refund).
 - **At-least-once + idempotent = exactly-once effect.**
 - **Record first, call out, record result.** Never a DB transaction across a network call.
 - **Timeouts:** mark unknown, query, retry with the same key and backoff with jitter, reconcile. Never assume failure.

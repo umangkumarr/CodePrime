@@ -4,7 +4,7 @@ description: "Design a photo-sharing app step by step: direct uploads to object 
 difficulty: "Medium"
 sidebar:
   label: "Instagram (photo sharing)"
-tags: ["Feeds", "Media storage", "CDN", "Sharding", "Caching"]
+tags: ["News feed", "Media storage", "CDN", "Sharding", "Caching"]
 ---
 
 A photo-sharing app looks like three screens: a camera, a profile and an endless scroll of pictures from people
@@ -49,7 +49,7 @@ The vocabulary you need:
 
 ### Functional (what users can do)
 
-- **Post** a photo or a short video (or a carousel of up to 10), with a caption.
+- **Post** a photo or a short video (or a carousel of several, up to a fixed limit such as 20), with a caption.
 - **Follow** and unfollow other users; see follower and following lists.
 - **Home feed**: posts from people you follow, ranked, with infinite scroll.
 - **Like** and **comment** on posts; see like and comment counts.
@@ -231,7 +231,7 @@ Two refinements that matter at scale:
 
 ### What we store
 
-[![Data model: users own posts and stories and appear in follows twice, as follower and followee; a post has media items, likes, comments and one post_counters row](/img/system-design/instagram/04-data-model.png)](/img/system-design/instagram/04-data-model.png)
+[![Data model: users own posts and stories and are linked to each other through follows; a post has media items, likes, comments and one post_counters row](/img/system-design/instagram/04-data-model.png)](/img/system-design/instagram/04-data-model.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -335,6 +335,8 @@ one read of one list.
 Push for normal authors; pull for celebrities.
 
 [![Hybrid fan-out: on post.ready a worker checks whether the author is a celebrity; if not, it fetches followers in pages, keeps active users and prepends the post ID to each follower's feed list, trimmed to about 500; if so, it skips fan-out and the post is pulled from the author's own post list at read time](/img/system-design/instagram/05-fanout.png)](/img/system-design/instagram/05-fanout.png)
+
+*Select the diagram to zoom in and move around.*
 
 - **Most authors** (say, under a few hundred thousand followers; the threshold is a tuning knob) are pushed. The
   workers page through followers 1,000 at a time and do batched writes to the feed cache.

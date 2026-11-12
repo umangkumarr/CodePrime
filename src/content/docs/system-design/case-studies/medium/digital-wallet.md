@@ -1,9 +1,9 @@
 ---
-title: "Design a Digital Wallet (like Paytm Wallet / PayPal balance)"
-description: "Design a stored-balance wallet: top-ups, transfers and withdrawals on a double-entry ledger, no negative balances, cross-shard sagas, hot accounts and reconciliation."
+title: "Design a Digital Wallet (like PayPal or Amazon Pay balance)"
+description: "Design a stored-balance wallet: top-ups, transfers and payouts on a double-entry ledger, no overdrafts, cross-shard sagas, hot accounts and reconciliation."
 difficulty: "Medium"
 sidebar:
-  label: "Digital wallet (like Paytm Wallet)"
+  label: "Digital wallet (like PayPal balance)"
 tags: ["Payments", "Ledger", "Consistency", "Databases", "Idempotency"]
 ---
 
@@ -211,7 +211,8 @@ bug detector: run it every few minutes, and page someone if it is ever not zero.
 
 - **Top-up clearing**: money a gateway has captured for us but not yet sent to our bank. Its negative balance
   means "the gateway owes us this". When the gateway settles to the escrow account (often a day later), a
-  settlement journal brings it back to zero.
+  settlement journal moves the amount from top-up clearing to an **escrow bank** system account that mirrors the
+  real bank balance, bringing clearing back to zero.
 - **Payout clearing**: money promised to banks for withdrawals in progress.
 - **Fee revenue**, **promotions / cashback** (the marketing budget paying users), **refunds**, **chargebacks**,
   and **suspense** (money we cannot yet attribute, waiting for an investigation).
@@ -242,8 +243,10 @@ entry still sums to zero.
 **4. `idempotency_key` is unique on `journal_entries`.** If the same request arrives twice, the second insert
 fails on the unique index and we return the first result. The database enforces it, not application code.
 
-**5. `holds` reserve money without moving it.** A withdrawal in progress places a hold; the spendable amount is
-`balance_minor - held_minor`. Card systems call this an authorisation.
+**5. `holds` reserve money without moving it.** For example, a cab app can reserve the estimated fare when the
+ride starts and take the final amount when it ends; the spendable amount is `balance_minor - held_minor`. Card
+systems call this an authorisation. (Withdrawals in this design go further and move the money to payout clearing
+straight away, section 9.)
 
 ### Balance: derived or cached?
 
@@ -259,8 +262,9 @@ Either both commit or neither does, so the cache can never drift because of a cr
   become a single lookup, not a sum.
 - A **verifier job** recomputes `sum(postings)` per account (incrementally, from the last checkpoint) and
   compares it with the cached value. A mismatch is a bug and an incident.
-- A `CHECK (balance_minor >= 0)` constraint on user wallets is the last line of defence against a negative
-  balance, even if application code is wrong.
+- A check constraint such as `CHECK (allow_negative OR balance_minor >= 0)` is the last line of defence against a
+  negative user balance, even if application code is wrong. `allow_negative` is true only for system accounts,
+  because some of them (top-up clearing, the in-flight accounts of section 10) legitimately go below zero.
 
 A Redis cache in front of balances is fine **for display** only. Never decide whether a payment may go through
 from a cache: that decision is always made inside the ledger transaction.
@@ -354,7 +358,7 @@ The rules that make this safe:
    payout clearing. Bob cannot spend it twice while the bank works.
 2. **Use a stable reference.** The payout request carries our `withdrawal_id` as the bank's reference, so the
    bank can deduplicate and we can ask about it later. On success the bank returns its own reference (in India, the
-   **UTR** number), which we save on the withdrawal.
+   **UTR** number for NEFT, or the RRN for IMPS), which we save on the withdrawal.
 3. **Never re-send on a timeout.** "Unknown" is not "failed". Re-sending could pay Bob twice. Instead, ask the
    bank for the status of that reference, repeatedly with backoff, and if it still cannot tell us, wait for the
    next reconciliation file.
@@ -607,12 +611,12 @@ short outage is recoverable; an inconsistent ledger is a financial incident.
   clearing, fees, in-flight, suspense) make the books close. Global sum is always zero.
 - **Money:** `bigint` minor units plus a currency; explicit rounding rules; never floats.
 - **Balance:** derived = sum of postings; cached in `account_balances`, updated in the **same transaction**;
-  `balance_after` on each posting; verifier job; `CHECK (balance >= 0)`.
+  `balance_after` on each posting; verifier job; a `CHECK` that user balances never go below zero.
 - **No negative balance:** `SELECT ... FOR UPDATE` or conditional `UPDATE ... WHERE balance >= amount`; lock
   accounts in ID order to avoid deadlocks.
 - **Top-up:** pending record → gateway → credit only on verified webhook or status poll, idempotent on the
   top-up ID.
-- **Withdrawal:** hold or move funds first, call the bank with our reference, on timeout check status, never
+- **Withdrawal:** move funds to payout clearing first, call the bank with our reference, on timeout check status, never
   re-send; failure = reversal journal.
 - **Cross-shard:** 2PC blocks; use a saga of local balanced journals through in-flight accounts, with a durable
   transfer log and per-step idempotency keys.

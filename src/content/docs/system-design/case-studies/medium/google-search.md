@@ -109,20 +109,21 @@ page is re-crawled on average every **30 days** (popular pages far more often, t
 - Pages to fetch: $50\text{B} / 30 \text{ days} \approx 1.7\text{B}$ a day, about **19,000 pages per second**.
 - Download bandwidth: $19{,}000 \times 100\text{ KB} \approx 1.9\text{ GB/s}$, roughly **15 Gbit/s** of
   sustained traffic.
-- Raw HTML: $50\text{B} \times 100\text{ KB} = 5\text{ PB}$, about 1 PB compressed.
+- Raw HTML: $50\text{B} \times 100\text{ KB} = 5\text{ PB}$, about 1.25 PB compressed (HTML compresses about 4:1).
 - Extracted text: $50\text{B} \times 10\text{ KB} = 500\text{ TB}$.
-- Inverted index: a compressed index is typically 25–35% of the text it covers, so about **150 TB**. Compressed
+- Inverted index: a compressed index with word positions is typically a third to a half of the size of the text it
+  covers, so about **200 TB**. Compressed
   document copies for snippets add a similar amount.
 
 **Sharding and fan-out**
 
 - With **10 million documents per shard**, we need $50\text{B} / 10\text{M} = 5{,}000$ shards, each holding about
-  30 GB of index: it fits on one machine's SSD, with the hottest parts in RAM.
+  40 GB of index: it fits on one machine's SSD, with the hottest parts in RAM.
 - Every query goes to every shard (section 9 explains why), so at peak the shards together answer
   $115{,}000 \times 5{,}000 \approx 575$ million shard-queries per second.
 - If one machine can answer about 1,000 shard-queries per second, that is around **575,000 machines** for one
   copy of the serving capacity. The number is rough, but the lesson is real: **query fan-out is the dominant
-  cost**, which is why caching, tiering and early termination (sections 11 and 13) matter so much.
+  cost**, which is why caching, tiering and early termination (sections 11 to 13) matter so much.
 
 Three conclusions follow:
 
@@ -256,7 +257,7 @@ fast:
 
 ### Compression
 
-An uncompressed docID is 4 or 8 bytes, and the index holds hundreds of billions of postings. Compression makes the
+An uncompressed docID is 4 or 8 bytes, and the index holds trillions of postings (50 billion pages × hundreds of distinct terms each). Compression makes the
 index several times smaller, which means more of it fits in RAM, which makes queries faster. It is not just a
 storage saving.
 
@@ -610,7 +611,7 @@ ten served in 200 ms beats a perfect one that never arrives.
   are new every day, so the index must still carry full load.
 - **Freshness:** big immutable base tier + small in-memory fresh tier + deleted-docs bitmap, merged at the next
   build (LSM pattern).
-- **Numbers:** ~10B queries/day (~116K/s, ~230K/s peak); 50B pages × 10 KB text = 500 TB; index ~150 TB in
+- **Numbers:** ~10B queries/day (~116K/s, ~230K/s peak); 50B pages × 10 KB text = 500 TB; index ~200 TB in
   5,000 shards of 10M docs; crawl ~19K pages/s.
 
 ## Practice questions

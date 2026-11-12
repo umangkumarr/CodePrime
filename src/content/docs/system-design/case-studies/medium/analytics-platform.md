@@ -1,6 +1,6 @@
 ---
 title: "Design an Analytics Platform for Metrics and Logs (like Datadog / Prometheus + ELK)"
-description: "Design a Datadog-style observability platform: agents, a Kafka buffer, a time-series DB with compression and rollups, log indexing, dashboards, alerting and quotas."
+description: "Design a Datadog-style observability platform: agents, a Kafka buffer, a time-series DB with compression and rollups, log indexing, alerting and quotas."
 difficulty: "Medium"
 sidebar:
   label: "Metrics and logs platform (like Datadog)"
@@ -233,7 +233,7 @@ What the buffer buys us:
   series to the same partition and so to the same ingester, in order. Logs can be partitioned by
   `tenant + stream labels`.
 
-The rule from the email-service design applies here too: **only say `200 OK` after the data is durably in the
+The rule from the [email service design](/system-design/case-studies/medium/email-service/) applies here too: **only say `200 OK` after the data is durably in the
 log** (written to several brokers). If the gateway dies before that, the agent never got its OK and retries.
 
 **At-least-once delivery.** A consumer that crashes after writing but before committing its offset will read the
@@ -354,7 +354,7 @@ month. The cost: the index is large (it can approach the size of the data itself
 disks, and indexing burns a lot of CPU at write time, for data that is mostly never searched.
 
 **Option B: index labels only, scan the rest** (the approach Grafana Loki is known for). Lines are grouped into
-**streams** by their label set, compressed into chunks of a few MB, and stored in object storage. The only index
+**streams** by their label set, compressed into chunks of a megabyte or two, and stored in object storage. The only index
 is the tiny one from labels to chunks. A search like `{service="checkout"} |= "timeout"` first uses the labels to
 pick the right chunks for the time range, then **decompresses and scans them in parallel** across many workers,
 like `grep` at scale.
@@ -580,6 +580,6 @@ two minutes behind than for ingestion to reject data, because a backlog can be c
    share of ~0.9 TB a day for 730 days, plus longer queries scanning far more chunks. Offer it as a paid
    retention tier on cheaper object storage, and steer them towards rollups for anything older than weeks.
 5. **Why not store logs in the time-series database, or metrics in the log store?** Metrics are small numbers
-   that compress to about a byte and are read as ranges of one series; logs are large, varied text searched by
+   that compress to about a byte and a half and are read as ranges of one series; logs are large, varied text searched by
    content. Storing either in the other's engine wastes either compression or search ability. They share the
    ingestion pipeline and query layer, not the storage engine.

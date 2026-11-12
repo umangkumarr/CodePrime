@@ -131,8 +131,9 @@ Peak traffic is **5×** average, and a flash sale briefly reaches **100×** aver
 
 - One booking with passengers, segments, payments and its event history: ~20 KB.
   $100{,}000 \times 20\text{ KB} = 2\text{ GB}$ a day, under **1 TB a year**. Small.
-- Fare cache: entries live a few minutes. Even if all ~700,000 searches in a 10-minute peak window were distinct,
-  at ~20 KB each that is about **14 GB**. It fits in memory on a small cluster.
+- Fare cache: entries live a few minutes. Even if all ~3.5 million searches in a 10-minute peak window
+  ($5{,}800 \times 600$) were distinct, at ~20 KB each that is about **70 GB**. It fits in memory on a small
+  cluster, and in practice many searches repeat, so the real figure is far lower.
 
 Three conclusions follow:
 
@@ -291,7 +292,8 @@ experience and wasted supplier calls when many of **our** users chase the same s
 - **Short-lived lock:** `SET seat:XY865:2026-12-12:14C <booking_id> NX EX 600` in Redis. `NX` means "only if
   nobody holds it", so one request wins atomically. The TTL means an abandoned lock frees itself.
 - **The airline still has the last word.** Another agency or the airline's own website may take 14C. If the
-  airline refuses, we release our lock, refresh the seat map and ask the user to choose again.
+  airline refuses, we release our lock (deleting it only if it still holds our booking ID, so we never remove
+  a lock another booking took after ours expired), refresh the seat map and ask the user to choose again.
 - **Paid seats** are extras the airline sells with their own document (an EMD, electronic miscellaneous
   document). Treat them like a small booking: hold, pay, issue, with the same idempotency rules.
 
@@ -337,7 +339,9 @@ retrying blindly can create two PNRs or two tickets.
 
 - **Within minutes:** retrieve the PNR (by record locator, or by our reference if even the create call timed
   out). A ticket number on it means the ticket exists: mark `TICKETED` and capture. No ticket and the hold still
-  valid: we may safely try ticketing once more, because we have just confirmed it did not happen. Otherwise
+  valid: we may try ticketing once more, but only after waiting long enough that the timed-out request cannot
+  still be in progress on the supplier's side (and, if the supplier offers it, checking its transaction status);
+  otherwise a slow first request and the retry could both issue a ticket. Otherwise
   cancel the PNR and release the money.
 - **Nightly:** compare three ledgers: our bookings, the tickets the suppliers report (and the BSP/ARC sales
   report), and the payment gateway's settlement file. Every ticket must match a captured payment and vice versa.
@@ -363,7 +367,9 @@ keeps one row each, and the booking is only `TICKETED` when all of them are.
 
 **2. Unique keys are business rules.** `booking.idempotency_key` stops duplicate bookings;
 `payment.idempotency_key` stops duplicate charges; `supplier_booking.our_reference` lets reconciliation find a
-PNR; `passenger.ticket_number` stops one ticket being attached twice.
+PNR; `passenger.ticket_number` stops one ticket being attached twice. (One ticket number per passenger fits the
+common single-PNR booking. With several supplier bookings each passenger gets one ticket per PNR, so the ticket
+number moves to its own `ticket` table keyed by supplier booking and passenger, still unique.)
 
 **3. `version` on the booking** supports the conditional updates from section 8.
 
@@ -483,14 +489,14 @@ supplier gateway; the rest of the system sees only our internal offer and order 
 - **Seats:** Redis `SET NX EX` lock to reduce collisions; the airline decides; own inventory uses a unique key.
 - **Flash traffic:** supplier quotas, pre-warm, coalesce, prioritise booking over search, waiting room, circuit
   breakers.
-- **Numbers:** 100K bookings/day × 1,000 look-to-book = 100M searches/day (~1,200/s, ~6,000/s peak);
-  bookings ~1/s; data ~2 GB/day.
+- **Numbers:** 100K bookings/day × 1,000 look-to-book = 100M searches/day (~1,160/s, ~5,800/s peak);
+  bookings ~1.2/s (~120/s in a flash sale); data ~2 GB/day.
 
 ## Practice questions
 
 1. **The user paid but the app shows "processing" for 10 minutes. What happened and what do you do?** Probably a
    ticketing timeout: the booking is in `TICKETING_UNKNOWN`. The reconciliation worker retrieves the PNR; if a
-   ticket exists, capture and confirm; if not and the hold is valid, retry ticketing once; otherwise cancel and
+   ticket exists, capture and confirm; if not and the hold is valid, retry ticketing once (after the wait described in section 10); otherwise cancel and
    release the authorisation, and tell the user. Alert if many bookings sit in this state.
 2. **How would you show a price calendar ("cheapest fare each day this month")?** Do not run 30 live searches.
    Build it from cached and recently seen prices (a price-history store), label the numbers as "from" prices, and

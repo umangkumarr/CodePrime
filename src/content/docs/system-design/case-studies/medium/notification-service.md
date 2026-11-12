@@ -318,12 +318,13 @@ Rules that make this work:
 
 Providers fail in three ways, and each needs a different answer.
 
-[![Channel worker attempt: pick a healthy provider, call it with a short timeout, then branch on the result: 2xx marks SENT and keeps the provider's id; 400 or 410 marks FAILED and drops a dead token; 429, 5xx or a timeout checks retries left, and either waits in the retry queue and tries again, or tries a fallback channel, else dead letters](/img/system-design/notification-service/04-retry-fallback.png)](/img/system-design/notification-service/04-retry-fallback.png)
+[![Channel worker attempt: pick a healthy provider, call it with a short timeout, then branch on the result: 2xx marks SENT and keeps the provider's id; 400, 404 or 410 marks FAILED and drops a dead token; 429, 5xx or a timeout checks retries left, and either waits in the retry queue and tries again, or tries a fallback channel, else dead letters](/img/system-design/notification-service/04-retry-fallback.png)](/img/system-design/notification-service/04-retry-fallback.png)
 
 *Select the diagram to zoom in and move around.*
 
-1. **Permanent errors** (`400` bad request, APNs `410` "this token is no longer active", an invalid phone
-   number, an email hard bounce): **never retry.** Mark failed, and clean up the bad address (section 15).
+1. **Permanent errors** (`400` bad request, APNs `410` "this token is no longer active", FCM `404`
+   `UNREGISTERED`, an invalid phone number, an email hard bounce): **never retry.** Mark failed, clean up the bad
+   address (section 15), and use a fail-based channel fallback if the type has one (below).
 2. **Temporary errors** (`429` rate limited, `5xx`, timeouts): **retry with exponential backoff and jitter.**
    Wait 1 s, then 4 s, then 16 s…, each with a random spread so thousands of failed jobs do not all retry in
    the same instant and knock the provider over again. Retries go to a **delay queue**, not a sleeping worker,
@@ -365,7 +366,9 @@ We defend at three layers.
 
 **Layer 1: the API's idempotency key.** The producer sends `Idempotency-Key: order-981-shipped`. The API does
 an atomic "set if absent" in Redis (`SET key notification_id NX EX 86400`). If the key was new, proceed; if it
-existed, return the original `notification_id` and do nothing else. A good key comes from the business event
+existed, return the original `notification_id` and do nothing else. If the write to the ingest queue then
+fails, the API deletes the key before returning an error; otherwise the producer's retry would be told "done"
+for a notification that was never queued. A good key comes from the business event
 (order ID + event), not a random number generated per attempt, otherwise every retry looks new.
 
 **Layer 2: a content dedupe key in the router.** For events that several producers might raise, the router
@@ -373,15 +376,17 @@ checks `(user_id, type, entity_id)` in a short window (for example 24 hours), wh
 
 **Layer 3: idempotent workers.** Each delivery has a `delivery_id`. Before calling the provider, the worker
 checks that the delivery is still in `Queued` state and marks it `Sending` (a conditional update). A
-redelivered job finds `Sent` and stops.
+redelivered job finds `Sent` and stops. One that finds `Sending` left behind by a crashed worker is the
+ambiguous case below.
 
 There is one gap no design can close: if the worker calls the SMS provider and crashes **before** it records
 the answer, it cannot know whether the SMS went out. It must choose between retrying (a possible duplicate) and
 not retrying (a possible loss). For an OTP, retrying is better; for a marketing SMS, skipping is. This is the
 honest answer to "can you guarantee exactly once?": **no, not across a boundary you do not control; you get
 at-least-once delivery plus de-duplication, which makes duplicates rare.** Some providers help: APNs accepts an
-`apns-collapse-id` and FCM a `collapse_key`, so a repeated push replaces the earlier one on the screen instead
-of stacking, and some SMS and email APIs accept a client reference for de-duplication.
+`apns-collapse-id` and Android notifications sent through FCM a `tag`, so a repeated push replaces the earlier
+one on the screen instead of stacking, and some SMS and email APIs accept a client reference for
+de-duplication.
 
 ## 12. Deep dive: scheduling, batching and digests
 
@@ -592,7 +597,7 @@ stream, aggregates for dashboards, TTL on raw rows.
   (APNs/FCM, email, SMS, in-app) → tracker.
 - **We do not deliver; providers do.** So: queues, retries, circuit breakers, multiple SMS/email vendors,
   channel fallback, DLQ.
-- **Errors:** permanent (`400`, `410`, hard bounce) → never retry, clean up; temporary (`429`, `5xx`, timeout)
+- **Errors:** permanent (`400`, `404`/`410` dead token, hard bounce) → never retry, clean up; temporary (`429`, `5xx`, timeout)
   → exponential backoff with jitter, capped.
 - **Exactly once is impossible at the provider boundary:** at-least-once + idempotency key (API) + dedupe key
   (router) + state check (worker) + collapse IDs.
@@ -603,7 +608,7 @@ stream, aggregates for dashboards, TTL on raw rows.
   (push ~4 KB, SMS 160 GSM-7 or 70 Unicode characters per segment).
 - **Data:** notification (one event) fans out to deliveries (user × channel); status ranks only move forward;
   raw events with TTL, aggregates in OLAP.
-- **Tokens:** register on every app start, one token per user, deactivate on `410` / `UNREGISTERED`, expire stale.
+- **Tokens:** register on every app start, one token per user, deactivate on APNs `410` / FCM `UNREGISTERED`, expire stale.
 - **Burst:** 100M users in 5 min ≈ 333K/s. Split audience into ~100K batch jobs of 1,000, render once per
   locale, many HTTP/2 connections, shaped rate, separate bulk pool, canary + kill switch.
 - **Numbers:** ~1B notifications/day ≈ 11.6K/s average, ~120K/s peak; ~500 GB/day of delivery records.
