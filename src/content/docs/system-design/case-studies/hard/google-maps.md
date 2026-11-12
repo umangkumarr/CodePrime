@@ -430,8 +430,8 @@ Things worth noticing:
 ## 9. Deep dive: live traffic from phones
 
 Google has described publicly that its traffic layer is built from **aggregated, anonymised location data**
-from phones whose users have turned location sharing on, along with other sources such as reports from Waze
-users. No cameras or road sensors are needed: millions of phones moving at car speed *are* the sensors.
+from phones whose users have turned location sharing on, along with other sources such as incident reports
+from drivers. No cameras or road sensors are needed: millions of phones moving at car speed *are* the sensors.
 
 [![Live traffic pipeline: opted-in phones send latitude, longitude and time into a location stream that strips identity; the map matcher turns short traces into road segments and speeds; an aggregator per segment and per minute writes current speeds to the live speeds store, sends new edge weights to routing, archives into speed history by hour of week, and the live speeds colour the traffic layer green, amber or red](/img/system-design/google-maps/06-traffic.png)](/img/system-design/google-maps/06-traffic.png)
 
@@ -555,8 +555,8 @@ Search turns "central stn" into one precise point. It has three parts:
   or category ("coffee"). Addresses differ by country, so parsers are per-country.
 - **Lookup:** an **inverted index** from words (with typo tolerance and abbreviations: "stn" → "station") to
   places, plus a **geospatial index** to rank by distance from the user or the visible map area.
-- **Interpolation:** not every house is stored. If a street segment is known to hold numbers 1–99 on one side,
-  number 40 is placed about 40% of the way along it.
+- **Interpolation:** not every house is stored. If a street segment is known to hold the even numbers 2–100 on one
+  side, number 40 is placed about 40% of the way along it.
 
 Ranking blends text match, distance, and popularity. **Reverse geocoding** finds the nearest address point or
 street segment to a coordinate with the same spatial index. The full design of a places index (geohashes,

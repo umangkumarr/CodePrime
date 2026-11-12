@@ -147,15 +147,17 @@ participants have their camera on. Peak load is **3×** the daily average.
   0.5 Mbps (360p) + 0.15 Mbps (180p) ≈ **2.2 Mbps**.
 - **Downlink**: the active speaker large at 720p (1.5 Mbps) + 8 small tiles at 180p ($8 \times 0.15 = 1.2$ Mbps)
   + the 3 loudest audio streams ($3 \times 40\text{ kbps} = 0.12$ Mbps) ≈ **2.8 Mbps**.
-- So each camera-on participant pushes about **5 Mbps** through a media server. With cameras off, it is closer to
-  0.2 Mbps. Averaging half and half: about **2.6 Mbps** per participant.
+- So each camera-on participant pushes about **5 Mbps** through a media server. Turning the camera off saves only
+  the uplink: that participant still watches everyone else, so it is about **2.9 Mbps**. Averaging half and half:
+  about **4 Mbps** per participant. (This is an upper bound: many meetings have fewer than nine people, so their
+  downlinks are smaller.)
 
 **Media server fleet**
 
-- Peak traffic through media servers: $28\text{M} \times 2.6\text{ Mbps} \approx 73\text{ Tbps}$.
+- Peak traffic through media servers: $28\text{M} \times 4\text{ Mbps} \approx 110\text{ Tbps}$.
 - Assume one media server can comfortably forward **10 Gbps** (in practice it is limited by packets per second
-  and encryption CPU, not the network card). Servers needed: $73\text{ Tbps} / 10\text{ Gbps} \approx 7{,}300$.
-- Add ~30% headroom for failover and spikes: about **10,000 media servers**, spread over a few dozen regions.
+  and encryption CPU, not the network card). Servers needed: $110\text{ Tbps} / 10\text{ Gbps} \approx 11{,}000$.
+- Add ~30% headroom for failover and spikes: about **15,000 media servers**, spread over a few dozen regions.
 - Packets: at ~1,200 bytes per packet, 5 Mbps is about $5{,}000{,}000 / 9{,}600 \approx 520$ packets per second
   per camera-on participant, so a busy server moves around **a million packets per second**. That is why media
   servers are carefully tuned C/C++ or Rust programs, not ordinary web services.
@@ -168,8 +170,8 @@ participants have their camera on. Peak load is **3×** the daily average.
 
 Three conclusions follow:
 
-1. **The media plane is the system.** Signalling, the database and the website are tiny next to tens of terabits
-   per second of live packets.
+1. **The media plane is the system.** Signalling, the database and the website are tiny next to around a hundred
+   terabits per second of live packets.
 2. **Never decode on the server if you can avoid it.** Transcoding 28 million streams would need a fleet many
    times larger.
 3. **Put media servers close to users.** Every millisecond of distance is latency, and long-haul bandwidth is
@@ -245,7 +247,7 @@ Messages on the signalling channel (JSON, each with a sequence number so a recon
 
 ## 7. High-level design
 
-[![High-level architecture: clients reach a web and API tier backed by a meeting database, a signalling service that asks a media allocator for a nearby SFU, and the SFU itself over SRTP on UDP, or through a TURN relay when UDP is blocked; SFUs in two regions are cascaded; recording workers write MP4 files and transcripts to an object store](/img/system-design/zoom/02-architecture.png)](/img/system-design/zoom/02-architecture.png)
+[![High-level architecture: clients reach a web and API tier backed by a meeting database, a signalling service that asks a media allocator for a nearby SFU, and the SFU itself over SRTP on UDP, or through a TURN relay when UDP is blocked; SFUs in two regions are cascaded; recording workers receive streams and write MP4 files, and a transcription service receives audio per speaker, both into an object store](/img/system-design/zoom/02-architecture.png)](/img/system-design/zoom/02-architecture.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -290,7 +292,8 @@ Things worth noticing:
   timeout.
 - **Audio first.** Clients start audio as soon as the path is ready and bring video up a moment later. Hearing
   people within two seconds feels fast even if video takes a little longer.
-- **Roster updates are pushed, not polled.** Everyone else gets a `roster_delta` saying Alice joined.
+- **Roster updates are pushed, not polled.** Everyone else gets a `roster_delta` saying Alice joined, and Alice
+  gets one whenever someone else joins (step 11).
 
 ## 9. Low-level design: meeting state and data model
 
@@ -357,7 +360,7 @@ the enhancement packets a receiver cannot use. Codecs such as VP9 and AV1 suppor
 | --- | --- | --- |
 | Sender work | Encode 2–3 independent streams | Encode one layered stream |
 | Upload cost | Sum of all layers (~1.4× the top layer) | A bit more than the top layer alone |
-| Switching quality | Needs a key frame on the new layer | Instant: just forward fewer layers |
+| Switching quality | Needs a key frame on the new layer | Down: instant, just forward fewer layers; up: at the next switch point the encoder provides |
 | Codec support | Every codec | VP9, AV1 (and H.264 SVC extensions, less common) |
 
 Both mean the **sender pays once and the SFU tailors per receiver**, which is exactly what an MCU does, but
@@ -583,8 +586,8 @@ of any per-packet work beyond header reads and encryption.
   audio makes transcripts easy.
 - **E2EE:** frame-level encryption (SFrame-style) keeps headers readable so SFUs still work; you lose cloud
   recording and cloud transcription.
-- **Numbers:** ~2.2 Mbps up and ~2.8 Mbps down per camera-on participant; ~28M peak participants → ~70 Tbps →
-  roughly 10,000 media servers at 10 Gbps each with headroom.
+- **Numbers:** ~2.2 Mbps up and ~2.8 Mbps down per camera-on participant (~4 Mbps averaged with camera-off
+  viewers); ~28M peak participants → ~110 Tbps → roughly 15,000 media servers at 10 Gbps each with headroom.
 
 ## Practice questions
 

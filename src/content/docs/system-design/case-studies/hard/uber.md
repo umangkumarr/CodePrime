@@ -226,7 +226,7 @@ That makes "everything within k steps" a clean, nearly circular ring, which is e
 ### Searching with rings
 
 At a resolution where cells are a few hundred metres across (H3 resolution 8 has an average edge of about
-460 m), the search is:
+530 m), the search is:
 
 1. Find the rider's cell `c`.
 2. Take the **disk** of cells within `k` steps of `c` (H3 calls this `gridDisk`, formerly `kRing`). For `k = 1`
@@ -329,9 +329,12 @@ server that owns the driver's city or cell on the hash ring. All changes to that
 owner, which serialises them in memory, and are persisted as a conditional write:
 
 ```sql
-UPDATE drivers SET status = 'offered'
-WHERE driver_id = 7 AND status = 'available';   -- 0 rows means someone else got D7
+UPDATE driver_state SET status = 'offered'
+WHERE city_id = 12 AND driver_id = 7 AND status = 'available';   -- 0 rows means someone else got D7
 ```
+
+(`driver_state` is the driver's live dispatch status, kept on the city's shard next to its trips. It is separate
+from the global driver profile in section 16.)
 
 **For trips**, the trip row carries its state and a **version** number (optimistic locking):
 
@@ -342,8 +345,8 @@ WHERE city_id = 12 AND trip_id = 't9' AND state = 'MATCHING' AND version = 3;
 ```
 
 If the rider cancelled first, the trip is `CANCELLED` (version 4), this update touches 0 rows, and dispatch
-releases D7 and tells the driver "trip no longer available". Because we **shard by city**, a trip and the driver
-serving it live on the same shard, so both updates can share one local transaction instead of a distributed one.
+releases D7 and tells the driver "trip no longer available". Because we **shard by city**, a trip and the live
+status of the driver serving it live on the same shard, so both updates can share one local transaction instead of a distributed one.
 
 Retries are safe too: accept messages carry the `trip_id` and an offer ID, so a duplicated Accept from a flaky
 phone finds the trip already `DRIVER_ASSIGNED` to the same driver and is simply acknowledged again.
@@ -455,7 +458,9 @@ small cities share one.
 **3. `trip_events` is append-only.** State changes are never edited, only added, which gives an audit trail
 and lets other services rebuild what happened.
 
-**4. Riders and drivers are global**, sharded by their own ID, because people travel between cities. A rider's
+**4. Rider and driver profiles are global**, sharded by their own ID, because people travel between cities
+(the `status` column there is the account status; the live `available` / `offered` / `on_trip` status is the
+per-city `driver_state` row from section 10). A rider's
 trip history is served by a secondary index (`rider_id → trip IDs`) or a separate history store built from trip
 events.
 
@@ -537,7 +542,7 @@ other way.
 | Geo index | Geohash or quadtree | H3 hexagons | **H3** (or any cell scheme): equal-distance neighbours make ring search clean |
 | Ranking | Straight-line distance | Road ETA | **ETA**: distance ignores rivers, one-way streets and traffic |
 | Offers | Broadcast to many drivers | One at a time with timeout | **One at a time**: no wasted offers, driver held cleanly |
-| Matching | Greedy per request | Batched every few seconds | **Greedy** by default, **batched** in dense areas |
+| Matching | Greedy per request | Batched every second or two | **Greedy** by default, **batched** in dense areas |
 | Concurrency | Distributed locks | Single owner + compare-and-set | **CAS on versioned rows**: simple, no lock to leak |
 | Sharding | By user | By city / region | **City**: trips, drivers and riders are local, so transactions stay local |
 | Cross-region replication | Synchronous | Asynchronous + phone digest | **Async**, with the digest covering the gap |

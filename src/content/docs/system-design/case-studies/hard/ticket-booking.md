@@ -86,8 +86,8 @@ We need two sets of numbers: a normal day, and the worst ten minutes of the year
 
 - Bookings: $1\text{M} / 2.5 = 400{,}000$ a day $\approx$ **5 per second** on average, perhaps **50 per
   second** at the Friday-evening peak (10×).
-- Page views: $20\text{M} \times 10 = 200\text{M}$ a day $\approx$ **2,300 per second**, ~10,000 per second at
-  peak. That is about **500 page views per booking**: this system is overwhelmingly **read-heavy**.
+- Page views: $20\text{M} \times 10 = 200\text{M}$ a day $\approx$ **2,300 per second**, ~23,000 per second at
+  the same 10× peak. That is about **500 page views per booking**: this system is overwhelmingly **read-heavy**.
 - Inventory: say 10,000 screens × 4 shows a day × 7 days on sale = 280,000 shows. At 250 seats each that is
   **70 million show-seat rows**; at ~100 bytes a row, about **7 GB**. Small. We shard for throughput and
   isolation, not for size.
@@ -97,7 +97,8 @@ We need two sets of numbers: a normal day, and the worst ten minutes of the year
 **Assumptions:** two stadium concerts of **50,000 seats** each, **100,000 tickets** in all, at most **4 per
 order** (so at least 25,000 orders). **3 million** fans arrive in the 10 minutes before 10:00.
 
-- Arrivals: 3M in ~5 minutes $\approx$ **10,000 new visitors per second**, all loading the same page.
+- Arrivals: 3M in 10 minutes is 5,000 a second on average, but most come in the last few minutes; 3M in ~5
+  minutes $\approx$ **10,000 new visitors per second**, all loading the same page.
 - Waiting-room polling: each waiting browser asks "where am I in the queue?" every 15 seconds:
   $3\text{M} / 15 = 200{,}000$ **requests per second**. These must be served from the CDN edge or a tiny
   counter service, never by the booking system.
@@ -196,7 +197,7 @@ perfectly consistent for millions of viewers would cost far more than an occasio
 ## 7. Deep dive: seat holds that never double-book
 
 This is the part interviewers push on hardest. Asha and Ravi both see seat A8 as free and tap it at the same
-moment.
+moment: Asha asks for A7 and A8, Ravi for A8 and A9.
 
 ### The race
 
@@ -237,8 +238,8 @@ COMMIT;
 *Select the diagram to zoom in and move around.*
 
 Why this is safe: an `UPDATE` takes a **row lock** on each row it changes. Ravi's update reaches row A8, finds
-Asha's transaction holding the lock, and waits. When Asha commits, both PostgreSQL and MySQL (InnoDB) re-check
-Ravi's `WHERE` clause against the **newly committed** row, see `HELD`, and skip it. Ravi's statement changes 1
+Asha's transaction holding the lock, and waits. When Asha commits, both PostgreSQL (at its default `READ
+COMMITTED` level) and MySQL (InnoDB) re-check Ravi's `WHERE` clause against the **newly committed** row, see `HELD`, and skip it. Ravi's statement changes 1
 row instead of 2, so the application rolls back, which also frees A9. No double booking, no extra round trip,
 no separate lock service.
 
@@ -246,9 +247,10 @@ Two practical details:
 
 - **All or nothing.** A fan wants A7 and A8 together, not one of them. Checking "rows affected = number of
   seats" inside one transaction gives exactly that.
-- **Lock in a fixed order.** If Asha holds A7, A8 and Ravi holds A8, A7, each can lock one row and wait for the
-  other: a **deadlock**. The database detects it and kills one, but it is cleaner to always touch seats sorted
-  by `seat_id`.
+- **Lock in a fixed order.** If Asha locks A7 then A8 while Ravi locks A8 then A7, each can hold one row and wait
+  for the other: a **deadlock**. The database detects it and aborts one (the application retries it), but it is
+  cleaner to always lock seats sorted by `seat_id`. A single `UPDATE` usually visits rows in index order, but
+  that is not guaranteed; to be certain, lock first with `SELECT ... ORDER BY seat_id FOR UPDATE`.
 
 A variation is **optimistic concurrency** with a `version` column: read the row with its version, then
 `UPDATE ... WHERE version = :v_read`. Same principle: the write only succeeds if nothing changed since you read.
@@ -288,7 +290,9 @@ SET hold:42:A8 booking-91 NX EX 600
 `NX` means "only set if the key does not exist" and `EX 600` means "delete it after 600 seconds". Redis runs
 commands one at a time, so of two simultaneous `SET ... NX` calls exactly one succeeds. The expiry is
 automatic: no sweeper needed. To hold several seats at once, run the checks and sets inside one **Lua script**,
-which Redis also executes atomically, so you never end up holding A7 but not A8.
+which Redis also executes atomically, so you never end up holding A7 but not A8. Releasing early (payment failed)
+must also be a script that deletes the key **only if it still holds your booking ID**; a plain `DEL` arriving
+after your hold expired would delete someone else's hold.
 
 Redis is fast, but on its own it is **not a safe source of truth**. Its replication is asynchronous, so if the
 primary fails right after granting a hold, the new primary may not know about it and can grant the same seat
@@ -330,12 +334,14 @@ The confirm step is itself a conditional update, guarded by the hold:
 BEGIN;
 UPDATE show_seat SET status = 'BOOKED', hold_expires_at = NULL
 WHERE  show_id = 42 AND booking_id = :b AND status = 'HELD';      -- must change 2 rows
-UPDATE booking   SET status = 'CONFIRMED' WHERE id = :b AND status IN ('HELD', 'PAYMENT_PENDING');
+UPDATE booking   SET status = 'CONFIRMED' WHERE id = :b AND status IN ('HELD', 'PAYMENT_PENDING');  -- must change 1 row
 INSERT INTO outbox (topic, payload) VALUES ('BookingConfirmed', :json);
 COMMIT;
 ```
 
-The **outbox** row is written in the same transaction as the booking, and a relay publishes it to the event bus
+If either count is short (a seat was lost after the hold expired, or the sweeper already marked the booking
+`EXPIRED`), the transaction rolls back and the saga refunds. The **outbox** row is written in the same transaction
+as the booking, and a relay publishes it to the event bus
 afterwards. That way "booking confirmed" and "event sent" can never disagree: either both happened or neither.
 
 [![Booking states: HELD to PAYMENT_PENDING to CONFIRMED to CHECKED_IN; HELD expires when the timer fires, PAYMENT_PENDING expires when the timer fires and the provider says unpaid or fails when declined; an expired booking whose late payment arrives is REFUNDED; a confirmed booking can be CANCELLED and then REFUNDED](/img/system-design/ticket-booking/04-booking-states.png)](/img/system-design/ticket-booking/04-booking-states.png)
@@ -431,7 +437,7 @@ Even inside the room, protect the booking system:
 - **General admission counters.** A 20,000-person standing area is not seats but a count. A single row
   `UPDATE ga SET sold = sold + 4 WHERE id = 1 AND sold + 4 <= capacity` is correct but becomes one hot row that
   every buyer queues on. Split the capacity into, say, 20 **buckets** of 1,000 and let each buyer try a random
-  bucket, or keep the count in Redis with an atomic decrement and confirm in the database.
+  bucket (moving on to another if it is full), or keep the count in Redis with an atomic decrement and confirm in the database.
 
 ## 10. Low-level design: the data model
 
@@ -452,7 +458,7 @@ one shard. The `booking` row lives on the same shard as its show for the same re
 
 **3. Status and hold in the same row.** `status`, `booking_id` and `hold_expires_at` sit on `show_seat`, so a
 single conditional `UPDATE` can claim, check and expire in one place (section 7). An index on
-`(show_id, status, hold_expires_at)` lets the sweeper find expired holds quickly.
+`(status, hold_expires_at)` lets the sweeper find expired holds on its shard quickly, without scanning every show.
 
 **4. Money is stored as exact decimals** (`numeric`), never floating point, and the price is **copied** into
 `show_seat` and the booking at hold time. If the organiser changes prices later, existing bookings keep the price

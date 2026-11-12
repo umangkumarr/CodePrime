@@ -43,7 +43,8 @@ The key vocabulary:
 - **Object**: the bytes (a few bytes up to terabytes) plus **metadata**: size, content type, a checksum, creation
   time and any custom tags you attach (`x-amz-meta-camera: pixel-8`).
 - **Bucket**: a named container of objects, with its own owner, region, access policy and settings (versioning,
-  lifecycle rules). In S3, general purpose bucket names are globally unique.
+  lifecycle rules). In S3, general purpose bucket names are globally unique by default (since March 2026 a bucket
+  can instead be created in its account's own regional namespace).
 - **Key**: the object's name inside the bucket, for example `photos/2024/cat.jpg`. The namespace is **flat**: the
   slashes are ordinary characters, and "folders" are an illusion created by listing keys that share a prefix.
 - **Immutable objects**: you never edit an object in place. A new PUT to the same key **replaces** it as a whole
@@ -65,7 +66,7 @@ coordination between them.
   (metadata only), **DELETE** it.
 - **LIST** the keys in a bucket by prefix, page by page, optionally grouped into "folders" by a delimiter.
 - **Multipart upload** for large objects: upload parts in parallel, then combine them into one object (up to
-  5 TiB).
+  about 50 TB).
 - **Versioning**: keep every version of a key; recover from overwrites and deletes.
 - **Storage classes and lifecycle rules**: move old data to cheaper tiers and expire it automatically.
 - **Access control**: per-bucket policies, signed requests and time-limited **pre-signed URLs**.
@@ -378,7 +379,7 @@ then "the first row at or after `(photos-bucket, cat.jpg)`": one seek. LIST is a
 hangs off that. Renaming would only need a new metadata row; a completed multipart upload simply points the
 new version at the parts' existing data, with no copying.
 
-**3. Large objects are cut into chunks.** A 5 TiB object cannot be one erasure-coding stripe. It is cut into
+**3. Large objects are cut into chunks.** A 50 TB object cannot be one erasure-coding stripe. It is cut into
 **chunks** (for example 64 MB), each erasure-coded into 9 fragments independently. A range read uses the chunk
 table to find which chunk holds the bytes it needs.
 
@@ -467,14 +468,15 @@ that upload independently and in parallel.
 *Select the diagram to zoom in and move around.*
 
 The S3 limits, which are public and worth knowing: parts are **5 MiB to 5 GiB** (only the last part may be
-smaller), at most **10,000 parts**, and objects up to **5 TiB**. A single PUT is limited to 5 GiB, and AWS
-suggests multipart for objects over about 100 MB.
+smaller), at most **10,000 parts**, and objects up to **48.8 TiB** (10,000 × 5 GiB, announced as "50 TB" in December
+2025; before that the limit was 5 TiB). A single PUT is limited to 5 GiB, and AWS recommends multipart for
+objects of 100 MB or more.
 
 Why this design works:
 
 - **Each part is stored like a small object**, with its own chunks and fragments. "Complete" only writes
   metadata: the new version's chunk list is the parts' chunk lists in order. No bytes are copied, so completing a
-  5 TiB upload is as quick as completing a 10 MB one.
+  50 TB upload is as quick as completing a 10 MB one.
 - **Atomic visibility:** until Complete commits, readers see the old version (or nothing). Then the whole
   object appears at once, exactly like a normal PUT.
 - **The client chooses the order.** Parts can upload in any order and be retried individually; Complete lists
@@ -567,7 +569,7 @@ money, so object stores offer **storage classes**. S3's public line-up includes:
 | S3 Standard | Frequently read data | Highest storage price, no retrieval fee, at least 3 AZs |
 | S3 Standard-IA (infrequent access) | Backups, older media | Cheaper storage, a per-GB retrieval fee, 30-day minimum storage charge |
 | S3 One Zone-IA | Re-creatable data | Cheaper still, but stored in one AZ, so a zone loss can lose it |
-| S3 Glacier Instant / Flexible Retrieval / Deep Archive | Archives and compliance copies | Much cheaper; Flexible takes minutes to hours to restore, Deep Archive up to about 12 hours; longer minimum durations |
+| S3 Glacier Instant / Flexible Retrieval / Deep Archive | Archives and compliance copies | Much cheaper; Flexible takes minutes to hours to restore, Deep Archive within 12 hours (48 for bulk); longer minimum durations |
 | S3 Intelligent-Tiering | Unknown or changing access patterns | Moves objects between tiers automatically by how often they are read, for a small monitoring fee |
 
 How might a provider make cold tiers cheaper? We cannot see inside S3, but a typical design uses denser, slower
@@ -699,7 +701,8 @@ end-to-end checksums.** Remove any one of the three and the nines collapse.
   first; spread rebuilds over thousands of disks.
 - **Versioning:** new version per PUT, delete markers on DELETE; lifecycle rules expire noncurrent versions,
   tier data to cheaper classes and abort incomplete uploads.
-- **Multipart:** 5 MiB to 5 GiB parts, up to 10,000 parts, 5 TiB objects; Complete is a metadata-only commit.
+- **Multipart:** 5 MiB to 5 GiB parts, up to 10,000 parts, objects up to about 50 TB (5 TiB
+  before December 2025); Complete is a metadata-only commit.
 - **Hot prefixes:** auto-split ranges (S3: 3,500 writes and 5,500 reads per second per prefix), back off on
   `503 Slow Down`; hot objects go behind a CDN.
 - **Numbers (our assumptions):** 10 EB logical, 15 EB raw, 750,000 disks, about 20 disk failures a day, about
@@ -711,9 +714,10 @@ end-to-end checksums.** Remove any one of the three and the nines collapse.
    have to query every partition and merge the results. Range partitioning keeps keys with a shared prefix
    together so a LIST is one sorted scan. The cost is hot ranges for sequential keys, handled by automatic
    splitting.
-2. **A client PUTs an object, gets `200 OK`, and immediately GETs it from another region's endpoint. What does it
-   see?** Read-after-write is guaranteed within the bucket's region, where the metadata lives. Another region has
-   the object only if cross-region replication copied it, which is asynchronous, so it may not be there yet.
+2. **A client PUTs an object, gets `200 OK`, and immediately GETs it from a replica bucket in another region. What
+   does it see?** Read-after-write is guaranteed only within the bucket's own region, where its metadata lives. The
+   replica has the object only once cross-region replication has copied it, which is asynchronous, so it may get
+   `404 Not Found` or the previous version for a while.
 3. **How would you add "rename a folder"?** There are no folders: renaming `photos/` means rewriting the
    metadata row of every key under it. Because names point to a `data_id`, no bytes move, but it is still one
    metadata write per object and not atomic across partitions. That is why classic object stores do not offer a

@@ -169,8 +169,8 @@ The **TTL** (time to live) of a lease is a trade-off:
   a short network glitch, loses the lock by mistake.
 - **Long TTL** (a minute): fewer false expiries, but a crash leaves the lock stuck for a minute.
 
-Lock services typically use TTLs of around 10 seconds and renew every third of the TTL, so two renewals can be
-lost before the lease is in danger.
+A common choice is a TTL of around 10 seconds (Chubby's default lease was 12 seconds), renewed every third of the
+TTL: if one renewal is lost, there is still a second attempt before the lease runs out.
 
 ### The fundamental problem: the holder cannot know it lost the lock
 
@@ -247,11 +247,13 @@ In practice:
   ```sql
   UPDATE reports
   SET    body = :body, fence = :token
-  WHERE  id = :id AND fence < :token;   -- 0 rows updated = stale holder
+  WHERE  id = :id AND fence <= :token;  -- 0 rows updated = stale holder
   ```
 
-  An object store can use a conditional put (write only if the stored version tag still matches), and another
-  etcd or ZooKeeper cluster can compare revisions inside a transaction.
+  The comparison is `<=`, not `<`, so the current holder can write more than once with the same token. An object
+  store can use a conditional put (write only if the stored version tag still matches), and when the resource is
+  kept in the same etcd cluster as the lock, a transaction can check that the lock key still carries your revision
+  in the same atomic step as the write (section 12).
 - **When the resource cannot check.** Some resources (an email provider, a payment gateway, an old file system)
   cannot compare tokens. Then the lock alone cannot be safe, and you should make the action **idempotent** instead
   (section 16), or accept that the lock is only an efficiency lock. Chubby offered a fallback for such servers, the
@@ -261,6 +263,10 @@ In practice:
 
 A random value, like the Redis token in section 4, cannot be a fencing token on its own: the resource cannot tell
 whether `9b1e` is newer than `7f3c`. Ordering is the point.
+
+The same idea appears inside consensus systems themselves: a Raft **term** and Kafka's **leader epoch** (see the
+[message queue case study](/system-design/case-studies/medium/message-queue/)) are fencing tokens that let
+followers reject a deposed leader.
 
 ## 7. Redlock, and the debate about it
 
@@ -386,8 +392,12 @@ can never be elected in the same term**.
 3. Each follower writes the entry to disk and replies.
 4. When a **majority** (counting the leader) has stored entry 7, it is **committed**: it will survive any future
    leader change. The leader applies it to the state machine ("lock held by session 42") and replies to the client.
-   The entry's position, revision 7, becomes the **fencing token**.
+   The entry's position in the log, 7, becomes the **fencing token** (etcd exposes a counter of this kind as the
+   **revision**).
 5. Slow followers catch up later; the leader does not wait for them.
+
+The diagram shows a 3-server cell to keep it small, so a majority is 2; in the 5-server cell of section 8 the
+leader waits for 2 followers, making 3 of 5.
 
 ### Reads must be careful too
 
@@ -415,7 +425,7 @@ The dangerous moment is when keep-alives stop getting through. The client cannot
 or only the network is slow, so a good client library is conservative:
 
 1. It tracks the lease locally with a **monotonic clock**, starting from when the keep-alive was *sent*, so its
-   estimate of the deadline is never later than the server's.
+   estimate of the deadline is never later than the server's (assuming both clocks tick at roughly the same rate).
 2. When the deadline is close and no reply has come, it tells the application **"session in jeopardy: stop
    writing"** (Chubby's name for this state). The application should pause work that needs the lock.
 3. If contact comes back in time, work resumes. If the lease ends, the library reports **"session expired: you
@@ -563,7 +573,7 @@ backoff, and give the new leader a grace period (section 10) so sessions do not 
 | Leader server crashes | Writes stop for one election timeout | Raft elects a new leader from the up-to-date majority; sessions get a grace period |
 | Network partition | Minority side cannot commit | Majority side continues; minority refuses writes rather than risk two holders |
 | Clock jumps on a server | Time-based expiry could fire early or late | Leases measured with monotonic clocks; servers do not rely on clocks agreeing |
-| Disk loss on one server | That server's log is gone | It rejoins as an empty follower and copies a snapshot plus the log from the leader |
+| Disk loss on one server | That server's log and its record of votes are gone | It must rejoin as a **new member** through a membership change, never as its old self (it could vote twice in a term or forget committed entries), then copy a snapshot plus the log from the leader |
 | Client retries an acquire | Could appear to queue behind itself | Idempotent acquire keyed by session (or lease) ID |
 | Bug in a client that never releases | Lock held forever while the session lives | Maximum hold time, monitoring of lock age, admin tools to revoke a session |
 
@@ -577,7 +587,8 @@ without it:
 - **Idempotent operations.** Give each action a unique ID (an idempotency key) and record it. Then running the same
   job twice does no harm, which is often easier than guaranteeing it runs once.
 - **Single-writer partitioning.** Route all work for one key to one consumer (for example a Kafka partition), so
-  nobody else is ever competing for it.
+  nobody else is normally competing for it. A consumer that pauses past its session timeout can still overlap with
+  the partition's new owner during a rebalance, so keep that work idempotent too.
 - **Database-native locks.** If the protected data lives in one database, its own transactions and row locks (or
   `SELECT ... FOR UPDATE`) are simpler and safer than an external lock.
 

@@ -62,7 +62,7 @@ handle this.
 | --- | --- | --- |
 | **Latency** | Search in under 200 ms at the 99th percentile; business page under 100 ms | People search while walking; slowness feels broken |
 | **Availability** | 99.99% for search and business pages | Reads are the product |
-| **Scale** | 200 million businesses worldwide; 100 million daily active users | Yelp / Google Maps-sized place catalogue |
+| **Scale** | 200 million businesses worldwide; 100 million daily active users | A global, map-app-sized place catalogue |
 | **Freshness** | A new or edited business appears in search within minutes; a review within seconds to minutes | Nobody minds a new café showing up a minute late |
 | **Consistency** | Eventual for search; read-your-writes for the author's own review | You must see your own review after posting it |
 | **Correctness of geo** | Never miss a place that is inside the radius; never show one far outside it | A "nearby" result 30 km away destroys trust |
@@ -85,7 +85,7 @@ each about **1 MB** original plus **200 KB** of resized copies.
   about **17,000 per second** at peak.
 - Business page views: $100\text{M} \times 10 = 1\text{B}$ a day, about **11,600 per second** on average.
 - Writes: 2M reviews + 1M edits = 3M a day, about **35 per second**.
-- Read-to-write ratio: roughly $17{,}400 / 35 \approx$ **500 : 1**. This is a read-optimised system: we can
+- Read-to-write ratio: about $5{,}800 + 11{,}600 = 17{,}400$ reads a second against 35 writes, roughly **500 : 1**. This is a read-optimised system: we can
   afford to do extra work on every write (reindexing, recomputing aggregates) to make reads cheap.
 
 **Storage**
@@ -259,7 +259,7 @@ again; libraries do this for you.
   metres apart, but their geohashes are `s00000` and `7zzzzz`: they share **no** prefix, because they sit on
   opposite sides of both the equator and the prime meridian, the very first cuts. "Search by prefix only" would
   miss them; "search the 3 × 3 neighbours" finds them.
-- **Shared prefix is not guaranteed even for neighbours.** One step north of `9q8yy` (length 5) is `9q8zj`. The
+- **Shared prefix is not guaranteed even for neighbours.** One step north of `9q8yy` (length 5) is `9q8zn`. The
   prefix shrinks from 5 to 3 shared characters.
 - **The 180° meridian.** Fiji and parts of Russia straddle it. The east neighbour of a cell at longitude +179.99
   is at −179.99: neighbour code must wrap around.
@@ -275,7 +275,7 @@ $1.22 \times \cos 37.77° \approx 0.97$ km wide and 0.61 km tall: **smaller** th
 | --- | --- | --- | --- |
 | 3 × 3 block of length-5 cells (3.9 km × 4.9 km each) | 9 | about 169 km² | **54×** too much |
 | Only the length-6 cells that touch the circle | 11 | about 6.5 km² | about 2× |
-| Only the length-7 cells that touch the circle | 204 | about 3.7 km² | about 1.2×, but 204 lookups |
+| Only the length-7 cells that touch the circle | about 200 | about 3.7 km² | about 1.2×, but about 200 lookups |
 
 This is the core trade-off of every grid index: **big cells mean few lookups but many false candidates; small
 cells mean few false candidates but many lookups.** A good choice is the precision whose cell is roughly the size

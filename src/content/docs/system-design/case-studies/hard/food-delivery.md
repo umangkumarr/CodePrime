@@ -215,8 +215,8 @@ Things worth noticing:
 
 - **Payment is authorised, not captured, at order time.** An authorisation is a hold on the customer's card: the
   money is reserved but not taken. We capture the exact final amount after delivery, which makes cancellations
-  and partial refunds (a missing item) cheap. For methods with no "hold" (UPI in India, many wallets), a typical
-  design charges upfront and refunds on cancellation. For cash on delivery, nothing is charged; the courier
+  and partial refunds (a missing item) cheap. For methods normally used without a "hold" (most UPI payments in
+  India, many wallets), a typical design charges upfront and refunds on cancellation. For cash on delivery, nothing is charged; the courier
   collects cash and the ledger records that the courier now owes it to the platform.
 - **The customer gets "Order placed" before the restaurant has accepted.** Waiting for a human in a kitchen
   would leave the app spinning. The ETA shown is a prediction; it is updated when the restaurant accepts.
@@ -271,9 +271,11 @@ the database row is the durable record.
 | GPS history, events | Append-only, huge | Kafka, then a data lake (object storage) | Disputes, analytics, training ETA models |
 | Money | Double-entry ledger | Relational database, append-only | Auditable, see the payment system case study |
 
-Sharding: orders are sharded by `order_id` (or by city, since almost nothing crosses a city boundary).
-**Sharding by city** is attractive here: dispatch, discovery and live positions are all naturally local, and a
-city is a natural unit for capacity and failure isolation. Very large cities can be split further.
+Sharding: in this design the order DB is sharded by `order_id` (as in the architecture diagram), which spreads
+load evenly because almost every order query is by ID. Sharding orders by city also works, since almost nothing
+crosses a city boundary. The real-time parts, **dispatch, discovery and live positions, are partitioned by
+city**: they are naturally local, and a city is a natural unit for capacity and failure isolation. Very large
+cities can be split further.
 
 ## 8. Deep dive: discovery by delivery area and ETA
 
@@ -488,7 +490,8 @@ $$
 \text{ETA} \approx \max(\text{accept} + \text{prep},\ \text{dispatch} + \text{drive to store}) + \text{pickup} + \text{drive to customer} + \text{drop-off}
 $$
 
-In the example: $\max(2 + 15,\ 9 + 8) + 3 + 12 + 3 = 17 + 18 = 35$ minutes.
+In the example, dispatch sends the courier at minute 9 (just in time, section 12):
+$\max(2 + 15,\ 9 + 8) + 3 + 12 + 3 = 17 + 18 = 35$ minutes.
 
 Practical points:
 
@@ -524,7 +527,9 @@ How it is built:
 
 - **A double-entry ledger.** On delivery, one transaction writes balanced entries: debit "customer funds
   received" ₹580, credit "owed to restaurant" ₹400, "owed to courier" ₹80, "platform revenue" ₹100. Every
-  entry sums to zero, so money can never appear or vanish. Refunds are new entries, never edits.
+  transaction's debits equal its credits (₹580 = ₹400 + ₹80 + ₹100), so money can never appear or vanish.
+  Refunds are new entries, never edits. A real ledger adds more lines in the same balanced way, such as the
+  payment provider's processing fee (an expense that reduces the platform's share) and taxes.
 - **Batch payouts.** Restaurants are typically paid daily or weekly by bank transfer, summing all their orders
   minus refunds. Couriers are often paid weekly, with an option to cash out instantly for a small fee. Batching
   saves transfer fees and gives time to handle disputes.

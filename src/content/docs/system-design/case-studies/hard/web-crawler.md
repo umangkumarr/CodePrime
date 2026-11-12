@@ -17,7 +17,7 @@ right time.
 
 This case study builds that crawler from first principles. The crawler's output feeds a search engine; what
 happens to pages after they are fetched (parsing for the index, ranking, serving queries) is covered in
-[Design a Web Search Engine](/system-design/case-studies/medium/google-search/).
+[Design Google Search](/system-design/case-studies/medium/google-search/).
 
 :::tip[How to read this]
 If you have an interview tomorrow, jump to the [cheat sheet](#cheat-sheet-for-last-minute-revision) at the
@@ -93,7 +93,8 @@ set them aside.
 days**, which is $15\text{B} / 15 = 1\text{B}$ fetches a day. An average HTML page is **100 KB** (many servers
 send it gzip-compressed, but we budget for the full size). Pages compress about **4:1** in storage. We know of
 roughly **100 billion URLs** in total (most are never worth fetching). An average fetch takes about **1 second**
-from connect to last byte.
+from connect to last byte. (The search engine case study assumes a bigger index and so a faster crawl, about
+19,000 pages per second; the design below scales to it by adding nodes.)
 
 **Fetch rate and bandwidth**
 
@@ -302,11 +303,13 @@ The most specific (longest) matching rule wins, so `/search/help` is allowed and
 
 How a crawler should handle it:
 
-- **Cache it per host.** RFC 9309 says a cached copy should not be used for more than 24 hours unless the file
+- **Cache it per host** (strictly, per scheme, host and port: `http://a.com` and `https://a.com` each have
+  their own file). RFC 9309 says a cached copy should not be used for more than 24 hours unless the file
   cannot be reached. Store the parsed rules, not the raw text.
 - **Status codes matter.** A `4xx` (for example 404, no file) means no restrictions. A `5xx` or a network failure
   means "assume everything is disallowed" for now, because the site might be in trouble; keep using the last good
-  copy if there is one.
+  copy if there is one. If the file stays unreachable for a long time (the RFC's example is 30 days), the crawler
+  may treat it as missing or keep using the cached copy.
 - **Limit the size**: the RFC asks crawlers to parse at least the first 500 KiB, so a huge file cannot exhaust memory.
 - **Crawl-delay** ("wait N seconds between requests") is **not** part of the standard. Some crawlers honour it,
   some ignore it. A careful crawler honours it within sane bounds.

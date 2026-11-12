@@ -83,7 +83,7 @@ Two facts from this journey shape the whole design:
 | **Scale** | ~5,000 engineers, ~2,000 services, ~50,000 hosts in 6 regions | A typical large tech company |
 | **Reproducibility** | The same commit always builds the same artefact | Otherwise a tested build means nothing |
 | **Consistency** | Every host eventually runs the desired version, even if it was down during the rollout | No forgotten servers on old code |
-| **Security** | Only reviewed code from the main branch reaches production; secrets never leave the vault in plain text | A deploy pipeline is a prime target for attackers |
+| **Security** | Only reviewed code from the main branch reaches production; secrets reach only the services allowed to use them, never code, images or logs | A deploy pipeline is a prime target for attackers |
 
 ### Out of scope
 
@@ -118,8 +118,8 @@ the work is reused. A service image is **1 GB**, but only **50 MB** of new layer
 - Agents: 50,000 hosts checking for work every 30 s is $50{,}000 / 30 \approx 1{,}700$ requests per second,
   cheap if each check is a "nothing changed" answer.
 
-**The hard part: moving bytes.** Rolling the largest service means copying $10{,}000 \times 1\text{ GB} =
-10\text{ TB}$. From one origin with a 10 Gbit/s link (1.25 GB/s) that takes $10{,}000 \text{ GB} / 1.25
+**The hard part: moving bytes.** In the worst case (a base-image change, or fresh hosts with nothing cached),
+rolling the largest service means copying $10{,}000 \times 1\text{ GB} = 10\text{ TB}$. From one origin with a 10 Gbit/s link (1.25 GB/s) that takes $10{,}000 \text{ GB} / 1.25
 \text{ GB/s} = 8{,}000\text{ s}$, over **2 hours**, and the origin is saturated for everyone else. Section 15
 fixes this with peer-to-peer distribution.
 
@@ -147,8 +147,9 @@ JSON, and every caller is authenticated.
 | `POST /v1/agents/{host}/status` | Host agent | Report the version actually running and its health. |
 
 Why does the agent **ask** (`GET desired`) rather than wait to be told? Because of the **pull model**, which
-section 10 explains. A long poll gives near-instant reaction without 1,700 empty requests per second turning into
-a burden: an idle agent makes just two requests a minute.
+section 10 explains. A long poll reacts almost instantly yet costs no more than a 30-second poll: an idle agent
+makes just two requests a minute (the ~1,700 per second from section 3), and almost all of them end in a cheap
+"nothing changed".
 
 ## 5. High-level design
 
@@ -512,7 +513,7 @@ How it works:
 
 1. The artefact is split into **pieces** (say 4 MB each), each with its own hash.
 2. The origin sends **one copy per region** to a regional **seed** (a cache), so cross-region links carry it
-   once, not 2,000 times.
+   once, not once per host.
 3. Hosts ask a **tracker** "who has which pieces?", download different pieces from different peers at the same
    time, and immediately **upload** the pieces they have to others. Every new downloader is also a new uploader,
    so total bandwidth grows with the number of hosts instead of being fixed by the origin.

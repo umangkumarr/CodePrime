@@ -405,8 +405,8 @@ That last rule gives the client a small state machine:
 
 [![Client sync states: Synchronised moves to Awaiting ack when a local edit is sent; another local edit moves it to Awaiting plus buffer; an ack returns to Synchronised, or sends the buffer and stays awaiting; a lost connection leads to Offline, then Rebasing on reconnect, then resending pending ops](/img/system-design/google-docs/05-client-states.png)](/img/system-design/google-docs/05-client-states.png)
 
-In **every** state, a `remote` op from the server is transformed against the in-flight op and the buffer (if
-any), then applied to the screen, and the in-flight op and buffer are transformed against it in turn.
+Whenever a `remote` op arrives from the server, it is transformed against the in-flight op and the buffer (if
+there are any), then applied to the screen, and the in-flight op and buffer are transformed against it in turn.
 
 ## 11. Cursors and presence
 
@@ -426,7 +426,7 @@ differently keeps the system cheap.
 
 ## 12. Offline editing and reconnect
 
-Your laptop loses Wi-Fi at revision 7 (`"CHATS"`). You keep typing an exclamation mark at the end,
+Alice's laptop loses Wi-Fi at revision 7 (`"CHATS"`). She keeps typing: an exclamation mark at the end,
 `ins(5,"!")`, which the client keeps in its buffer (and saves to local storage so a closed tab does not lose it).
 Meanwhile Bob deletes the `C`, which becomes revision 8: `del(0,1)`, leaving `"HATS"`.
 
@@ -441,8 +441,9 @@ Meanwhile Bob deletes the `C`, which becomes revision 8: `del(0,1)`, leaving `"H
 
 **Duplicates.** Suppose Alice's op had actually reached the server just before the connection dropped, but the ack
 was lost. The client cannot tell, so it resends. The server checks `(client_id, seq) = (alice, 12)` against the
-log: if it is already there, it replies with the original revision instead of applying it twice. **Retries are
-safe because ops are idempotent by ID.**
+log: if it is already there, it replies with the original revision instead of applying it twice. The same ID
+works on the client side: if Alice's own op shows up among the missed revisions during catch-up, her client
+treats it as the lost ack instead of transforming against it. **Retries are safe because ops are idempotent by ID.**
 
 **Long offline periods.** If Alice was away for a week and the document saw 50,000 ops, transforming her op
 against all of them still works but is slow and the result may surprise her. Two common choices: transform anyway
@@ -489,7 +490,9 @@ wide-column store (Bigtable, Cassandra, ScyllaDB) or sharded MySQL / Postgres: r
 `(doc_id, revision)`, and read as a range ("everything after 12,000"). Snapshot contents go in a blob store with
 the key in the table. A per-user index `(user_id, updated_at, doc_id)` serves the "my documents" list.
 
-The `UNIQUE (doc_id, client_id, seq)` constraint is the duplicate check from section 12, enforced by the database.
+The `UNIQUE (doc_id, client_id, seq)` constraint is the duplicate check from section 12. A relational database
+enforces it directly; a wide-column store has no unique secondary constraints, so there the owner server keeps
+the highest `seq` it has accepted from each client (rebuilt from the log on load) and checks against that.
 
 ## 14. Comments, permissions and sharing
 
@@ -526,8 +529,9 @@ keyed by `doc_id`, so documents are independent. Spread them across thousands of
 
 **Never two owners.** Networks partition; a paused server may wake up still believing it owns document 42. The
 defence is in the op log: appending revision 341 is a **conditional write**, "insert `(42, 341)` only if it does
-not exist" (optionally also checking the epoch). If two servers race, only one write succeeds, and the loser
-discovers it is no longer the owner and drops its sessions. This is the **fencing** pattern.
+not exist, and only if my lease epoch is not older than the newest epoch the log has seen". The first part keeps
+the history a single line; the epoch check stops a stale owner from appending after a new owner has taken over.
+The loser's write fails, it discovers it is no longer the owner, and it drops its sessions. This is the **fencing** pattern.
 
 **Failover.** If server 17 dies, its leases expire. The next connection for document 42 triggers a new owner,
 which loads the latest snapshot plus later ops. Clients reconnect, say "I am at revision N", and resend unacked ops,

@@ -263,8 +263,8 @@ Real files do not have convenient spaces, so CDC uses a **rolling hash**:
    hash used by FastCDC) can be updated in $O(1)$ when the window moves by one byte: remove the outgoing byte's
    contribution and add the incoming one, instead of rehashing 48 bytes.
 3. Cut a boundary wherever the hash matches a pattern, for example "its lowest 13 bits are all zero". That
-   happens with probability $1/2^{13}$ at each position, so blocks average about **8 KB**. Use more bits for
-   bigger blocks.
+   happens with probability $1/2^{13}$ at each position, so the gap between cuts averages about **8 KB** (a
+   little more once the minimum size below is added). Use more bits for bigger blocks.
 4. Enforce a **minimum** size (do not cut in the first 2 KB of a block) and a **maximum** size (force a cut at
    64 KB) so pathological content, like a file of all zeros, does not produce tiny or endless blocks.
 
@@ -281,7 +281,7 @@ file between two specific copies, so it suits one-to-one transfers better than a
 
 | | Fixed-size | Content-defined |
 | --- | --- | --- |
-| Cost to compute | Just hashing | A rolling hash over every byte, plus hashing (roughly 2× the CPU) |
+| Cost to compute | Just hashing | A rolling hash over every byte, plus hashing (more CPU; Gear-style hashes keep the extra small) |
 | Edit in place | One block changes | One block (sometimes two) changes |
 | Insert or delete bytes | Every later block changes | Only the nearby block changes |
 | Dedup across different files | Only if content is aligned to the same offsets | Finds shared runs at any offset |
@@ -386,7 +386,7 @@ lookup directory so a namespace can be moved without changing its ID.
 folder of 10,000 files, changes **one row**; nothing is re-uploaded and the files' version history follows them.
 
 **3. A version is a block list.** `file_version.block_list` is the ordered list of hashes. A 1 GB file with 4 MB
-blocks has 250 hashes, about 8 KB of metadata. Very large lists can be stored as a separate row set, but the idea
+blocks has 256 hashes, about 8 KB of metadata as 32-byte binary hashes. Very large lists can be stored as a separate row set, but the idea
 is the same.
 
 **4. The journal is the heart of sync.** Every change in a namespace (add, edit, rename, delete) appends a row
@@ -461,8 +461,8 @@ up, because the cursor says exactly what is missing.
 
 Inside the notification service, each server keeps an in-memory map `ns_id → waiting connections`. It subscribes
 to the change bus for the namespaces its connections care about; when "namespace 42 changed" arrives, it answers
-every waiting request for namespace 42. A server can hold hundreds of thousands of idle connections, so 200
-million waiting devices need a fleet of a few thousand machines. The response can include a `backoff` hint so
+every waiting request for namespace 42. A server can hold a few hundred thousand idle connections, so 200
+million waiting devices need a fleet of roughly a thousand machines. The response can include a `backoff` hint so
 that, under load, clients wait before polling again.
 
 **3. Applying remote changes safely.** The client fetches only missing blocks (it can reuse `h1`, `h3`, `h4` from
@@ -551,7 +551,8 @@ reference are kept alive by their references.
 - **Deleting a file** is a journal entry with `op = delete` and `deleted_at` set on the `file` row. The versions
   and blocks remain, so the file appears in "Deleted files" and can be restored with zero upload.
 - **Retention windows** decide when old versions and deleted files really go. Real services offer a fixed window
-  (for example, Dropbox advertises 30 days of version history on its basic plans and longer on paid ones, and
+  (for example, Dropbox documents 30 days of version history on its Basic, Plus and Family plans and 180 or 365
+  days on its business plans, and
   Google Drive empties its trash after 30 days). After the window, a background job removes the version rows and
   decrements block references; garbage collection reclaims blocks nothing references.
 - **Ransomware recovery** falls out of this design: if malware encrypts every file on a laptop, the client
