@@ -4,7 +4,7 @@ description: "A step-by-step framework for a 45–60 minute system design interv
 sidebar:
   label: "How to answer"
   order: 1
-tags: ["Interview Prep", "Estimation", "Scalability", "Fundamentals"]
+tags: ["Interview prep", "Estimation", "Scalability", "Fundamentals"]
 ---
 
 A system design interview gives you a one-line prompt ("Design a URL shortener", "Design WhatsApp") and an empty
@@ -50,8 +50,9 @@ something on the board.
 *Select the diagram to zoom in and move around.*
 
 A time budget keeps you honest. The most common way to fail is to spend 20 minutes on requirements and estimates
-and never reach the interesting part. Introductions and your questions at the end usually take 5–10 minutes of the
-slot, so plan for the design time you really have.
+and never reach the interesting part. The budgets below add up to roughly the whole 45 or 60 minutes. Introductions
+and your questions at the end often take 5–10 minutes of the slot, so when they do, shorten the estimate and the deep
+dives first and keep the high-level design whole.
 
 | Step | 45-minute interview | 60-minute interview | Leaves on the board |
 | --- | --- | --- | --- |
@@ -383,7 +384,8 @@ which cuts latency and takes most bandwidth off your own servers. Deep dive:
 **Message queue.** A durable buffer between a producer of work and the workers that do it, such as Kafka,
 RabbitMQ or SQS. It lets the user get a fast reply while slow work happens later, absorbs traffic spikes, and lets
 each side scale and fail independently. Most queues deliver **at least once**, so consumers must be idempotent.
-Seen in practice: [Design an email service](/system-design/case-studies/medium/email-service/).
+Deep dive: [Design a message queue](/system-design/case-studies/medium/message-queue/). Seen in practice:
+[Design an email service](/system-design/case-studies/medium/email-service/).
 
 **SQL vs NoSQL.** Relational (SQL) databases such as PostgreSQL and MySQL give tables with a fixed schema, joins
 and transactions; they are the safe default for structured data with relationships. NoSQL stores (key-value,
@@ -399,7 +401,9 @@ shard. Seen in practice: [Design a URL shortener](/system-design/case-studies/ea
 **Replication.** Keeping copies of the same data on several machines, for durability (a disk dies, the data
 survives) and for read scaling (replicas serve reads). With **leader-follower** replication one node takes writes
 and copies them to followers; asynchronous copying is fast but a follower may lag a little, so a read right after
-a write may look stale. Deep dive: [Design a distributed key-value store](/system-design/case-studies/easy/distributed-key-value-store/).
+a write may look stale. Leader-follower in practice: [Design a message queue](/system-design/case-studies/medium/message-queue/).
+The main alternative, **leaderless** replication with quorums (any replica accepts writes):
+[Design a distributed key-value store](/system-design/case-studies/easy/distributed-key-value-store/).
 
 **Consistent hashing.** A way to map keys to servers so that adding or removing a server moves only a small share
 of the keys, instead of reshuffling almost all of them as `hash(key) % N` does. Servers and keys are placed on a
@@ -408,7 +412,8 @@ ring, and each key belongs to the next server clockwise; "virtual nodes" smooth 
 
 **Rate limiting.** Capping how many requests a client may make in a time window, to protect the system from abuse,
 bugs and overload. Common algorithms are the token bucket and the sliding window; the limiter usually sits in the
-load balancer or API gateway and answers `429 Too Many Requests`. Seen in practice:
+load balancer or API gateway and answers `429 Too Many Requests`. Deep dive:
+[Design a rate limiter](/system-design/case-studies/medium/rate-limiter/). Seen in practice:
 [Design a load balancer](/system-design/case-studies/easy/load-balancer/) and
 [Design an authentication system](/system-design/case-studies/easy/authentication-system/).
 
@@ -457,8 +462,11 @@ operations, evolution over time and organisational trade-offs as well as technic
 ## 12. Practise the framework
 
 The framework only becomes automatic with practice. Take a case study, cover the page, set a 45-minute timer and
-answer out loud (or with a friend playing interviewer), then compare your answer with the page. Good ones to start
-with:
+answer out loud (or with a friend playing interviewer), then compare your answer with the page. The case studies
+follow the same order (requirements, estimates, API, high-level design, deep dives, then reliability, growth and
+trade-offs), with one difference: they are longer than an interview, so the full data model usually gets its own
+"low-level design" section later, next to the deep dive that needs it. In the interview, sketch the main tables in
+step 3 and refine them during the deep dives. Good ones to start with:
 
 - [URL shortener](/system-design/case-studies/easy/url-shortener/): the classic first problem; ID generation and caching.
 - [Search autocomplete](/system-design/case-studies/easy/search-autocomplete/): tries, precomputation and very low latency.

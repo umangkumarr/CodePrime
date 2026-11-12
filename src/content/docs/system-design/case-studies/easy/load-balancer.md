@@ -4,7 +4,7 @@ description: "Design a load balancer step by step: L4 vs L7, balancing algorithm
 difficulty: "Easy"
 sidebar:
   label: "Load balancer"
-tags: ["Load Balancing", "Networking", "High Availability", "Consistent Hashing"]
+tags: ["Load balancing", "Networking", "High availability", "Consistent hashing"]
 ---
 
 One server can only do so much. When a website outgrows it, we run ten or a thousand copies of the server, and
@@ -71,7 +71,7 @@ inside one balancer node, and how many nodes work together.
 | **Latency** | Adds under 1 ms at L4 and a few ms at L7 (p99) | It is on every request's path, so its cost is paid millions of times |
 | **Throughput** | Hundreds of thousands of requests per second, tens of Gbit/s | It must never be the bottleneck |
 | **Scalability** | Add balancer nodes horizontally | Traffic grows; one box cannot keep up |
-| **Fast failure detection** | Stop using a dead backend within about 5–10 s | Users should see at most a few errors |
+| **Fast failure detection** | Stop using a dead backend within about 10–15 s | Users should see at most a few errors |
 | **Security** | Hold TLS private keys safely; absorb floods | It is the front door facing the internet |
 
 ### Out of scope
@@ -263,6 +263,9 @@ work in practice:
 - **Bounded loads:** cap each server at, say, 125% of the average; if the chosen server is full, the key
   moves on to the next one clockwise. This stops one hot key range from overloading a server.
 
+The [distributed cache](/system-design/case-studies/easy/distributed-cache/) case study walks through the ring
+with a worked example.
+
 **Maglev hashing** (from Google's Maglev paper) is a variant built for L4 balancers: it fills a large lookup
 table so a pick is one array read, spreads load very evenly, and moves few connections when backends
 change.
@@ -384,8 +387,8 @@ The weakness: half the hardware sits idle, and one active node caps capacity.
 Larger systems run many balancer nodes, **all active**. Each one announces the same VIP to the router using
 **BGP** (the routing protocol of the internet). The router now has several equal routes and uses **ECMP**
 (equal-cost multi-path): it hashes each packet's 5-tuple to pick a node, so all packets of one connection
-take the same path. If a node dies, its BGP session drops, the router stops using it within seconds, and
-capacity scales by adding nodes.
+take the same path. If a node dies, its BGP session drops and the router stops using it (within a second or so with fast
+failure detection such as BFD; default BGP timers are far slower), and capacity scales by adding nodes.
 
 The catch: when the set of nodes changes, the router's hash changes and some existing connections land on a
 different node, which has never seen them. This is why large L4 balancers (Maglev, Katran) use **consistent

@@ -115,7 +115,7 @@ allocation, no double charge) and resilience (gates that work offline). Design f
 
 Start the way you would in an LLD interview: nouns become classes, verbs become methods.
 
-[![Class diagram: ParkingGarage is composed of Levels, each composed of ParkingSpots; the garage uses a SpotAllocator interface (implemented by NearestFirstAllocator) and a PricingPolicy interface (implemented by HourlyPricing); a Ticket holds a ParkingSpot, is for a Vehicle and has zero or one Payment](/img/system-design/parking-garage/01-class-model.png)](/img/system-design/parking-garage/01-class-model.png)
+[![Class diagram: ParkingGarage is composed of Levels, each composed of ParkingSpots; the garage uses a SpotAllocator interface (implemented by NearestFirstAllocator) and a PricingPolicy interface (implemented by HourlyPricing); a Ticket holds a ParkingSpot, is for a Vehicle and has zero or more Payments](/img/system-design/parking-garage/01-class-model.png)](/img/system-design/parking-garage/01-class-model.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -129,7 +129,8 @@ What each class is for:
   gates call it at the same time (section 10).
 - **`Vehicle`** carries a plate and a `VehicleType`. `fits(spotType)` answers "may this vehicle use that spot?".
 - **`Ticket`** is one visit: vehicle, spot, entry time and a status that follows a state machine (section 5).
-- **`Payment`** is one charge against a ticket: amount, method and status.
+- **`Payment`** is one charge against a ticket: amount, method and status. A ticket usually has one, but can have
+  more (a driver who overstays the grace period pays again for the extra time).
 - **`SpotAllocator`** and **`PricingPolicy`** are interfaces. This is the **Strategy pattern**: the garage asks
   "which spot?" and "how much?" without knowing the rule. A city-centre garage can use nearest-first
   allocation and hourly pricing; an airport can use a long-stay allocator and daily pricing, with no change to
@@ -347,7 +348,9 @@ UPDATE spot
 ```
 
 The `WHERE status = 'AVAILABLE'` is the trick. The database locks the row while it updates it, so the second
-request re-checks the condition after the first one commits, finds `ASSIGNED`, and changes 0 rows. This is a
+request waits, re-checks the condition after the first one commits, finds `ASSIGNED`, and changes 0 rows (this is
+the behaviour at the default Read Committed level in PostgreSQL and MySQL; at stricter isolation levels
+PostgreSQL raises a serialisation error instead, which you treat as "lost, retry"). This is a
 **compare-and-set**: "change it only if it still looks the way I saw it". The in-memory version in the LLD answer
 is the same idea with an atomic variable:
 
@@ -423,8 +426,9 @@ The same compare-and-set idea as allocation, applied to counters. A few more rul
   reservations expected to arrive soon. Otherwise the sign says FULL for walk-ins, even though spots look empty.
 - **No-shows** are released after a grace window (for example 30 minutes). The capacity returns, and the policy
   decides whether the driver pays a fee.
-- **Payment** is a card **pre-authorisation** at booking (the bank holds the money without moving it), captured
-  at exit for the real amount.
+- **Payment** is a card **pre-authorisation** (the bank holds the money without moving it), captured at exit for
+  the real amount. Holds expire after a few days, so for a booking made weeks ahead, save a card token at booking
+  and place the hold shortly before the start.
 
 ## 12. Deep dive: gates that work offline
 
