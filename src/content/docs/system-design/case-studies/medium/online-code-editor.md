@@ -1,6 +1,6 @@
 ---
 title: "Design an Online Code Editor and Judge (like LeetCode / Replit)"
-description: "Design a LeetCode-style judge: browser editor and drafts, a queue and worker pool, microVM sandboxes for untrusted code, verdicts, live results and contest spikes."
+description: "Design a LeetCode-style online judge: a job queue and worker pool, microVM sandboxes for untrusted code, verdicts, live results and contest spikes."
 difficulty: "Medium"
 sidebar:
   label: "Online code judge (like LeetCode)"

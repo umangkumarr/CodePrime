@@ -1,6 +1,6 @@
 ---
 title: "Design an E-commerce Store (like Amazon)"
-description: "Design an Amazon-style store step by step: catalogue and faceted search, cached product pages, carts, stock reservations, the checkout saga, idempotency and flash sales."
+description: "Design an Amazon-style store: catalogue and faceted search, cached product pages, carts, stock reservations, the checkout saga and flash sales."
 difficulty: "Medium"
 sidebar:
   label: "E-commerce store (like Amazon)"

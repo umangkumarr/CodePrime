@@ -1,6 +1,6 @@
 ---
 title: "Design a File Sharing and Sync System (like Dropbox / Google Drive)"
-description: "Design Dropbox-style file sync: content-defined chunking, block deduplication, a strongly consistent metadata journal, long-poll sync, conflicted copies and sharing."
+description: "Design Dropbox-style file sync: content-defined chunking, block deduplication, a consistent metadata journal, long-poll sync and conflicted copies."
 difficulty: "Hard"
 sidebar:
   label: "File sync (like Dropbox / Google Drive)"

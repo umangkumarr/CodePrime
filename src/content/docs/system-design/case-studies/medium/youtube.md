@@ -1,6 +1,6 @@
 ---
 title: "Design YouTube (video sharing)"
-description: "Design a YouTube-scale video platform: resumable uploads, a parallel transcoding pipeline, adaptive streaming through a tiered CDN, the long tail and view counts."
+description: "Design YouTube: resumable uploads, a parallel transcoding pipeline, adaptive streaming through a tiered CDN, the long tail and view counts."
 difficulty: "Medium"
 sidebar:
   label: "YouTube (video sharing)"

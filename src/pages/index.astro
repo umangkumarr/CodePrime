@@ -8,14 +8,15 @@ const docs = await getCollection('docs', (e) => !e.data.draft);
 const count = (prefix: string) => docs.filter((d) => d.id.startsWith(prefix)).length;
 const tags = await getTags();
 const problems = count('docs/codes/');
+const studies = count('system-design/case-studies/');
 
 const tracks = [
   {title: 'LeetCode sheets', note: 'Striver SDE · DP · Blind 75', meta: `${problems} problems`, href: `${base}/docs/leetcode/`},
   {title: 'DSA fundamentals', note: 'Bits, number theory, trees', meta: `${count('docs/dsa/')} articles`, href: `${base}/docs/dsa/`},
   {
     title: 'System design',
-    note: 'How real products scale',
-    meta: count('system-design/case-studies/') > 0 ? `${count('system-design/case-studies/')} case studies` : 'New',
+    note: 'Interview case studies',
+    meta: studies > 0 ? `${studies} case studies` : 'New',
     href: `${base}/system-design/`,
   },
   {
@@ -28,7 +29,7 @@ const tracks = [
 
 const topics = tags.slice(0, 10);
 
-const description = `${problems} DSA interview problems from the Striver SDE sheet and Blind 75, explained step by step in C++, Java and Python, for prep and last-minute revision.`;
+const description = `${problems} DSA problems in C++, Java and Python and ${studies} system design case studies, explained step by step for prep and last-minute revision.`;
 const siteUrl = new URL(`${base}/`, Astro.site).href;
 
 // Tells search engines and AI answers exactly which "CodePrime" this is, and who makes it.
@@ -53,7 +54,7 @@ const structuredData = {
       description,
       learningResourceType: ['Tutorial', 'Practice problems'],
       educationalLevel: 'Intermediate',
-      teaches: ['Data structures', 'Algorithms', 'Coding interview preparation', 'Last-minute interview revision'],
+      teaches: ['Data structures', 'Algorithms', 'System design', 'Coding interview preparation', 'Last-minute interview revision'],
       programmingLanguage: ['C++', 'Java', 'Python'],
       isAccessibleForFree: true,
       license: 'https://opensource.org/licenses/MIT',
@@ -74,7 +75,7 @@ const structuredData = {
 
 <StarlightPage
   frontmatter={{
-    title: 'DSA interview problems explained in C++, Java and Python',
+    title: 'DSA and system design interview problems, explained step by step',
     description,
     template: 'splash',
     pagefind: false,
@@ -86,7 +87,7 @@ const structuredData = {
     <section class="hero">
       <div class="hero__copy">
         <h1 class="hero__title">Learn the pattern,<br />not the answer.</h1>
-        <p class="hero__lead">{problems} interview problems, each explained step by step with C++, Java and Python solutions tested against brute force. Prepare properly, or revise the night before.</p>
+        <p class="hero__lead">{problems} coding interview problems with C++, Java and Python solutions, and {studies} system design case studies from easy to hard, each explained step by step. Prepare properly, or revise the night before.</p>
         <div class="actions">
           <a class="btn btn--primary" href={`${base}/docs/leetcode/`}>Start solving</a>
           <button type="button" class="btn btn--secondary" data-open-search>

@@ -1,6 +1,6 @@
 ---
 title: "Design Shopify (a multi-tenant e-commerce platform)"
-description: "Design a platform that runs millions of online shops on shared infrastructure: pods, tenant isolation, custom domains, cached storefronts, app rate limits and flash sales."
+description: "Design a Shopify-style multi-tenant platform: pods, tenant isolation, custom domains, cached storefronts, app rate limits and flash sales."
 difficulty: "Medium"
 sidebar:
   label: "Shopify (multi-tenant e-commerce)"

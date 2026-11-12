@@ -1,6 +1,6 @@
 ---
 title: "Design Google Search (a web search engine)"
-description: "Design a web search engine step by step: crawl, parse and de-duplicate pages, build a sharded inverted index, fan out queries, rank with BM25 and PageRank, cache."
+description: "Design a web search engine: crawl and de-duplicate pages, build a sharded inverted index, fan out queries, and rank with BM25 and PageRank."
 difficulty: "Medium"
 sidebar:
   label: "Google Search (web search engine)"

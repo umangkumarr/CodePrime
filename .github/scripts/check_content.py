@@ -10,6 +10,8 @@ Problem pages (src/content/docs/docs/codes/*.md, *.mdx; drafts skipped) must hav
     (the site turns each run into one C++ | Java | Python tab group)
 DSA articles and Project Euler pages that contain code must follow the same three-language rule.
 Everywhere: every Python block must parse, and every /img/... image must exist in public/.
+Search metadata, on every page under src/content/docs (drafts skipped): a `description` of 50–160 characters
+(Google cuts longer ones off), and system design case studies must also declare `difficulty`.
 
 Exit status is non-zero when any page fails, with one line per problem found.
 """
@@ -20,7 +22,9 @@ import re
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DOCS = os.path.join(ROOT, 'src', 'content', 'docs', 'docs')
+CONTENT = os.path.join(ROOT, 'src', 'content', 'docs')
+DOCS = os.path.join(CONTENT, 'docs')
+DESCRIPTION_LIMITS = (50, 160)
 FENCE = re.compile(r'^```([\w+-]*)([^\n]*)\n(.*?)^```[ \t]*$', re.S | re.M)
 LANG_KEY = {'cpp': 'cpp', 'c++': 'cpp', 'java': 'java', 'python': 'python', 'py': 'python'}
 
@@ -74,6 +78,23 @@ def images(text):
     for url in re.findall(r'\]\((/img/[^)\s]+)', text) + re.findall(r'src="(/img/[^"]+)"', text):
         if not os.path.exists(os.path.join(ROOT, 'public', url.lstrip('/'))):
             problems.append(f'missing image {url}')
+    return problems
+
+
+def search_metadata(path, text):
+    """Front matter that search results depend on (see "Search metadata" in CLAUDE.md)."""
+    fm = front_matter(text)
+    problems = []
+    m = re.search(r'^description:\s*(.*)$', fm, re.M)
+    description = m.group(1).strip().strip('"\'') if m else ''
+    low, high = DESCRIPTION_LIMITS
+    if not description:
+        problems.append('front matter: missing description (it is the Google snippet)')
+    elif not low <= len(description) <= high:
+        problems.append(f'front matter: description is {len(description)} characters; keep it {low}-{high}')
+    rel = os.path.relpath(path, CONTENT).replace(os.sep, '/')
+    if rel.startswith('system-design/case-studies/') and not re.search(r'^difficulty:\s*"?(Easy|Medium|Hard)"?\s*$', fm, re.M):
+        problems.append('front matter: system design case studies need difficulty: Easy, Medium or Hard')
     return problems
 
 
@@ -132,6 +153,20 @@ def main():
         for p in problems:
             print(f'{os.path.relpath(path, ROOT)}: {p}')
         failures += bool(problems)
+
+    # Search metadata on every content page, not only those with code.
+    for dirpath, _, files in os.walk(CONTENT):
+        for name in sorted(files):
+            if not name.endswith(('.md', '.mdx')):
+                continue
+            path = os.path.join(dirpath, name)
+            text = open(path, encoding='utf-8').read()
+            if re.search(r'^draft:\s*true', front_matter(text), re.M):
+                continue
+            problems = search_metadata(path, text)
+            for p in problems:
+                print(f'{os.path.relpath(path, ROOT)}: {p}')
+            failures += bool(problems)
 
     print(f'Checked {checked} pages: {failures} with problems.')
     return 1 if failures else 0

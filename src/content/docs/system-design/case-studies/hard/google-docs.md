@@ -1,6 +1,6 @@
 ---
 title: "Design Google Docs (real-time collaborative editing)"
-description: "Design a real-time collaborative editor like Google Docs: operations, Operational Transformation and CRDTs with worked examples, one owner per document, presence and offline sync."
+description: "Design a real-time collaborative editor like Google Docs: Operational Transformation and CRDTs with worked examples, presence and offline sync."
 difficulty: "Hard"
 sidebar:
   label: "Google Docs (collaborative editing)"

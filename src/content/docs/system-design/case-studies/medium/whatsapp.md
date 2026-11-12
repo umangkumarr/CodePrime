@@ -1,6 +1,6 @@
 ---
 title: "Design WhatsApp (a chat application)"
-description: "Design a WhatsApp-scale chat app: persistent connections, delivery receipts, offline inboxes, ordering, group fan-out, end-to-end encryption, media and presence."
+description: "Design a WhatsApp-scale chat app: persistent connections, delivery receipts, offline inboxes, group fan-out, end-to-end encryption and presence."
 difficulty: "Medium"
 sidebar:
   label: "WhatsApp (chat application)"

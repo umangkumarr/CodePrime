@@ -1,6 +1,6 @@
 ---
 title: "Design Facebook (social network: profiles, friends, news feed)"
-description: "Design a Facebook-scale social network: a friend graph with a TAO-style cache, hybrid feed fan-out, ranked feeds, privacy checks on every read and multi-region consistency."
+description: "Design a Facebook-scale social network: a friend graph with a TAO-style cache, hybrid feed fan-out, ranked feeds and privacy checks on every read."
 difficulty: "Medium"
 sidebar:
   label: "Facebook (social network)"

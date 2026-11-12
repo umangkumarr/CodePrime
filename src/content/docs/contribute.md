@@ -25,6 +25,7 @@ Create `src/content/docs/docs/codes/<problem-slug>.md`. The front matter holds t
 ````md
 ---
 title: Two Sum
+description: Return the indices of the two numbers that add up to a target, in one pass using a hash map.
 source: https://leetcode.com/problems/two-sum/
 difficulty: Easy            # optional: Easy | Medium | Hard
 tags: [Array, Hash Table]
@@ -82,7 +83,9 @@ Finally, add the page's slug to the right group in `src/data/sidebar.json`.
 
 ## Add a system design case study
 
-Create `src/content/docs/system-design/case-studies/<name>.md`. It appears in the System Design sidebar automatically. Diagrams can be written as [Mermaid](https://mermaid.js.org/) code blocks:
+Create `src/content/docs/system-design/case-studies/<easy|medium|hard>/<name>.md` with a `title`, a `description`, `difficulty: Easy | Medium | Hard`, a short `sidebar.label` and a few `tags`. It appears in that level's sidebar group and on the overview automatically. Follow the structure of the existing case studies: the idea in five minutes, requirements, estimates with the arithmetic shown, API, data model, high-level design, deep dives, what breaks as it grows, trade-offs, a cheat sheet and practice questions.
+
+Draw diagrams as images in `public/img/system-design/<name>/`, each linked to itself (`[![What it shows](/img/system-design/<name>/01-architecture.png)](/img/system-design/<name>/01-architecture.png)`) so readers can open them in the zoomable viewer. Small diagrams can also be [Mermaid](https://mermaid.js.org/) code blocks:
 
 ````md
 ```mermaid
@@ -90,6 +93,10 @@ flowchart LR
   Rider --> Gateway --> Dispatch --> Driver
 ```
 ````
+
+## Search metadata
+
+Every page needs a `description` of 50–160 characters that says what the page covers and the key idea. It is the snippet Google shows, and CI checks its length. Titles, structured data, breadcrumbs and the sitemap are generated for you.
 
 ## Open a pull request
 

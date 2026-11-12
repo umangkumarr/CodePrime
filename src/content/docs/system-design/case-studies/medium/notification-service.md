@@ -1,6 +1,6 @@
 ---
 title: "Design a Notification Service (push, email, SMS, in-app)"
-description: "Design a notification platform step by step: one API, templates, preferences, per-channel queues, provider retries and fallback, deduplication and 100M-user blasts."
+description: "Design a notification service: one API, templates, preferences, per-channel queues, provider retries and fallback, deduplication and mass blasts."
 difficulty: "Medium"
 sidebar:
   label: "Notification service"
