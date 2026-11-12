@@ -1,6 +1,6 @@
 ---
 title: "Construct Binary Tree from Preorder and Inorder Traversal"
-description: "Rebuild a binary tree from its preorder and inorder traversals in linear time: the first preorder value is the root, and a hash map finds it in inorder to split the subtrees."
+description: "Rebuild a binary tree from preorder and inorder in O(n): the first preorder value is the root, and a hash map finds it in inorder to split the subtrees."
 source: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/"
 difficulty: "Medium"
 tags: ["Array", "Hash Table", "Divide and Conquer", "Tree", "Binary Tree"]

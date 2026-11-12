@@ -1,6 +1,6 @@
 ---
 title: "Combination Sum"
-description: "List every combination of distinct candidates (each usable any number of times) that sums to target, by backtracking over the sorted array in non-decreasing order."
+description: "List every combination of candidates (each reusable) that sums to target, by backtracking over the sorted array in non-decreasing order."
 source: "https://leetcode.com/problems/combination-sum/"
 difficulty: "Medium"
 tags: ["Array", "Backtracking"]
