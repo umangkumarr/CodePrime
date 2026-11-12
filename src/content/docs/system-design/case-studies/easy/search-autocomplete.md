@@ -55,7 +55,7 @@ user's own history, and we will bolt those on at the end.
 
 | Property | Target | Why it matters |
 | --- | --- | --- |
-| **Latency** | Suggestions on screen within ~100 ms of a pause in typing; server time under 10 ms at p99 | People type a key every 200–300 ms; a late list is useless or, worse, jumps under the cursor |
+| **Latency** | Suggestions on screen within ~100 ms of the request leaving the client (after the debounce pause); server time under 10 ms at p99 | A quick typist presses a key every 100–200 ms; a late list is useless or, worse, jumps under the cursor |
 | **Availability** | 99.99%, and **fail soft**: if suggestions are down, the search box still works | Autocomplete is a helper, not the product |
 | **Scale** | Hundreds of thousands of requests per second on average, around a million at peak | Every keystroke is a request |
 | **Freshness** | General suggestions may be hours old; trending topics within minutes | A breaking news story should appear quickly |
@@ -224,11 +224,12 @@ Step by step:
 
 ### The latency budget
 
-The user should see suggestions within roughly 100 ms of pausing. Here is a typical split:
+The user should see suggestions within roughly 100 ms of the request being sent. Here is a typical split, with the
+debounce wait listed first because it happens before the request leaves the client:
 
 | Step | Budget | How we meet it |
 | --- | --- | --- |
-| Debounce wait | 50–150 ms (by design) | Only after the user pauses; not counted as "slow" by the user |
+| Debounce wait | 50–150 ms (by design) | Happens while the user pauses; not part of the 100 ms and not felt as "slow" |
 | Network to the CDN edge and back | 10–40 ms | Edges are near users; reuse connections (HTTP/2 or HTTP/3) |
 | Edge to our data centre and back (on a miss) | 10–40 ms | Serve from several regions |
 | Suggestion service + trie lookup | 1–10 ms | Everything in RAM; no disk, no database query |
@@ -239,7 +240,7 @@ browser matters more than shaving microseconds off the lookup.
 
 ## 8. Inside the suggestion service
 
-[![Serving workflow: the prefix is normalised, the result cache is checked and a hit is returned at once; on a miss the trie shard gives candidates, trending and user boosts are merged and ranked, the safety filter keeps the top 5, the answer is returned and stored in the result cache](/img/system-design/search-autocomplete/04-serving.png)](/img/system-design/search-autocomplete/04-serving.png)
+[![Serving workflow: the prefix is normalised, the result cache is checked and a hit is returned at once; on a miss the trie shard gives candidates, trending boosts are merged and ranked, the safety filter keeps the top 5, the answer is returned and stored in the result cache](/img/system-design/search-autocomplete/04-serving.png)](/img/system-design/search-autocomplete/04-serving.png)
 
 1. **Normalise** the prefix the same way the builder normalised queries: lowercase, trim spaces, collapse
    repeated spaces, Unicode normalisation (so `café` typed two different ways matches). If the two sides
@@ -248,7 +249,8 @@ browser matters more than shaving microseconds off the lookup.
    were already filtered before they were stored.
 3. **On a miss, read the trie shard.** Ask for a few more than we will show (say 10), so the later steps have room
    to drop or reorder some.
-4. **Merge and rank** with fresh signals: trending boosts and, if personalisation is on, the user's own history
+4. **Merge and rank** with fresh signals, mainly trending boosts (section 13). The user's own history is **not**
+   merged here: this list is stored in a shared cache, so personal suggestions come from a separate private call
    (section 13).
 5. **Safety filter:** apply the online blocklist (section 12), remove duplicates, keep the top 5.
 6. **Return and store** the result in the cache with a short TTL.
@@ -308,7 +310,8 @@ function fill(node):
 
 This visits each node once and merges a few short lists at each, so it is roughly linear in the number of nodes.
 Each node also only needs its children's top-k, never the whole subtree, which keeps it cheap. For a trie larger
-than one machine, each shard builds its own range in parallel.
+than one machine, each shard builds its own range in parallel, and the few short prefixes that span several shards
+(section 11) are filled last by merging those shards' top-k lists.
 
 ### Step 4: publish and swap
 
@@ -354,8 +357,10 @@ The `Cache-Control: max-age=300` header lets the browser and CDN reuse an answer
 trending changes visible; a longer one saves more traffic. Short prefixes are so popular that even a TTL of a
 minute takes most of that load off our servers.
 
-A neat extra trick: if the list for `ca` contained **fewer than k** suggestions, it already holds every
-suggestion that starts with `ca`, so the client can answer `car` by filtering that list locally, with no request.
+A neat extra trick: if the server marks the list for `ca` as **complete** (the node had fewer than k suggestions
+in total), it already holds every suggestion that starts with `ca`, so the client can answer `car` by filtering
+that list locally, with no request. A short list alone is not proof, because the safety filter may have removed
+entries.
 
 ## 11. Deep dive: sharding the trie
 
@@ -378,6 +383,9 @@ data and traffic.
   read-only.
 - The builder recomputes the split points from size and traffic, and publishes the new map together with the
   snapshots, so the map and the data always agree.
+- **Prefixes above a split need care.** The prefix `s` belongs to neither `sa–sm` nor `sn–z`, and its list must
+  draw on both halves. The builder has every score, so it computes the lists for these few short prefixes
+  globally and stores them on one of the shards (or on every shard: there are only a handful).
 
 Why does this work so neatly? Because every node already stores its own answer. Serving a prefix needs **only
 that one node**, never data from another shard, so one request touches exactly one shard.
@@ -517,8 +525,9 @@ stale suggestions", never to a broken search box.
   (`score = old × 0.9 + today`) → popularity and distinct-user threshold → blocklist → build bottom-up → versioned
   snapshot → load beside the old copy and swap a pointer.
 - **Online path:** client debounce → browser cache → CDN → gateway → stateless suggestion service → result
-  cache → in-memory trie shard → merge trending and personal → online filter → top 5.
-- **Latency:** aim for ~100 ms after a pause; the server takes under 10 ms, the rest is network, so cache at the edge.
+  cache → in-memory trie shard → merge trending → online filter → top 5; personal history comes from a separate
+  private call merged on the client.
+- **Latency:** aim for ~100 ms from request to screen; the server takes under 10 ms, the rest is network, so cache at the edge.
 - **Client:** debounce ~100 ms, drop out-of-order responses, cache recent prefixes, filter locally when a list is
   already complete.
 - **Sharding:** by data-driven prefix ranges (split hot letters like `s`), or by hash of the prefix with a flat

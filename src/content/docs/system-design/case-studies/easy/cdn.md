@@ -227,17 +227,20 @@ always matches geography.
 | Granularity | Per resolver (or subnet) | Per network path, automatic |
 | Failover speed | Limited by DNS TTL and resolvers that ignore it | Fast: withdraw the BGP route and traffic shifts in seconds to minutes |
 | Load control | Fine-grained: send exactly 20% of users elsewhere | Coarse: BGP does not know about server load |
-| DDoS | Attackers can target one PoP's address | Attack traffic is split across all PoPs automatically |
+| DDoS | Attackers can target one PoP's address | Attack traffic is split automatically among the PoPs nearest its sources |
 | Catch | Depends on resolver location | A route change mid-connection can move a long TCP connection to another PoP |
 
 Many CDNs combine them: anycast to reach a PoP, then a **load balancer inside the PoP** (often using consistent
-hashing, section 10) to pick a server.
+hashing, section 10; the [distributed cache](/system-design/case-studies/easy/distributed-cache/) case study
+explains the ring in detail) to pick a server.
 
 ## 7. Flow 2: serving a request (hit, miss and revalidation)
 
 Once the request reaches an edge server, it follows the same decision every time.
 
 [![How an edge server answers a request: build the cache key and look it up; if found and still fresh, respond with a HIT; if stale, revalidate with an If-None-Match request and either reuse it on 304 or store the new body on 200; if not found (MISS), fetch from the shield and then origin, store it if cacheable, and respond](/img/system-design/cdn/04-cache-lookup.png)](/img/system-design/cdn/04-cache-lookup.png)
+
+*Select the diagram to zoom in and move around.*
 
 The three outcomes:
 

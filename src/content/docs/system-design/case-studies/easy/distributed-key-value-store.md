@@ -4,7 +4,7 @@ description: "Design a Dynamo-style key-value store: consistent hashing, N/R/W q
 difficulty: "Easy"
 sidebar:
   label: "Key-value store (like Dynamo)"
-tags: ["Databases", "Replication", "Consistent Hashing", "Consistency", "Storage"]
+tags: ["Databases", "Replication", "Consistent hashing", "Consistency", "Storage"]
 ---
 
 A key-value store is the simplest database there is. It remembers one thing: for a **key** (`cart:42`), a
@@ -251,7 +251,8 @@ by its version.
 
 A senior-level caveat: **quorum overlap is not the same as full consistency.** Clock skew under last-write-wins
 (section 10), a write that failed after reaching only one replica, and the sloppy quorums of the next section can
-all produce surprising reads. Quorums give strong *probabilistic* guarantees, not transactions.
+all produce surprising reads, and two concurrent writes can still conflict. Quorums make stale reads unlikely,
+not impossible: they are not linearisable and they are not transactions.
 
 Picking replicas across **failure domains** matters as much as picking N. Real stores place the N copies in
 different racks or availability zones, so a single power or network failure cannot take out every copy.
@@ -408,8 +409,10 @@ tree)**, which turns every write into sequential appends.
 
 **The write path**
 
-1. **Commit log:** append the write to a log file on disk. Appending is the fastest thing a disk can do, and it
-   means a crash loses nothing: on restart, the node replays the log.
+1. **Commit log:** append the write to a log file on disk. Appending is the fastest thing a disk can do, and on
+   restart the node replays the log to rebuild what was in memory. How much a crash can lose depends on how often
+   the log is flushed to disk (`fsync`): every write is safest but slowest, while Cassandra's default syncs every
+   10 seconds and relies on the other replicas to cover the last few seconds of a single node's crash.
 2. **Memtable:** insert the write into a sorted in-memory structure (a skip list or balanced tree). The write is
    now acknowledged.
 3. **Flush:** when the memtable is full (tens to hundreds of MB), write it to disk in one sequential pass as an
@@ -446,7 +449,7 @@ tombstones, and reading through thousands of them is a well-known way to slow su
 
 Because membership changes move data, a node goes through clear states.
 
-[![Life of a node: Joining, where it takes tokens and streams data, then Up, serving reads and writes, then Leaving, handing ranges to neighbours, then Removed; an Up node whose gossip goes quiet becomes Suspected, returns to Up when heard from again, or becomes Down if silent too long; a Down node returns to Up after restarting and replaying hints, or is Removed when an operator replaces it](/img/system-design/distributed-key-value-store/09-node-states.png)](/img/system-design/distributed-key-value-store/09-node-states.png)
+[![Life of a node: Joining, where it takes tokens and streams data, then Up, serving reads and writes, then Leaving, handing ranges to neighbours, then Removed; an Up node whose gossip goes quiet becomes Suspected, returns to Up when heard from again, or becomes Down if silent too long; a Down node returns to Up after restarting and receiving the hints held for it, or is Removed when an operator replaces it](/img/system-design/distributed-key-value-store/09-node-states.png)](/img/system-design/distributed-key-value-store/09-node-states.png)
 
 *Select the diagram to zoom in and move around.*
 
@@ -499,7 +502,7 @@ catch up asynchronously.
 
 | Risk | Defence |
 | --- | --- |
-| A node crashes right after acknowledging | The commit log was written first; replaying it on restart rebuilds the memtable |
+| A node crashes right after acknowledging | The commit log was written first; replaying it on restart rebuilds the memtable, and the other W − 1 replicas also hold the write |
 | A whole node is lost | N = 3 copies on different racks or zones; a replacement node rebuilds from the others |
 | A replica is down for a while | Hinted handoff replays missed writes when it returns |
 | A replica silently missed writes | Read repair on reads, anti-entropy with Merkle trees on a schedule |

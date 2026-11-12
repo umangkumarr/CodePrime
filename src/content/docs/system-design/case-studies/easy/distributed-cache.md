@@ -4,7 +4,7 @@ description: "Design a distributed cache like Memcached or Redis Cluster: cachin
 difficulty: "Easy"
 sidebar:
   label: "Distributed cache (like Redis)"
-tags: ["Caching", "Consistent Hashing", "Replication", "Consistency"]
+tags: ["Caching", "Consistent hashing", "Replication", "Consistency"]
 ---
 
 Almost every fast website you use is fast because of a cache. When you open a profile, a product page or a
@@ -104,7 +104,7 @@ be stale**, it can keep everything in RAM, replicate asynchronously and stay sim
 ### Out of scope
 
 Using Redis as a primary database (with persistence to disk), message queues and pub/sub, multi-region active-active
-replication, and browser or CDN caching (see the CDN case study). Mention them, then set them aside.
+replication, and browser or CDN caching (see the [CDN case study](/system-design/case-studies/easy/cdn/)). Mention them, then set them aside.
 
 ## 3. Back-of-the-envelope estimates
 
@@ -437,7 +437,9 @@ Let only one caller rebuild a missing key; everyone else waits for its result.
 
 `SET lock:home:feed <id> NX EX 10` succeeds for exactly one caller, because `NX` means "only if absent". The lock has
 its own expiry, so if the winner crashes, the lock frees itself after 10 seconds instead of blocking forever. Losers
-wait briefly and retry, or are served a slightly old value if one is kept (next defence). Facebook's Memcache paper
+wait briefly and retry, or are served a slightly old value if one is kept (next defence). When the winner
+releases the lock, it deletes it only if it still holds its own `<id>` (checked atomically, for example with a
+small Lua script): if its rebuild ran past the 10 seconds, the lock may now belong to someone else. Facebook's Memcache paper
 describes a similar idea called **leases**.
 
 ### Defence 2: jittered TTLs
@@ -488,8 +490,8 @@ things happen daily.
 - **Delayed double delete.** Delete the key after the write, then delete it **again** a short moment later (say one
   second), which removes a stale value that a slow reader put back in between.
 - **Versioned or conditional sets.** Store a version (or the row's update time) with the value, and let the cache
-  accept a set only if it is newer than what it holds. Memcached-style `cas` or leases do the same job: a reader may
-  only fill a key if no delete happened since its miss.
+  accept a set only if it is newer than what it holds. Leases (from Facebook's Memcache paper) do a similar job: a reader
+  may only fill a key if no delete happened since its miss.
 - **Invalidate from the database's change log.** Instead of trusting every service to remember to delete, a small
   service reads the database's change stream (for example MySQL's binlog, through a tool like Debezium) and deletes
   the affected keys. Nothing is forgotten, and deletes can be retried until they succeed. It is a little slower (tens
@@ -579,7 +581,7 @@ The guiding rule: **the cache may fail, but the product must not.** Every failur
 
 ## Cheat sheet for last-minute revision
 
-- **Why cache:** RAM over the network is about 1 ms; the database is 10 to 100 times slower. A cache makes reads fast
+- **Why cache:** RAM over the network is about 1 ms or less; a database query is often 10 times slower or more. A cache makes reads fast
   and protects the database. **Hit ratio is everything**: 95% to 99% cuts database load five times.
 - **Cache good data:** read often, changes rarely, expensive to compute. Never the only copy.
 - **Patterns:** cache-aside (default: read, miss, load, set with TTL; write DB then **delete** key), read-through,
@@ -611,9 +613,10 @@ The guiding rule: **the cache may fail, but the product must not.** Every failur
    uncached data such as a new feature or a crawler.
 2. **Design an LRU cache class with `get` and `put` in O(1).** Hash map plus doubly linked list with dummy head and tail,
    exactly as in section 7. Mention thread safety (a lock, or striped locks per bucket) if asked.
-3. **How would you use the cache as a rate limiter (100 requests per minute per user)?** `INCR rate:{user}:{minute}` and
+3. **How would you use the cache as a rate limiter (100 requests per minute per user)?** `INCR rate:<user>:<minute>` and
    set a 60-second TTL on the first increment; reject when the count passes 100. For smoother limits use a sliding
-   window or a token bucket stored in the cache.
+   window or a token bucket stored in the cache (see the
+   [rate limiter case study](/system-design/case-studies/medium/rate-limiter/)).
 4. **One shard is overloaded but the others are idle. What could be wrong?** A hot key, a big key, a poor hash spread
    (too few virtual nodes), or many related keys pinned together by the same hash tag. Find out with per-key sampling,
    then spread or split the key, or move slots.
