@@ -53,7 +53,7 @@ python3 .github/scripts/check_content.py   # content rules for every problem pag
 | `src/content/docs/docs/dsa/` | DSA fundamentals articles (bit magic, number theory, trees) |
 | `src/content/docs/docs/project-euler/` | Project Euler+ (HackerRank) solutions; `249.md` is a draft |
 | `src/content/docs/docs/interviews/` | Company interview lists |
-| `src/content/docs/system-design/` | System design overview and case studies |
+| `src/content/docs/system-design/` | System design overview, `how-to-answer.md`, and case studies in `case-studies/{easy,medium,hard}/` |
 | `src/content/docs/docs/{dsa,leetcode}.mdx` | Track overview pages (render `TrackOverview`) |
 | `src/content/docs/contribute.md` | Public contribution guide (keep in sync with this file) |
 | `src/data/sidebar.json` | **Source of truth** for the DSA and LeetCode sidebars, sheet pages and breadcrumbs |
@@ -224,7 +224,11 @@ check and the build — it does **not** run solution tests, so this step is on y
   cpp/java/python order (no spoiler gates). Add new ones to `sidebar.json` under the right group.
 - **Project Euler+** (`docs/project-euler/NNN.md`): HackerRank full programs reading stdin; `sidebar.label`
   "NNN · Title", `sidebar.order` = problem number.
-- **System design** (`system-design/case-studies/<name>.md`): appears in its sidebar automatically. Diagrams are made
+- **System design** (`system-design/case-studies/<easy|medium|hard>/<name>.md`, with `difficulty` in the front
+  matter): each level folder is its own sidebar group, and `CaseStudyList` groups the overview by difficulty.
+  `system-design/how-to-answer.md` is the interview framework the case studies follow. Model new case studies on
+  `medium/email-service.md` (tip box, numbered sections, estimates with arithmetic, cheat sheet, practice
+  questions), written in our own words. Diagrams are made
   with the Archify skill (`finalize` must pass), then the diagram SVG is captured in light mode on white at 1.5x,
   trimmed with ~40px padding and saved as PNGs in `public/img/system-design/<name>/` (the ~850 KB Archify HTML is
   not committed). Each image is wrapped in a link to itself: `src/scripts/lightbox.ts` opens it in a glass viewer

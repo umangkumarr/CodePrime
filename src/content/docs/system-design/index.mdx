@@ -1,12 +1,12 @@
 ---
 title: System Design
 prev: false
-description: End-to-end architecture case studies of real products — the problems they hit at scale and how they solved them.
+description: System design interview case studies from easy to hard, explained from first principles with diagrams, estimates, trade-offs and a revision cheat sheet for each.
 ---
 
 import CaseStudyList from '../../../components/CaseStudyList.astro';
 
-How do products like ride-hailing, streaming and messaging platforms actually work end to end? This section takes real systems apart: what they had to build, where it broke as they grew, and the engineering decisions that fixed it.
+How do products like URL shorteners, chat apps, ride-hailing and cloud storage actually work end to end? This section designs them from scratch, the way you would in a system design interview: what they must do, how much load they face, the components that make them work, where they break as they grow and the trade-offs behind each choice. Case studies are grouped from easy to hard, and each one ends with a cheat sheet for last-minute revision.
 
 ## Case studies
 
@@ -14,12 +14,15 @@ How do products like ride-hailing, streaming and messaging platforms actually wo
 
 ## How each case study is structured
 
-Every case study follows the same arc, so you can compare systems side by side:
+Every case study follows the same arc, so you can compare systems side by side and revise quickly:
 
-1. **Requirements:** what the product must do, functionally and non-functionally.
-2. **Scale and constraints:** traffic, data volume, latency and availability targets.
-3. **High-level architecture:** the main services and how requests flow between them.
-4. **Deep dives:** the interesting components, such as matching, storage and real-time delivery.
-5. **What broke at scale:** the real problems the team ran into as usage grew.
-6. **How it was solved:** the redesigns, trade-offs and technologies chosen.
-7. **Takeaways:** patterns you can reuse in your own designs and interviews.
+1. **The idea in five minutes:** the background you need, in plain words.
+2. **Requirements:** what the system must do, and how well (latency, availability, durability).
+3. **Back-of-the-envelope estimates:** traffic, storage and bandwidth, with the arithmetic shown.
+4. **API and data model:** the calls clients make and what is stored where.
+5. **High-level design:** the main components and how a request flows through them, with diagrams.
+6. **Deep dives:** the parts interviewers push on, explained from first principles.
+7. **What breaks as it grows:** bottlenecks, failure modes and how to fix them.
+8. **Trade-offs, a cheat sheet and practice questions:** for the night before your interview.
+
+Select any diagram to open it full screen, where you can zoom and pan.
