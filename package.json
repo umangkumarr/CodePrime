@@ -12,14 +12,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.3.6",
-    "@astrojs/sitemap": "3.7.4",
-    "@astrojs/starlight": "0.42.10",
+    "@astrojs/markdown-remark": "7.3.10",
+    "@astrojs/sitemap": "3.7.6",
+    "@astrojs/starlight": "0.43.1",
     "@expressive-code/plugin-line-numbers": "0.44.3",
     "@fontsource-variable/bricolage-grotesque": "5.3.0",
     "@fontsource-variable/jetbrains-mono": "5.3.0",
     "@fontsource/ibm-plex-sans": "5.3.0",
-    "astro": "7.4.7",
+    "astro": "7.4.13",
     "astro-mermaid": "2.2.0",
     "katex": "0.19.1",
     "mermaid": "11.17.2",
